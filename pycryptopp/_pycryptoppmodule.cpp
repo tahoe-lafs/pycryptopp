@@ -9,7 +9,7 @@ typedef int Py_ssize_t;
 #endif
 
 /* from Crypto++ */
-//#include "rsa.h"
+#include "cryptopp/rsa.h"
 
 static PyObject *pycryptopp_error;
 static PyObject *raise_pycryptopp_error (const char *format, ...);
@@ -46,7 +46,7 @@ typedef struct {
     //xxx
 } RSA_key;
 
-static const unsigned MIN_RSA_KEY_SIZE_BITS=16; /* by experimentation, Crypto++ gives an exception for sizes fewer than 16 bits. */
+static const int MIN_RSA_KEY_SIZE_BITS=16; /* by experimentation, Crypto++ gives an exception for sizes fewer than 16 bits. */
 
 static PyObject *
 generate(PyObject *self, PyObject *args, PyObject *kwdict) {
@@ -69,7 +69,7 @@ generate(PyObject *self, PyObject *args, PyObject *kwdict) {
 }
 
 static PyMethodDef pycryptopp_methods[] = { 
-    {"generate", generate, METH_VARARGS | METH_KEYWORDS, "Generate an RSA key."},
+    {"generate", (PyCFunction)generate, METH_VARARGS | METH_KEYWORDS, "Generate an RSA key."},
     {NULL, NULL, 0, NULL}  /* sentinel */
 };
 

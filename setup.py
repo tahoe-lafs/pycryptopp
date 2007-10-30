@@ -14,14 +14,15 @@ else:
 use_setuptools(min_version=min_version, download_delay=0)
 
 from setuptools import Extension, find_packages, setup
+# from distutils.core import Extension, setup
+# def find_packages():
+#     return ["pycryptopp",]
 
 DEBUGMODE=False
 # DEBUGMODE=True
 
 extra_compile_args=[]
 extra_link_args=[]
-
-extra_compile_args.append("-std=c99")
 
 undef_macros=[]
 
@@ -84,7 +85,7 @@ setup(name='pycryptopp',
       packages=find_packages(),
       classifiers=trove_classifiers,
       # XXXentry_points = { 'console_scripts': [ 'zfec = zfec.cmdline_zfec:main', 'zunfec = zfec.cmdline_zunfec:main' ] },
-      ext_modules=[Extension('_pycryptopp', ['pycryptopp/_pycryptoppmodule.c',], extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, undef_macros=undef_macros),],
+      ext_modules=[Extension('_pycryptopp', ['pycryptopp/_pycryptoppmodule.cpp',], extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, undef_macros=undef_macros),],
       test_suite="pycryptopp.test", # XXX
       zip_safe=False, # I prefer unzipped for easier access.
       )
