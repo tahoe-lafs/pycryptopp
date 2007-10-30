@@ -9,6 +9,7 @@ typedef int Py_ssize_t;
 #endif
 
 /* from Crypto++ */
+#include "cryptopp/osrng.h"
 #include "cryptopp/pssr.h"
 #include "cryptopp/randpool.h"
 #include "cryptopp/rsa.h"
@@ -238,8 +239,38 @@ See also generate().\n\
 \n\
 ";
 
+static PyObject *
+generate(PyObject *self, PyObject *args, PyObject *kwdict) {
+    static char *kwlist[] = {
+        "size",
+        NULL
+    };
+    int size;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "i", kwlist, &size))
+        return NULL;
+
+    if (size < MIN_RSA_KEY_SIZE_BITS)
+        return raise_pycryptopp_error("Precondition violation: size in bits is required to be >= %u, but it was %d", MIN_RSA_KEY_SIZE_BITS, size);
+
+    printf("WHEEE 1 !\n");
+
+    AutoSeededRandomPool osrng;
+    RSASigningKey *signer = reinterpret_cast<RSASigningKey*>(RSASigningKey_new(&RSASigningKey_type, NULL, NULL));
+    if (signer == NULL)
+        return NULL;
+    signer->k = new RSASS<PSS, SHA256>::Signer(osrng, size);
+    return reinterpret_cast<PyObject*>(signer);
+}
+
+static char generate__doc__[] = "\
+Create an RSA signing key using the operating system's random number generator.\n\
+\n\
+";
+
 static PyMethodDef pycryptopp_methods[] = { 
     {"generate_from_seed", reinterpret_cast<PyCFunction>(generate_from_seed), METH_VARARGS, generate_from_seed__doc__},
+    {"generate", reinterpret_cast<PyCFunction>(generate), METH_VARARGS, generate__doc__},
     {NULL, NULL, 0, NULL}  /* sentinel */
 };
 
