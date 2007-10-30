@@ -10,4 +10,4 @@ except ImportError:
     # know what our version is. This should not happen very often.
     pass
 
-from _pycryptopp import generate
+from _pycryptopp import generate_from_seed
