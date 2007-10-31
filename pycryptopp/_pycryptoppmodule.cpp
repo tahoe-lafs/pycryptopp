@@ -253,7 +253,7 @@ generate_from_seed(PyObject *self, PyObject *args, PyObject *kwdict) {
         return raise_pycryptopp_error("Precondition violation: seed is required to be of length >= %u, but it was %d", 8, seedlen);
 
     RandomPool randPool;
-    randPool.IncorporateEntropy((byte *)seed, seedlen);
+    randPool.Put((byte *)seed, seedlen); /* In Crypto++ v5.5.2, the recommended interface is "IncorporateEntropy()", but "Put()" is supported for backwards compatibility.  In Crypto++ v5.2 (the version that comes with Ubuntu dapper), only "Put()" is available. */
 
     RSASigningKey *signer = reinterpret_cast<RSASigningKey*>(RSASigningKey_new(&RSASigningKey_type, NULL, NULL));
     if (signer == NULL)
