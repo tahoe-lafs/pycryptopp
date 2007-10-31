@@ -9,11 +9,21 @@ typedef int Py_ssize_t;
 #endif
 
 /* from Crypto++ */
+#ifdef USE_NAME_CRYPTO_PLUS_PLUS
+// For Debian (and Ubuntu, and their many derivatives)
+#include "crypto++/filters.h"
+#include "crypto++/osrng.h"
+#include "crypto++/pssr.h"
+#include "crypto++/randpool.h"
+#include "crypto++/rsa.h"
+#else
+// For upstream Crypto++ library
 #include "cryptopp/filters.h"
 #include "cryptopp/osrng.h"
 #include "cryptopp/pssr.h"
 #include "cryptopp/randpool.h"
 #include "cryptopp/rsa.h"
+#endif
 
 USING_NAMESPACE(CryptoPP)
 

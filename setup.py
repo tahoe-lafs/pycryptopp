@@ -5,8 +5,8 @@
 # Copyright (C) 2007 Allmydata, Inc.
 # Author: Zooko Wilcox-O'Hearn
 
+import os, sys
 from ez_setup import use_setuptools
-import sys
 if 'cygwin' in sys.platform.lower():
     min_version='0.6c6'
 else:
@@ -20,8 +20,9 @@ DEBUGMODE=False
 
 extra_compile_args=[]
 extra_link_args=[]
-
+define_macros=[]
 undef_macros=[]
+libraries=[]
 
 if DEBUGMODE:
     extra_compile_args.append("-O0")
@@ -29,6 +30,27 @@ if DEBUGMODE:
     extra_compile_args.append("-Wall")
     extra_link_args.append("-g")
     undef_macros.append('NDEBUG')
+
+# Check for the existence of "/usr/include/crypto++/rsa.h", and if it is
+# present, pass #define "USE_NAME_CRYPTO_PLUS_PLUS" to the C++ compiler, and
+# tell the C++ compiler to link to an extra library named "crypto++".
+
+# This is because the upstream Crypto++ GNUmakefile and the Microsoft Visual
+# Studio projects produce include directory and library named "cryptopp", but
+# Debian (and hence Ubuntu, and a lot of other derivative distributions)
+# changed that name to "crypto++".
+
+# So this will very likely do what you want, unless what you want is to ignore
+# an extant install of Crypto++ which has include files in
+# /usr/include/crypto++, and instead include and link to a specific install of
+# Crypto++ which is named "cryptopp", in which case you'll have to remove the
+# /usr/include/crypto++ or edit this setup.py file.
+checkincldir = os.path.join("/", "usr", "include", "crypto++")
+if os.path.exists(checkincldir):
+    define_macros.append(("USE_NAME_CRYPTO_PLUS_PLUS", True,))
+    libraries.append("crypto++")
+else:
+    libraries.append("cryptopp")
 
 trove_classifiers=[
     "Environment :: Console",
@@ -82,7 +104,7 @@ setup(name='pycryptopp',
       packages=find_packages(),
       classifiers=trove_classifiers,
       # XXXentry_points = { 'console_scripts': [ 'zfec = zfec.cmdline_zfec:main', 'zunfec = zfec.cmdline_zunfec:main' ] },
-      ext_modules=[Extension('_pycryptopp', ['pycryptopp/_pycryptoppmodule.cpp',], libraries=["cryptopp",], extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, undef_macros=undef_macros),],
+      ext_modules=[Extension('_pycryptopp', ['pycryptopp/_pycryptoppmodule.cpp',], libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros),],
       test_suite="pycryptopp.test",
       zip_safe=False, # I prefer unzipped for easier access.
       )
