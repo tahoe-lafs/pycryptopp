@@ -86,6 +86,6 @@ setup(name='pycryptopp',
       classifiers=trove_classifiers,
       # XXXentry_points = { 'console_scripts': [ 'zfec = zfec.cmdline_zfec:main', 'zunfec = zfec.cmdline_zunfec:main' ] },
       ext_modules=[Extension('_pycryptopp', ['pycryptopp/_pycryptoppmodule.cpp',], libraries=["cryptopp",], extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, undef_macros=undef_macros),],
-      test_suite="pycryptopp.test", # XXX
+      test_suite="pycryptopp.test",
       zip_safe=False, # I prefer unzipped for easier access.
       )

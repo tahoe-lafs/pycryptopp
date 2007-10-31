@@ -9,15 +9,13 @@ typedef int Py_ssize_t;
 #endif
 
 /* from Crypto++ */
+#include "cryptopp/filters.h"
 #include "cryptopp/osrng.h"
 #include "cryptopp/pssr.h"
 #include "cryptopp/randpool.h"
 #include "cryptopp/rsa.h"
 
 USING_NAMESPACE(CryptoPP)
-
-static PyObject *pycryptopp_error;
-static PyObject *raise_pycryptopp_error (const char *format, ...);
 
 static char pycryptopp__doc__[] = "\
 pycryptopp - Python wrappers around Crypto++ \n\
@@ -33,6 +31,7 @@ To deserialize an RSA verifying key from a string, call create_verifying_key_fro
 
 /* NOTE: if the complete expansion of the args (by vsprintf) exceeds 1024 then memory will be invalidly overwritten. */
 /* (We don't use vsnprintf because Microsoft standard libraries don't support it.) */
+static PyObject *pycryptopp_error;
 static PyObject *
 raise_pycryptopp_error(const char *format, ...) {
     char exceptionMsg[1024];
@@ -156,7 +155,38 @@ RSASigningKey_dealloc(RSASigningKey* self) {
     self->ob_type->tp_free((PyObject*)self);
 }
 
+static PyObject *
+RSASigningKey_sign(RSASigningKey *self, PyObject *args, PyObject *kwdict) {
+    static const char *kwlist[] = {
+        "msg",
+        NULL
+    };
+    const char *msg;
+    int msgsize;
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#", const_cast<char**>(kwlist), &msg, &msgsize))
+        return NULL;
+
+    assert (msgsize >= 0);
+
+    size_t sigsize = self->k->SignatureLength();
+    PyStringObject* result = reinterpret_cast<PyStringObject*>(PyString_FromStringAndSize(NULL, sigsize));
+    if (!result)
+        return NULL;
+
+    AutoSeededRandomPool osrng;
+    ArraySink* arraysinkp = new ArraySink(reinterpret_cast<byte*>(PyString_AS_STRING(result)), sigsize);
+    SignerFilter* signerfilterp = new SignerFilter(osrng, *(self->k), arraysinkp, false);
+    StringSource(reinterpret_cast<const byte*>(msg), static_cast<size_t>(msgsize), true, signerfilterp);
+
+    return reinterpret_cast<PyObject*>(result);
+}
+
+static char RSASigningKey_sign__doc__[] = "\
+Return a signature on the argument.\n\
+";
+
 static PyMethodDef RSASigningKey_methods[] = {
+    {"sign", reinterpret_cast<PyCFunction>(RSASigningKey_sign), METH_VARARGS, RSASigningKey_sign__doc__},
     {NULL},
 };
 
@@ -205,7 +235,7 @@ static PyTypeObject RSASigningKey_type = {
 static const int MIN_RSA_KEY_SIZE_BITS=1536; /* recommended minimum by NESSIE in 2003 */
 static PyObject *
 generate_from_seed(PyObject *self, PyObject *args, PyObject *kwdict) {
-    static char *kwlist[] = {
+    static const char *kwlist[] = {
         "size",
         "seed",
         NULL
@@ -213,13 +243,14 @@ generate_from_seed(PyObject *self, PyObject *args, PyObject *kwdict) {
     int size;
     const char* seed;
     int seedlen;
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "is#", kwlist, &size, &seed, &seedlen))
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "is#", const_cast<char**>(kwlist), &size, &seed, &seedlen))
         return NULL;
 
     if (size < MIN_RSA_KEY_SIZE_BITS)
         return raise_pycryptopp_error("Precondition violation: size in bits is required to be >= %u, but it was %d", MIN_RSA_KEY_SIZE_BITS, size);
 
-    printf("WHEEE 0 !\n");
+    if (seedlen < 8)
+        return raise_pycryptopp_error("Precondition violation: seed is required to be of length >= %u, but it was %d", 8, seedlen);
 
     RandomPool randPool;
     randPool.IncorporateEntropy((byte *)seed, seedlen);
@@ -237,23 +268,27 @@ Create an RSA signing key deterministically from the given seed.\n\
 This implies that if someone can guess the seed then they can learn the signing key.\n\
 See also generate().\n\
 \n\
+@param size length of the key in bits\n\
+@param seed seed\n\
+\n\
+@precondition size >= 1536\n\
+@precondition len(seed) >= 8\n\
+\n\
 ";
 
 static PyObject *
 generate(PyObject *self, PyObject *args, PyObject *kwdict) {
-    static char *kwlist[] = {
+    static const char *kwlist[] = {
         "size",
         NULL
     };
     int size;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "i", kwlist, &size))
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "i", const_cast<char**>(kwlist), &size))
         return NULL;
 
     if (size < MIN_RSA_KEY_SIZE_BITS)
         return raise_pycryptopp_error("Precondition violation: size in bits is required to be >= %u, but it was %d", MIN_RSA_KEY_SIZE_BITS, size);
-
-    printf("WHEEE 1 !\n");
 
     AutoSeededRandomPool osrng;
     RSASigningKey *signer = reinterpret_cast<RSASigningKey*>(RSASigningKey_new(&RSASigningKey_type, NULL, NULL));
