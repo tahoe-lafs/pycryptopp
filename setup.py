@@ -14,9 +14,6 @@ else:
 use_setuptools(min_version=min_version, download_delay=0)
 
 from setuptools import Extension, find_packages, setup
-# from distutils.core import Extension, setup
-# def find_packages():
-#     return ["pycryptopp",]
 
 DEBUGMODE=False
 # DEBUGMODE=True
