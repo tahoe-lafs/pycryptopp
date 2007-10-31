@@ -62,3 +62,6 @@ class Signer(unittest.TestCase):
         result = signer.sign("abc")
         self.failUnlessEqual(len(result), ((KEYSIZE+7)/8))
         # TODO: test against RSAInc. test vectors.
+
+if __name__ == "__main__":
+    unittest.main()
