@@ -47,6 +47,7 @@ if DEBUGMODE:
 # /usr/include/crypto++ or edit this setup.py file.
 checkincldir = os.path.join("/", "usr", "include", "crypto++")
 if os.path.exists(checkincldir):
+    print "%s detected, so we will use the Debian name \"crypto++\" to identify the library instead of the upstream name \"cryptopp\"." % (checkincldir,)
     define_macros.append(("USE_NAME_CRYPTO_PLUS_PLUS", True,))
     libraries.append("crypto++")
 else:
