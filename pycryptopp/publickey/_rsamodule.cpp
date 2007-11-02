@@ -2,6 +2,7 @@
  * _rsamodule.cpp -- Python wrappers around Crypto++'s RSA-PSS-SHA256
  * more precisely:
  * <a href="http://www.weidai.com/scan-mirror/sig.html#sem_PSS-MGF1">PSS-MGF1</a>* <a href="http://www.weidai.com/scan-mirror/sig.html#sem_PSS-MGF1">PSS-MGF1</a>
+ * with SHA-256 as the hash function
  */
 
 #include <Python.h>
@@ -12,14 +13,14 @@ typedef int Py_ssize_t;
 
 /* from Crypto++ */
 #ifdef USE_NAME_CRYPTO_PLUS_PLUS
-// For Debian (and Ubuntu, and their many derivatives)
+// for Debian (and Ubuntu, and their many derivatives)
 #include "crypto++/filters.h"
 #include "crypto++/osrng.h"
 #include "crypto++/pssr.h"
 #include "crypto++/randpool.h"
 #include "crypto++/rsa.h"
 #else
-// For upstream Crypto++ library
+// for upstream Crypto++ library
 #include "cryptopp/filters.h"
 #include "cryptopp/osrng.h"
 #include "cryptopp/pssr.h"
@@ -38,7 +39,6 @@ To deserialize an RSA signing key from a string, call create_signing_key_from_st
 \n\
 To get an RSA verifying key from an RSA signing key, call get_verifying_key() on the signing key.\n\
 To deserialize an RSA verifying key from a string, call create_verifying_key_from_string().\n\
-\n\
 ";
 
 /* NOTE: if the complete expansion of the args (by vsprintf) exceeds 1024 then memory will be invalidly overwritten. */
@@ -342,7 +342,6 @@ See also generate().\n\
 \n\
 @precondition size >= 1536\n\
 @precondition len(seed) >= 8\n\
-\n\
 ";
 
 static PyObject *
