@@ -224,10 +224,16 @@ SigningKey_sign(SigningKey *self, PyObject *args, PyObject *kwdict) {
     if (!result)
         return NULL;
 
-    AutoSeededRandomPool osrng;
-    ArraySink* arraysinkp = new ArraySink(reinterpret_cast<byte*>(PyString_AS_STRING(result)), sigsize);
-    SignerFilter* signerfilterp = new SignerFilter(osrng, *(self->k), arraysinkp, false);
-    StringSource(reinterpret_cast<const byte*>(msg), static_cast<size_t>(msgsize), true, signerfilterp);
+    AutoSeededRandomPool randpool;
+    size_t siglengthwritten = self->k->SignMessage(
+        randpool,
+        reinterpret_cast<const byte*>(msg),
+        static_cast<size_t>(msgsize),
+        reinterpret_cast<byte*>(PyString_AS_STRING(result)));
+    if (siglengthwritten != sigsize) {
+        fprintf(stderr, "%s: %d: %s: %s", __FILE__, __LINE__, __func__, "INTERNAL ERROR: signature was longer than expected, so unallocated memory was overwritten.");
+        abort();
+    }
 
     return reinterpret_cast<PyObject*>(result);
 }
