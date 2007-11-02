@@ -108,4 +108,5 @@ setup(name='pycryptopp',
       ext_modules=[Extension('_pycryptopp', ['pycryptopp/_pycryptoppmodule.cpp',], libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros),],
       test_suite="pycryptopp.test",
       zip_safe=False, # I prefer unzipped for easier access.
+      dependency_links=["setuptools-0.6c7-py2.5.egg",],
       )
