@@ -73,6 +73,7 @@ VerifyingKey_new(PyTypeObject *type, PyObject *args, PyObject *kwdict) {
     VerifyingKey *self;
 
     self = (VerifyingKey*)type->tp_alloc(type, 0);
+    self->k = NULL;
 
     return (PyObject *)self;
 }
@@ -86,6 +87,8 @@ VerifyingKey_init(VerifyingKey *self, PyObject *args, PyObject *kwdict) {
 
 static void
 VerifyingKey_dealloc(VerifyingKey* self) {
+    if (self->k != NULL)
+        delete self->k;
     self->ob_type->tp_free((PyObject*)self);
 }
 
@@ -151,6 +154,7 @@ SigningKey_new(PyTypeObject *type, PyObject *args, PyObject *kwdict) {
     SigningKey *self;
 
     self = (SigningKey*)type->tp_alloc(type, 0);
+    self->k = NULL;
 
     return (PyObject *)self;
 }
@@ -164,6 +168,8 @@ SigningKey_init(SigningKey *self, PyObject *args, PyObject *kwdict) {
 
 static void
 SigningKey_dealloc(SigningKey* self) {
+    if (self->k != NULL)
+        delete self->k;
     self->ob_type->tp_free((PyObject*)self);
 }
 
