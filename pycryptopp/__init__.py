@@ -1,3 +1,7 @@
+"""
+pycryptopp - Python wrappers for Crypto++
+"""
+
 __version__ = "unknown"
 try:
     from _version import __version__
@@ -6,4 +10,4 @@ except ImportError:
     # know what our version is. This should not happen very often.
     pass
 
-from _pycryptopp import __doc__, Error, generate, generate_from_seed
+import publickey# , ciphers, hashes

@@ -7,7 +7,7 @@ import unittest
 global VERBOSE
 VERBOSE=False
 
-import pycryptopp
+from pycryptopp.publickey import rsa
 
 from base64 import b32encode
 def ab(x): # debuggery
@@ -27,38 +27,38 @@ KEYSIZE=1536
 class Signer(unittest.TestCase):
     def test_generate_from_seed_bad_seed(self):
         try:
-            signer = pycryptopp.generate_from_seed(KEYSIZE, "aaa")
-        except pycryptopp.Error, le:
+            signer = rsa.generate_from_seed(KEYSIZE, "aaa")
+        except rsa.Error, le:
             self.failUnless("seed is required to be of length >=" in str(le), le)
         else:
             self.fail("Should have raised error from seed being too short.")
 
     def test_generate_from_seed_bad_size(self):
         try:
-            signer = pycryptopp.generate_from_seed(1535, "aaaaaaaa")
-        except pycryptopp.Error, le:
+            signer = rsa.generate_from_seed(1535, "aaaaaaaa")
+        except rsa.Error, le:
             self.failUnless("size in bits is required to be >=" in str(le), le)
         else:
             self.fail("Should have raised error from size being too small.")
 
     def test_generate_from_seed(self):
-        signer = pycryptopp.generate_from_seed(KEYSIZE, "aaaaaaaa")
+        signer = rsa.generate_from_seed(KEYSIZE, "aaaaaaaa")
         # Hooray!  It didn't raise an exception!  We win!
 
     def test_generate_bad_size(self):
         try:
-            signer = pycryptopp.generate(1535)
-        except pycryptopp.Error, le:
+            signer = rsa.generate(1535)
+        except rsa.Error, le:
             self.failUnless("size in bits is required to be >=" in str(le), le)
         else:
             self.fail("Should have raised error from size being too small.")
 
     def test_generate(self):
-        signer = pycryptopp.generate(KEYSIZE)
+        signer = rsa.generate(KEYSIZE)
         # Hooray!  It didn't raise an exception!  We win!
 
     def test_sign(self):
-        signer = pycryptopp.generate(KEYSIZE)
+        signer = rsa.generate(KEYSIZE)
         result = signer.sign("abc")
         self.failUnlessEqual(len(result), ((KEYSIZE+7)/8))
         # TODO: test against RSAInc. test vectors.

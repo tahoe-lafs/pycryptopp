@@ -23,6 +23,7 @@ extra_link_args=[]
 define_macros=[]
 undef_macros=[]
 libraries=[]
+ext_modules=[]
 
 if DEBUGMODE:
     extra_compile_args.append("-O0")
@@ -93,6 +94,10 @@ else:
         print "unable to find version in %s" % (VERSIONFILE,)
         raise RuntimeError("if %s.py exists, it is required to be well-formed" % (VERSIONFILE,))
 
+ext_modules.append(
+    Extension('pycryptopp.publickey._rsa', ['pycryptopp/publickey/_rsamodule.cpp',], libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
+    )
+
 setup(name='pycryptopp',
       # install_requires=['something>=1.0.0',],
       version=verstr,
@@ -105,7 +110,7 @@ setup(name='pycryptopp',
       packages=find_packages(),
       classifiers=trove_classifiers,
       # XXXentry_points = { 'console_scripts': [ 'zfec = zfec.cmdline_zfec:main', 'zunfec = zfec.cmdline_zunfec:main' ] },
-      ext_modules=[Extension('_pycryptopp', ['pycryptopp/_pycryptoppmodule.cpp',], libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros),],
+      ext_modules=ext_modules,
       test_suite="pycryptopp.test",
       zip_safe=False, # I prefer unzipped for easier access.
       dependency_links=["setuptools-0.6c7-py2.5.egg",],

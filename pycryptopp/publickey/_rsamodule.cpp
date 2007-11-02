@@ -1,5 +1,7 @@
 /**
- * pycryptopp -- Python wrappers around Crypto++
+ * _rsamodule.cpp -- Python wrappers around Crypto++'s RSA-PSS-SHA256
+ * more precisely:
+ * <a href="http://www.weidai.com/scan-mirror/sig.html#sem_PSS-MGF1">PSS-MGF1</a>* <a href="http://www.weidai.com/scan-mirror/sig.html#sem_PSS-MGF1">PSS-MGF1</a>
  */
 
 #include <Python.h>
@@ -27,7 +29,7 @@ typedef int Py_ssize_t;
 
 USING_NAMESPACE(CryptoPP)
 
-static char pycryptopp__doc__[] = "\
+static char rsa__doc__[] = "\
 pycryptopp - Python wrappers around Crypto++ \n\
 \n\
 To create a new RSA signing key from a seed, call generate_from_seed().\n\
@@ -41,9 +43,9 @@ To deserialize an RSA verifying key from a string, call create_verifying_key_fro
 
 /* NOTE: if the complete expansion of the args (by vsprintf) exceeds 1024 then memory will be invalidly overwritten. */
 /* (We don't use vsnprintf because Microsoft standard libraries don't support it.) */
-static PyObject *pycryptopp_error;
+static PyObject *rsa_error;
 static PyObject *
-raise_pycryptopp_error(const char *format, ...) {
+raise_rsa_error(const char *format, ...) {
     char exceptionMsg[1024];
     va_list ap;
 
@@ -51,11 +53,11 @@ raise_pycryptopp_error(const char *format, ...) {
     vsprintf (exceptionMsg, format, ap); /* Make sure that this can't exceed 1024 chars! */
     va_end (ap);
     exceptionMsg[1023]='\0';
-    PyErr_SetString (pycryptopp_error, exceptionMsg);
+    PyErr_SetString (rsa_error, exceptionMsg);
     return NULL;
 }
 
-static char RSAVerifyingKey__doc__[] = "\
+static char VerifyingKey__doc__[] = "\
 An RSA verifying key.\n\
 ";
 
@@ -64,13 +66,13 @@ typedef struct {
 
     /* internal */
     RSASS<PSS, SHA256>::Verifier *k;
-} RSAVerifyingKey;
+} VerifyingKey;
 
 static PyObject *
-RSAVerifyingKey_new(PyTypeObject *type, PyObject *args, PyObject *kwdict) {
-    RSAVerifyingKey *self;
+VerifyingKey_new(PyTypeObject *type, PyObject *args, PyObject *kwdict) {
+    VerifyingKey *self;
 
-    self = (RSAVerifyingKey*)type->tp_alloc(type, 0);
+    self = (VerifyingKey*)type->tp_alloc(type, 0);
 
     return (PyObject *)self;
 }
@@ -78,26 +80,26 @@ RSAVerifyingKey_new(PyTypeObject *type, PyObject *args, PyObject *kwdict) {
 /* This is not intended to be used. */
 /* XXX What's the polite way to tell Python that nobody should use this? */
 static int
-RSAVerifyingKey_init(RSAVerifyingKey *self, PyObject *args, PyObject *kwdict) {
+VerifyingKey_init(VerifyingKey *self, PyObject *args, PyObject *kwdict) {
     return 0;
 }
 
 static void
-RSAVerifyingKey_dealloc(RSAVerifyingKey* self) {
+VerifyingKey_dealloc(VerifyingKey* self) {
     self->ob_type->tp_free((PyObject*)self);
 }
 
-static PyMethodDef RSAVerifyingKey_methods[] = {
+static PyMethodDef VerifyingKey_methods[] = {
     {NULL},
 };
 
-static PyTypeObject RSAVerifyingKey_type = {
+static PyTypeObject VerifyingKey_type = {
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
-    "_pycryptopp.RSAVerifyingKey", /*tp_name*/
-    sizeof(RSAVerifyingKey),             /*tp_basicsize*/
+    "_rsa.VerifyingKey", /*tp_name*/
+    sizeof(VerifyingKey),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
-    (destructor)RSAVerifyingKey_dealloc, /*tp_dealloc*/
+    (destructor)VerifyingKey_dealloc, /*tp_dealloc*/
     0,                         /*tp_print*/
     0,                         /*tp_getattr*/
     0,                         /*tp_setattr*/
@@ -113,14 +115,14 @@ static PyTypeObject RSAVerifyingKey_type = {
     0,                         /*tp_setattro*/
     0,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
-    RSAVerifyingKey__doc__,           /* tp_doc */
+    VerifyingKey__doc__,           /* tp_doc */
     0,		               /* tp_traverse */
     0,		               /* tp_clear */
     0,		               /* tp_richcompare */
     0,		               /* tp_weaklistoffset */
     0,		               /* tp_iter */
     0,		               /* tp_iternext */
-    RSAVerifyingKey_methods,             /* tp_methods */
+    VerifyingKey_methods,             /* tp_methods */
     0,                         /* tp_members */
     0,                         /* tp_getset */
     0,                         /* tp_base */
@@ -128,12 +130,12 @@ static PyTypeObject RSAVerifyingKey_type = {
     0,                         /* tp_descr_get */
     0,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
-    (initproc)RSAVerifyingKey_init,      /* tp_init */
+    (initproc)VerifyingKey_init,      /* tp_init */
     0,                         /* tp_alloc */
-    RSAVerifyingKey_new,                 /* tp_new */
+    VerifyingKey_new,                 /* tp_new */
 };
 
-static char RSASigningKey__doc__[] = "\
+static char SigningKey__doc__[] = "\
 An RSA signing key.\n\
 ";
 
@@ -142,13 +144,13 @@ typedef struct {
 
     /* internal */
     RSASS<PSS, SHA256>::Signer *k;
-} RSASigningKey;
+} SigningKey;
 
 static PyObject *
-RSASigningKey_new(PyTypeObject *type, PyObject *args, PyObject *kwdict) {
-    RSASigningKey *self;
+SigningKey_new(PyTypeObject *type, PyObject *args, PyObject *kwdict) {
+    SigningKey *self;
 
-    self = (RSASigningKey*)type->tp_alloc(type, 0);
+    self = (SigningKey*)type->tp_alloc(type, 0);
 
     return (PyObject *)self;
 }
@@ -156,17 +158,17 @@ RSASigningKey_new(PyTypeObject *type, PyObject *args, PyObject *kwdict) {
 /* This is not intended to be used. */
 /* XXX What's the polite way to tell Python that nobody should use this? */
 static int
-RSASigningKey_init(RSASigningKey *self, PyObject *args, PyObject *kwdict) {
+SigningKey_init(SigningKey *self, PyObject *args, PyObject *kwdict) {
     return 0;
 }
 
 static void
-RSASigningKey_dealloc(RSASigningKey* self) {
+SigningKey_dealloc(SigningKey* self) {
     self->ob_type->tp_free((PyObject*)self);
 }
 
 static PyObject *
-RSASigningKey_sign(RSASigningKey *self, PyObject *args, PyObject *kwdict) {
+SigningKey_sign(SigningKey *self, PyObject *args, PyObject *kwdict) {
     static const char *kwlist[] = {
         "msg",
         NULL
@@ -195,18 +197,18 @@ static char RSASigningKey_sign__doc__[] = "\
 Return a signature on the argument.\n\
 ";
 
-static PyMethodDef RSASigningKey_methods[] = {
-    {"sign", reinterpret_cast<PyCFunction>(RSASigningKey_sign), METH_VARARGS, RSASigningKey_sign__doc__},
+static PyMethodDef SigningKey_methods[] = {
+    {"sign", reinterpret_cast<PyCFunction>(SigningKey_sign), METH_VARARGS, RSASigningKey_sign__doc__},
     {NULL},
 };
 
-static PyTypeObject RSASigningKey_type = {
+static PyTypeObject SigningKey_type = {
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
-    "_pycryptopp.RSASigningKey", /*tp_name*/
-    sizeof(RSASigningKey),             /*tp_basicsize*/
+    "_rsa.SigningKey", /*tp_name*/
+    sizeof(SigningKey),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
-    (destructor)RSASigningKey_dealloc, /*tp_dealloc*/
+    (destructor)SigningKey_dealloc, /*tp_dealloc*/
     0,                         /*tp_print*/
     0,                         /*tp_getattr*/
     0,                         /*tp_setattr*/
@@ -222,14 +224,14 @@ static PyTypeObject RSASigningKey_type = {
     0,                         /*tp_setattro*/
     0,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
-    RSASigningKey__doc__,           /* tp_doc */
+    SigningKey__doc__,           /* tp_doc */
     0,		               /* tp_traverse */
     0,		               /* tp_clear */
     0,		               /* tp_richcompare */
     0,		               /* tp_weaklistoffset */
     0,		               /* tp_iter */
     0,		               /* tp_iternext */
-    RSASigningKey_methods,             /* tp_methods */
+    SigningKey_methods,             /* tp_methods */
     0,                         /* tp_members */
     0,                         /* tp_getset */
     0,                         /* tp_base */
@@ -237,12 +239,12 @@ static PyTypeObject RSASigningKey_type = {
     0,                         /* tp_descr_get */
     0,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
-    (initproc)RSASigningKey_init,      /* tp_init */
+    (initproc)SigningKey_init,      /* tp_init */
     0,                         /* tp_alloc */
-    RSASigningKey_new,                 /* tp_new */
+    SigningKey_new,                 /* tp_new */
 };
 
-static const int MIN_RSA_KEY_SIZE_BITS=1536; /* recommended minimum by NESSIE in 2003 */
+static const int MIN_KEY_SIZE_BITS=1536; /* recommended minimum by NESSIE in 2003 */
 static PyObject *
 generate_from_seed(PyObject *self, PyObject *args, PyObject *kwdict) {
     static const char *kwlist[] = {
@@ -256,16 +258,16 @@ generate_from_seed(PyObject *self, PyObject *args, PyObject *kwdict) {
     if (!PyArg_ParseTupleAndKeywords(args, kwdict, "is#", const_cast<char**>(kwlist), &size, &seed, &seedlen))
         return NULL;
 
-    if (size < MIN_RSA_KEY_SIZE_BITS)
-        return raise_pycryptopp_error("Precondition violation: size in bits is required to be >= %u, but it was %d", MIN_RSA_KEY_SIZE_BITS, size);
+    if (size < MIN_KEY_SIZE_BITS)
+        return raise_rsa_error("Precondition violation: size in bits is required to be >= %u, but it was %d", MIN_KEY_SIZE_BITS, size);
 
     if (seedlen < 8)
-        return raise_pycryptopp_error("Precondition violation: seed is required to be of length >= %u, but it was %d", 8, seedlen);
+        return raise_rsa_error("Precondition violation: seed is required to be of length >= %u, but it was %d", 8, seedlen);
 
     RandomPool randPool;
     randPool.Put((byte *)seed, seedlen); /* In Crypto++ v5.5.2, the recommended interface is "IncorporateEntropy()", but "Put()" is supported for backwards compatibility.  In Crypto++ v5.2 (the version that comes with Ubuntu dapper), only "Put()" is available. */
 
-    RSASigningKey *signer = reinterpret_cast<RSASigningKey*>(RSASigningKey_new(&RSASigningKey_type, NULL, NULL));
+    SigningKey *signer = reinterpret_cast<SigningKey*>(SigningKey_new(&SigningKey_type, NULL, NULL));
     if (signer == NULL)
         return NULL;
     signer->k = new RSASS<PSS, SHA256>::Signer(randPool, size);
@@ -273,7 +275,7 @@ generate_from_seed(PyObject *self, PyObject *args, PyObject *kwdict) {
 }
 
 static char generate_from_seed__doc__[] = "\
-Create an RSA signing key deterministically from the given seed.\n\
+Create a signing key deterministically from the given seed.\n\
 \n\
 This implies that if someone can guess the seed then they can learn the signing key.\n\
 See also generate().\n\
@@ -297,11 +299,11 @@ generate(PyObject *self, PyObject *args, PyObject *kwdict) {
     if (!PyArg_ParseTupleAndKeywords(args, kwdict, "i", const_cast<char**>(kwlist), &size))
         return NULL;
 
-    if (size < MIN_RSA_KEY_SIZE_BITS)
-        return raise_pycryptopp_error("Precondition violation: size in bits is required to be >= %u, but it was %d", MIN_RSA_KEY_SIZE_BITS, size);
+    if (size < MIN_KEY_SIZE_BITS)
+        return raise_rsa_error("Precondition violation: size in bits is required to be >= %u, but it was %d", MIN_KEY_SIZE_BITS, size);
 
     AutoSeededRandomPool osrng;
-    RSASigningKey *signer = reinterpret_cast<RSASigningKey*>(RSASigningKey_new(&RSASigningKey_type, NULL, NULL));
+    SigningKey *signer = reinterpret_cast<SigningKey*>(SigningKey_new(&SigningKey_type, NULL, NULL));
     if (signer == NULL)
         return NULL;
     signer->k = new RSASS<PSS, SHA256>::Signer(osrng, size);
@@ -309,11 +311,11 @@ generate(PyObject *self, PyObject *args, PyObject *kwdict) {
 }
 
 static char generate__doc__[] = "\
-Create an RSA signing key using the operating system's random number generator.\n\
+Create a signing key using the operating system's random number generator.\n\
 \n\
 ";
 
-static PyMethodDef pycryptopp_methods[] = { 
+static PyMethodDef rsa_methods[] = { 
     {"generate_from_seed", reinterpret_cast<PyCFunction>(generate_from_seed), METH_VARARGS, generate_from_seed__doc__},
     {"generate", reinterpret_cast<PyCFunction>(generate), METH_VARARGS, generate__doc__},
     {NULL, NULL, 0, NULL}  /* sentinel */
@@ -323,26 +325,26 @@ static PyMethodDef pycryptopp_methods[] = {
 #define PyMODINIT_FUNC void
 #endif
 PyMODINIT_FUNC
-init_pycryptopp(void) {
+init_rsa(void) {
     PyObject *module;
     PyObject *module_dict;
 
-    if (PyType_Ready(&RSAVerifyingKey_type) < 0)
+    if (PyType_Ready(&VerifyingKey_type) < 0)
         return;
-    if (PyType_Ready(&RSASigningKey_type) < 0)
+    if (PyType_Ready(&SigningKey_type) < 0)
         return;
 
-    module = Py_InitModule3("_pycryptopp", pycryptopp_methods, pycryptopp__doc__);
+    module = Py_InitModule3("_rsa", rsa_methods, rsa__doc__);
     if (module == NULL)
       return;
 
-    Py_INCREF(&RSASigningKey_type);
-    Py_INCREF(&RSAVerifyingKey_type);
+    Py_INCREF(&SigningKey_type);
+    Py_INCREF(&VerifyingKey_type);
 
-    PyModule_AddObject(module, "RSASigningKey", (PyObject *)&RSASigningKey_type);
-    PyModule_AddObject(module, "RSAVerifyingKey", (PyObject *)&RSAVerifyingKey_type);
+    PyModule_AddObject(module, "SigningKey", (PyObject *)&SigningKey_type);
+    PyModule_AddObject(module, "VerifyingKey", (PyObject *)&VerifyingKey_type);
 
     module_dict = PyModule_GetDict(module);
-    pycryptopp_error = PyErr_NewException("_pycryptopp.Error", NULL, NULL);
-    PyDict_SetItemString(module_dict, "Error", pycryptopp_error);
+    rsa_error = PyErr_NewException("_rsa.Error", NULL, NULL);
+    PyDict_SetItemString(module_dict, "Error", rsa_error);
 }
