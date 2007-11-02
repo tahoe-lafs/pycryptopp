@@ -32,8 +32,8 @@ USING_NAMESPACE(CryptoPP)
 static char rsa__doc__[] = "\
 pycryptopp - Python wrappers around Crypto++ \n\
 \n\
-To create a new RSA signing key from a seed, call generate_from_seed().\n\
 To create a new RSA signing key from the operating system's random number generator, call generate().\n\
+To create a new RSA signing key from a seed, call generate_from_seed().\n\
 To deserialize an RSA signing key from a string, call create_signing_key_from_string().\n\
 \n\
 To get an RSA verifying key from an RSA signing key, call get_verifying_key() on the signing key.\n\
@@ -92,7 +92,40 @@ VerifyingKey_dealloc(VerifyingKey* self) {
     self->ob_type->tp_free((PyObject*)self);
 }
 
+static PyObject *
+VerifyingKey_verify(VerifyingKey *self, PyObject *args, PyObject *kwdict) {
+    static const char *kwlist[] = {
+        "msg",
+        "signature",
+        NULL
+    };
+    const char *msg;
+    int msgsize;
+    const char *signature;
+    int signaturesize;
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#s#", const_cast<char**>(kwlist), &msg, &msgsize, &signature, &signaturesize))
+        return NULL;
+
+    assert (msgsize >= 0);
+    assert (signaturesize >= 0);
+    size_t sigsize = self->k->SignatureLength();
+    if (sigsize != static_cast<size_t>(signaturesize))
+        return raise_rsa_error("Precondition violation: signatures are required to be of size %u, but it was %u", sigsize, signaturesize);
+
+    assert (signaturesize == sigsize);
+
+    if (self->k->VerifyMessage(reinterpret_cast<const byte*>(msg), static_cast<size_t>(msgsize), reinterpret_cast<const byte*>(signature), static_cast<size_t>(signaturesize)))
+        Py_RETURN_TRUE;
+    else
+        Py_RETURN_FALSE;
+}
+
+static char VerifyingKey_verify__doc__[] = "\
+Return whether the signature is a valid signature on the msg.\n\
+";
+
 static PyMethodDef VerifyingKey_methods[] = {
+    {"verify", reinterpret_cast<PyCFunction>(VerifyingKey_verify), METH_VARARGS, VerifyingKey_verify__doc__},
     {NULL},
 };
 
@@ -199,12 +232,30 @@ SigningKey_sign(SigningKey *self, PyObject *args, PyObject *kwdict) {
     return reinterpret_cast<PyObject*>(result);
 }
 
-static char RSASigningKey_sign__doc__[] = "\
+static char SigningKey_sign__doc__[] = "\
 Return a signature on the argument.\n\
 ";
 
+static PyObject *
+SigningKey_get_verifying_key(SigningKey *self, PyObject *args, PyObject *kwdict) {
+    VerifyingKey *verifier = reinterpret_cast<VerifyingKey*>(VerifyingKey_new(&VerifyingKey_type, NULL, NULL));
+    if (verifier == NULL)
+        return NULL;
+
+    verifier->k = new RSASS<PSS, SHA256>::Verifier(*(self->k));
+    if (verifier->k != NULL)
+        return reinterpret_cast<PyObject*>(verifier);
+    else
+        return NULL;
+}
+
+static char SigningKey_get_verifying_key__doc__[] = "\
+Return the corresponding verifying key.\n\
+";
+
 static PyMethodDef SigningKey_methods[] = {
-    {"sign", reinterpret_cast<PyCFunction>(SigningKey_sign), METH_VARARGS, RSASigningKey_sign__doc__},
+    {"sign", reinterpret_cast<PyCFunction>(SigningKey_sign), METH_VARARGS, SigningKey_sign__doc__},
+    {"get_verifying_key", reinterpret_cast<PyCFunction>(SigningKey_get_verifying_key), METH_VARARGS, SigningKey_get_verifying_key__doc__},
     {NULL},
 };
 

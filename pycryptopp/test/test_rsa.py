@@ -63,5 +63,39 @@ class Signer(unittest.TestCase):
         self.failUnlessEqual(len(result), ((KEYSIZE+7)/8))
         # TODO: test against RSAInc. test vectors.
 
+    def _help_test_sign_and_check(self, signer, msg):
+        sig = signer.sign(msg)
+        self.failUnlessEqual(len(sig), ((KEYSIZE+7)/8))
+        verifier = signer.get_verifying_key()
+        self.failUnless(verifier.verify(msg, sig))
+
+    def test_sign_and_check_a(self):
+        signer = rsa.generate(KEYSIZE)
+        return self._help_test_sign_and_check(signer, "a")
+
+    def test_sign_and_check_random(self):
+        signer = rsa.generate(KEYSIZE)
+        for i in range(3):
+            l = random.randrange(0, 2**10)
+            msg = randstr(l)
+            self._help_test_sign_and_check(signer, msg)
+
+    def _help_test_sign_and_failcheck(self, signer, msg):
+        sig = signer.sign("a")
+        sig = sig[:-1] + chr(ord(sig[-1])^0x01)
+        verifier = signer.get_verifying_key()
+        self.failUnless(not verifier.verify(msg, sig))
+
+    def test_sign_and_check_a(self):
+        signer = rsa.generate(KEYSIZE)
+        return self._help_test_sign_and_failcheck(signer, "a")
+
+    def test_sign_and_check_random(self):
+        signer = rsa.generate(KEYSIZE)
+        for i in range(3):
+            l = random.randrange(0, 2**10)
+            msg = randstr(l)
+            self._help_test_sign_and_failcheck(signer, msg)
+
 if __name__ == "__main__":
     unittest.main()
