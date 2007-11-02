@@ -124,8 +124,26 @@ static char VerifyingKey_verify__doc__[] = "\
 Return whether the signature is a valid signature on the msg.\n\
 ";
 
+static PyObject *
+VerifyingKey_serialize(VerifyingKey *self, PyObject *args, PyObject *kwdict) {
+    std::string outstr;
+    StringSink ss(outstr);
+    self->k->DEREncode(ss);
+    PyStringObject* result = reinterpret_cast<PyStringObject*>(PyString_FromStringAndSize(outstr.c_str(), outstr.size()));
+    if (!result)
+        return NULL;
+
+    return reinterpret_cast<PyObject*>(result);
+}
+
+static char VerifyingKey_serialize__doc__[] = "\
+Return a string containing the key material.  The string can be passed to \n\
+create_verifying_key_from_string() to instantiate a new copy of this key.\n\
+";
+
 static PyMethodDef VerifyingKey_methods[] = {
     {"verify", reinterpret_cast<PyCFunction>(VerifyingKey_verify), METH_VARARGS, VerifyingKey_verify__doc__},
+    {"serialize", reinterpret_cast<PyCFunction>(VerifyingKey_serialize), METH_VARARGS, VerifyingKey_serialize__doc__},
     {NULL},
 };
 
@@ -374,12 +392,37 @@ generate(PyObject *self, PyObject *args, PyObject *kwdict) {
 
 static char generate__doc__[] = "\
 Create a signing key using the operating system's random number generator.\n\
-\n\
+";
+
+static PyObject *
+create_verifying_key_from_string(PyObject *self, PyObject *args, PyObject *kwdict) {
+    static const char *kwlist[] = {
+        "serializedverifyingkey",
+        NULL
+    };
+    const char *serializedverifyingkey;
+    Py_ssize_t serializedverifyingkeysize;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#", const_cast<char**>(kwlist), &serializedverifyingkey, &serializedverifyingkeysize))
+        return NULL;
+
+    VerifyingKey *verifier = reinterpret_cast<VerifyingKey*>(VerifyingKey_new(&VerifyingKey_type, NULL, NULL));
+    if (verifier == NULL)
+        return NULL;
+    StringSource ss(serializedverifyingkey, serializedverifyingkeysize);
+
+    verifier->k = new RSASS<PSS, SHA256>::Verifier(ss);
+    return reinterpret_cast<PyObject*>(verifier);
+}
+
+static char create_verifying_key_from_string__doc__[] = "\
+Create a verifying key from its serialized state.\n\
 ";
 
 static PyMethodDef rsa_methods[] = { 
     {"generate_from_seed", reinterpret_cast<PyCFunction>(generate_from_seed), METH_VARARGS, generate_from_seed__doc__},
     {"generate", reinterpret_cast<PyCFunction>(generate), METH_VARARGS, generate__doc__},
+    {"create_verifying_key_from_string", reinterpret_cast<PyCFunction>(create_verifying_key_from_string), METH_VARARGS, create_verifying_key_from_string__doc__},
     {NULL, NULL, 0, NULL}  /* sentinel */
 };
 

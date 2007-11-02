@@ -63,39 +63,62 @@ class Signer(unittest.TestCase):
         self.failUnlessEqual(len(result), ((KEYSIZE+7)/8))
         # TODO: test against RSAInc. test vectors.
 
-    def _help_test_sign_and_check(self, signer, msg):
+class SignAndVerify(unittest.TestCase):
+    def _help_test_sign_and_check(self, signer, verifier, msg):
         sig = signer.sign(msg)
         self.failUnlessEqual(len(sig), ((KEYSIZE+7)/8))
-        verifier = signer.get_verifying_key()
         self.failUnless(verifier.verify(msg, sig))
 
     def test_sign_and_check_a(self):
         signer = rsa.generate(KEYSIZE)
-        return self._help_test_sign_and_check(signer, "a")
+        verifier = signer.get_verifying_key()
+        return self._help_test_sign_and_check(signer, verifier, "a")
 
-    def test_sign_and_check_random(self):
-        signer = rsa.generate(KEYSIZE)
+    def _help_test_sign_and_check_random(self, signer, verifier):
         for i in range(3):
             l = random.randrange(0, 2**10)
             msg = randstr(l)
-            self._help_test_sign_and_check(signer, msg)
+            self._help_test_sign_and_check(signer, verifier, msg)
 
-    def _help_test_sign_and_failcheck(self, signer, msg):
+    def test_sign_and_check_random(self):
+        signer = rsa.generate(KEYSIZE)
+        verifier = signer.get_verifying_key()
+        return self._help_test_sign_and_check_random(signer, verifier)
+
+    def _help_test_sign_and_failcheck(self, signer, verifier, msg):
         sig = signer.sign("a")
         sig = sig[:-1] + chr(ord(sig[-1])^0x01)
-        verifier = signer.get_verifying_key()
         self.failUnless(not verifier.verify(msg, sig))
 
-    def test_sign_and_check_a(self):
+    def test_sign_and_failcheck_a(self):
         signer = rsa.generate(KEYSIZE)
-        return self._help_test_sign_and_failcheck(signer, "a")
+        verifier = signer.get_verifying_key()
+        return self._help_test_sign_and_failcheck(signer, verifier, "a")
 
-    def test_sign_and_check_random(self):
-        signer = rsa.generate(KEYSIZE)
+    def _help_test_sign_and_failcheck_random(self, signer, verifier):
         for i in range(3):
             l = random.randrange(0, 2**10)
             msg = randstr(l)
-            self._help_test_sign_and_failcheck(signer, msg)
+            self._help_test_sign_and_failcheck(signer, verifier, msg)
 
+    def test_sign_and_failcheck_random(self):
+        signer = rsa.generate(KEYSIZE)
+        verifier = signer.get_verifying_key()
+        return self._help_test_sign_and_failcheck_random(signer, verifier)
+
+    def test_serialize_and_deserialize_and_test(self):
+        signer = rsa.generate(KEYSIZE)
+        verifier = signer.get_verifying_key()
+        serstr = verifier.serialize()
+        import sys
+        sys.stderr.write("WHEEE I GOT %s" % (ab(serstr),)) ; sys.stderr.flush()
+        verifier = None
+        newverifier = rsa.create_verifying_key_from_string(serstr)
+        self._help_test_sign_and_check(signer, verifier, "a")
+        self._help_test_sign_and_check_random(signer, verifier)
+        self._help_test_sign_and_failcheck(signer, verifier, "a")
+        self._help_test_sign_and_failcheck_random(signer, verifier)
+        
+    
 if __name__ == "__main__":
     unittest.main()
