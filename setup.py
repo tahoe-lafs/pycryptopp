@@ -24,6 +24,8 @@ define_macros=[]
 undef_macros=[]
 libraries=[]
 ext_modules=[]
+include_dirs=[]
+library_dirs=[]
 
 if DEBUGMODE:
     extra_compile_args.append("-O0")
@@ -32,27 +34,31 @@ if DEBUGMODE:
     extra_link_args.append("-g")
     undef_macros.append('NDEBUG')
 
-# Check for the existence of "/usr/include/crypto++/rsa.h", and if it is
-# present, pass #define "USE_NAME_CRYPTO_PLUS_PLUS" to the C++ compiler, and
-# tell the C++ compiler to link to an extra library named "crypto++".
+# Check for a directory starting with "/usr/include" or "/usr/local/include"
+# and ending with "cryptopp" or "crypto++".
 
 # This is because the upstream Crypto++ GNUmakefile and the Microsoft Visual
 # Studio projects produce include directory and library named "cryptopp", but
 # Debian (and hence Ubuntu, and a lot of other derivative distributions)
 # changed that name to "crypto++".
 
-# So this will very likely do what you want, unless what you want is to ignore
-# an extant install of Crypto++ which has include files in
-# /usr/include/crypto++, and instead include and link to a specific install of
-# Crypto++ which is named "cryptopp", in which case you'll have to remove the
-# /usr/include/crypto++ or edit this setup.py file.
-checkincldir = os.path.join("/", "usr", "include", "crypto++")
-if os.path.exists(checkincldir):
-    print "%s detected, so we will use the Debian name \"crypto++\" to identify the library instead of the upstream name \"cryptopp\"." % (checkincldir,)
-    define_macros.append(("USE_NAME_CRYPTO_PLUS_PLUS", True,))
-    libraries.append("crypto++")
-else:
-    libraries.append("cryptopp")
+# So this will very likely do what you want, but if it doesn't (because you
+# have more than one version of Crypto++ installed it guessed wrong about which
+# one you wanted to build against) and then you have to read this code and
+# understand what it is doing.
+
+for inclpath in ["/usr/include/cryptopp", "/usr/local/include/cryptopp", "/usr/include/crypto++", "/usr/local/include/crypto++",]:
+    if os.path.exists(inclpath):
+        if inclpath.endswith("crypto++"):
+            print "\"%s\" detected, so we will use the Debian name \"crypto++\" to identify the library instead of the upstream name \"cryptopp\"." % (inclpath,)
+            define_macros.append(("USE_NAME_CRYPTO_PLUS_PLUS", True,))
+            libraries.append("crypto++")
+        else:
+            libraries.append("cryptopp")
+    incldir = os.path.dirname(inclpath)
+    include_dirs.append(incldir)
+    libdir = os.path.join(os.path.dirname(incldir), "lib")
+    library_dirs.append(libdir)
 
 trove_classifiers=[
     "Environment :: Console",
@@ -95,7 +101,7 @@ else:
         raise RuntimeError("if %s.py exists, it is required to be well-formed" % (VERSIONFILE,))
 
 ext_modules.append(
-    Extension('pycryptopp.publickey._rsa', ['pycryptopp/publickey/_rsamodule.cpp',], libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
+    Extension('pycryptopp.publickey._rsa', ['pycryptopp/publickey/_rsamodule.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
     )
 
 setup(name='pycryptopp',
