@@ -220,7 +220,9 @@ SigningKey_sign(SigningKey *self, PyObject *args, PyObject *kwdict) {
         reinterpret_cast<const byte*>(msg),
         msgsize,
         reinterpret_cast<byte*>(PyString_AS_STRING(result)));
-    if (siglengthwritten != sigsize) {
+    if (siglengthwritten < sigsize)
+        fprintf(stderr, "%s: %d: %s: %s", __FILE__, __LINE__, __func__, "INTERNAL ERROR: signature was shorter than expected.");
+    else if (siglengthwritten > sigsize) {
         fprintf(stderr, "%s: %d: %s: %s", __FILE__, __LINE__, __func__, "INTERNAL ERROR: signature was longer than expected, so unallocated memory was overwritten.");
         abort();
     }
