@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # pycryptopp -- Python wrappers for Crypto++
-# 
+#
 # Copyright (C) 2007 Allmydata, Inc.
 # Author: Zooko Wilcox-O'Hearn
 
@@ -62,7 +62,7 @@ for inclpath in ["/usr/include/cryptopp", "/usr/local/include/cryptopp", "/usr/i
 
 trove_classifiers=[
     "Environment :: Console",
-    "Intended Audience :: Developers", 
+    "Intended Audience :: Developers",
     "Operating System :: Microsoft",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: Unix",
@@ -70,13 +70,13 @@ trove_classifiers=[
     "Operating System :: POSIX",
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: Microsoft :: Windows :: Windows NT/2000",
-    "Operating System :: OS Independent", 
-    "Natural Language :: English", 
-    "Programming Language :: C", 
+    "Operating System :: OS Independent",
+    "Natural Language :: English",
+    "Programming Language :: C",
     "Programming Language :: C++",
-    "Programming Language :: Python", 
+    "Programming Language :: Python",
     "Topic :: Software Development :: Libraries",
-# XXX ADD SOME 
+# XXX ADD SOME
     ]
 
 try:
