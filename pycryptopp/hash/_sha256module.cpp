@@ -55,6 +55,7 @@ typedef struct {
 
     /* internal */
     CryptoPP::SHA256 h;
+    PyStringObject* digest;
 } SHA256;
 
 PyDoc_STRVAR(SHA256__doc__,
@@ -62,6 +63,9 @@ PyDoc_STRVAR(SHA256__doc__,
 
 static PyObject *
 SHA256_update(SHA256* self, PyObject* msgobj) {
+    if (self->digest)
+        return raise_sha256_error("Precondition violation: once .digest() has been called you are required to never call .update() again.");
+
     const char *msg;
     size_t msgsize;
     PyString_AsStringAndSize(msgobj, const_cast<char**>(&msg), reinterpret_cast<int*>(&msgsize));
@@ -73,8 +77,26 @@ PyDoc_STRVAR(SHA256_update__doc__,
 "Update the hash object with the string msg. Repeated calls are equivalent to\n\
 a single call with the concatenation of all the messages.");
 
+static PyObject *
+SHA256_digest(SHA256* self, PyObject* dummy) {
+    if (!self->digest) {
+        self->digest = reinterpret_cast<PyStringObject*>(PyString_FromStringAndSize(NULL, self->h.DigestSize()));
+        if (!self->digest)
+            return NULL;
+        self->h.Final(reinterpret_cast<byte*>(PyString_AS_STRING(self->digest)));
+    }
+
+    Py_INCREF(self->digest);
+    return reinterpret_cast<PyObject*>(self->digest);
+}
+
+PyDoc_STRVAR(SHA256_digest__doc__,
+"Return the binary digest of the messages that were passed to the update()\n\
+method (including the initial message if any) so far.");
+
 static PyMethodDef SHA256_methods[] = {
     {"update", reinterpret_cast<PyCFunction>(SHA256_update), METH_VARARGS, SHA256_update__doc__},
+    {"digest", reinterpret_cast<PyCFunction>(SHA256_digest), METH_NOARGS, SHA256_digest__doc__},
     {NULL},
 };
 
