@@ -78,13 +78,6 @@ VerifyingKey_new(PyTypeObject *type, PyObject *args, PyObject *kwdict) {
     return (PyObject *)self;
 }
 
-/* This is not intended to be used. */
-/* XXX What's the polite way to tell Python that nobody should use this? */
-static int
-VerifyingKey_init(VerifyingKey *self, PyObject *args, PyObject *kwdict) {
-    return 0;
-}
-
 static void
 VerifyingKey_dealloc(VerifyingKey* self) {
     if (self->k != NULL)
@@ -184,7 +177,7 @@ static PyTypeObject VerifyingKey_type = {
     0,                         /* tp_descr_get */
     0,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
-    (initproc)VerifyingKey_init,      /* tp_init */
+    0,                         /* tp_init */
     0,                         /* tp_alloc */
     VerifyingKey_new,                 /* tp_new */
 };
@@ -208,13 +201,6 @@ SigningKey_new(PyTypeObject *type, PyObject *args, PyObject *kwdict) {
     self->k = NULL;
 
     return (PyObject *)self;
-}
-
-/* This is not intended to be used. */
-/* XXX What's the polite way to tell Python that nobody should use this? */
-static int
-SigningKey_init(SigningKey *self, PyObject *args, PyObject *kwdict) {
-    return 0;
 }
 
 static void
@@ -320,7 +306,7 @@ static PyTypeObject SigningKey_type = {
     0,                         /* tp_descr_get */
     0,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
-    (initproc)SigningKey_init,      /* tp_init */
+    0,                         /* tp_init */
     0,                         /* tp_alloc */
     SigningKey_new,                 /* tp_new */
 };
