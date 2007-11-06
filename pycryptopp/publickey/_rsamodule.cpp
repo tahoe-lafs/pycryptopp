@@ -7,10 +7,6 @@
 
 #include <Python.h>
 
-#if (PY_VERSION_HEX < 0x02050000)
-typedef int Py_ssize_t;
-#endif
-
 /* from Crypto++ */
 #ifdef USE_NAME_CRYPTO_PLUS_PLUS
 // for Debian (and Ubuntu, and their many derivatives)
@@ -90,21 +86,19 @@ VerifyingKey_verify(VerifyingKey *self, PyObject *args, PyObject *kwdict) {
         NULL
     };
     const char *msg;
-    int msgsize;
+    size_t msgsize;
     const char *signature;
-    int signaturesize;
+    size_t signaturesize;
     if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#s#", const_cast<char**>(kwlist), &msg, &msgsize, &signature, &signaturesize))
         return NULL;
 
-    assert (msgsize >= 0);
-    assert (signaturesize >= 0);
     size_t sigsize = self->k->SignatureLength();
-    if (sigsize != static_cast<size_t>(signaturesize))
+    if (sigsize != signaturesize)
         return raise_rsa_error("Precondition violation: signatures are required to be of size %u, but it was %u", sigsize, signaturesize);
 
     assert (signaturesize == sigsize);
 
-    if (self->k->VerifyMessage(reinterpret_cast<const byte*>(msg), static_cast<size_t>(msgsize), reinterpret_cast<const byte*>(signature), static_cast<size_t>(signaturesize)))
+    if (self->k->VerifyMessage(reinterpret_cast<const byte*>(msg), msgsize, reinterpret_cast<const byte*>(signature), signaturesize))
         Py_RETURN_TRUE;
     else
         Py_RETURN_FALSE;
@@ -211,11 +205,9 @@ SigningKey_sign(SigningKey *self, PyObject *args, PyObject *kwdict) {
         NULL
     };
     const char *msg;
-    int msgsize;
+    size_t msgsize;
     if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#", const_cast<char**>(kwlist), &msg, &msgsize))
         return NULL;
-
-    assert (msgsize >= 0);
 
     size_t sigsize = self->k->SignatureLength();
     PyStringObject* result = reinterpret_cast<PyStringObject*>(PyString_FromStringAndSize(NULL, sigsize));
@@ -226,7 +218,7 @@ SigningKey_sign(SigningKey *self, PyObject *args, PyObject *kwdict) {
     size_t siglengthwritten = self->k->SignMessage(
         randpool,
         reinterpret_cast<const byte*>(msg),
-        static_cast<size_t>(msgsize),
+        msgsize,
         reinterpret_cast<byte*>(PyString_AS_STRING(result)));
     if (siglengthwritten != sigsize) {
         fprintf(stderr, "%s: %d: %s: %s", __FILE__, __LINE__, __func__, "INTERNAL ERROR: signature was longer than expected, so unallocated memory was overwritten.");
@@ -399,7 +391,7 @@ create_verifying_key_from_string(PyObject *self, PyObject *args, PyObject *kwdic
         NULL
     };
     const char *serializedverifyingkey;
-    Py_ssize_t serializedverifyingkeysize;
+    size_t serializedverifyingkeysize;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#", const_cast<char**>(kwlist), &serializedverifyingkey, &serializedverifyingkeysize))
         return NULL;
@@ -407,7 +399,7 @@ create_verifying_key_from_string(PyObject *self, PyObject *args, PyObject *kwdic
     VerifyingKey *verifier = reinterpret_cast<VerifyingKey*>(VerifyingKey_new(&VerifyingKey_type, NULL, NULL));
     if (verifier == NULL)
         return NULL;
-    StringSource ss(reinterpret_cast<const byte*>(serializedverifyingkey), static_cast<size_t>(serializedverifyingkeysize), true);
+    StringSource ss(reinterpret_cast<const byte*>(serializedverifyingkey), serializedverifyingkeysize, true);
 
     verifier->k = new RSASS<PSS, SHA256>::Verifier(ss);
     return reinterpret_cast<PyObject*>(verifier);
@@ -424,7 +416,7 @@ create_signing_key_from_string(PyObject *self, PyObject *args, PyObject *kwdict)
         NULL
     };
     const char *serializedsigningkey;
-    Py_ssize_t serializedsigningkeysize;
+    size_t serializedsigningkeysize;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#", const_cast<char**>(kwlist), &serializedsigningkey, &serializedsigningkeysize))
         return NULL;
@@ -432,7 +424,7 @@ create_signing_key_from_string(PyObject *self, PyObject *args, PyObject *kwdict)
     SigningKey *verifier = reinterpret_cast<SigningKey*>(SigningKey_new(&SigningKey_type, NULL, NULL));
     if (verifier == NULL)
         return NULL;
-    StringSource ss(reinterpret_cast<const byte*>(serializedsigningkey), static_cast<size_t>(serializedsigningkeysize), true);
+    StringSource ss(reinterpret_cast<const byte*>(serializedsigningkey), serializedsigningkeysize, true);
 
     verifier->k = new RSASS<PSS, SHA256>::Signer(ss);
     return reinterpret_cast<PyObject*>(verifier);
