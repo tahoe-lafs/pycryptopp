@@ -106,18 +106,16 @@ class SignAndVerify(unittest.TestCase):
         verifier = signer.get_verifying_key()
         return self._help_test_sign_and_failcheck_random(signer, verifier)
 
-    def test_serialize_and_deserialize_and_test(self):
+    def test_serialize_and_deserialize_verifying_key_and_test(self):
         signer = rsa.generate(KEYSIZE)
         verifier = signer.get_verifying_key()
         serstr = verifier.serialize()
-        import sys
-        sys.stderr.write("WHEEE I GOT %s" % (ab(serstr),)) ; sys.stderr.flush()
         verifier = None
         newverifier = rsa.create_verifying_key_from_string(serstr)
-        self._help_test_sign_and_check(signer, verifier, "a")
-        self._help_test_sign_and_check_random(signer, verifier)
-        self._help_test_sign_and_failcheck(signer, verifier, "a")
-        self._help_test_sign_and_failcheck_random(signer, verifier)
+        self._help_test_sign_and_check(signer, newverifier, "a")
+        self._help_test_sign_and_check_random(signer, newverifier)
+        self._help_test_sign_and_failcheck(signer, newverifier, "a")
+        self._help_test_sign_and_failcheck_random(signer, newverifier)
         
     
 if __name__ == "__main__":

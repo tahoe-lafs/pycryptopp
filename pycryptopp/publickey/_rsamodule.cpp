@@ -395,7 +395,7 @@ create_verifying_key_from_string(PyObject *self, PyObject *args, PyObject *kwdic
     VerifyingKey *verifier = reinterpret_cast<VerifyingKey*>(VerifyingKey_new(&VerifyingKey_type, NULL, NULL));
     if (verifier == NULL)
         return NULL;
-    StringSource ss(serializedverifyingkey, serializedverifyingkeysize);
+    StringSource ss(reinterpret_cast<const byte*>(serializedverifyingkey), static_cast<size_t>(serializedverifyingkeysize), true);
 
     verifier->k = new RSASS<PSS, SHA256>::Verifier(ss);
     return reinterpret_cast<PyObject*>(verifier);
