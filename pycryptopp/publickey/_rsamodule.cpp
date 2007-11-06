@@ -26,16 +26,15 @@
 
 USING_NAMESPACE(CryptoPP)
 
-static char rsa__doc__[] = "\
-rsa -- RSA-PSS-SHA256 signatures\n\
+PyDoc_STRVAR(rsa__doc__,
+"rsa -- RSA-PSS-SHA256 signatures\n\
 \n\
 To create a new RSA signing key from the operating system's random number generator, call generate().\n\
 To create a new RSA signing key from a seed, call generate_from_seed().\n\
 To deserialize an RSA signing key from a string, call create_signing_key_from_string().\n\
 \n\
 To get an RSA verifying key from an RSA signing key, call get_verifying_key() on the signing key.\n\
-To deserialize an RSA verifying key from a string, call create_verifying_key_from_string().\n\
-";
+To deserialize an RSA verifying key from a string, call create_verifying_key_from_string().");
 
 /* NOTE: if the complete expansion of the args (by vsprintf) exceeds 1024 then memory will be invalidly overwritten. */
 /* (We don't use vsnprintf because Microsoft standard libraries don't support it.) */
@@ -53,9 +52,8 @@ raise_rsa_error(const char *format, ...) {
     return NULL;
 }
 
-static char VerifyingKey__doc__[] = "\
-An RSA verifying key.\n\
-";
+PyDoc_STRVAR(VerifyingKey__doc__,
+"An RSA verifying key.");
 
 typedef struct {
     PyObject_HEAD
@@ -93,9 +91,8 @@ VerifyingKey_verify(VerifyingKey *self, PyObject *args, PyObject *kwdict) {
         Py_RETURN_FALSE;
 }
 
-static char VerifyingKey_verify__doc__[] = "\
-Return whether the signature is a valid signature on the msg.\n\
-";
+PyDoc_STRVAR(VerifyingKey_verify__doc__,
+"Return whether the signature is a valid signature on the msg.");
 
 static PyObject *
 VerifyingKey_serialize(VerifyingKey *self, PyObject *dummy) {
@@ -109,10 +106,9 @@ VerifyingKey_serialize(VerifyingKey *self, PyObject *dummy) {
     return reinterpret_cast<PyObject*>(result);
 }
 
-static char VerifyingKey_serialize__doc__[] = "\
-Return a string containing the key material.  The string can be passed to \n\
-create_verifying_key_from_string() to instantiate a new copy of this key.\n\
-";
+PyDoc_STRVAR(VerifyingKey_serialize__doc__,
+"Return a string containing the key material.  The string can be passed to \n\
+create_verifying_key_from_string() to instantiate a new copy of this key.");
 
 static PyMethodDef VerifyingKey_methods[] = {
     {"verify", reinterpret_cast<PyCFunction>(VerifyingKey_verify), METH_KEYWORDS, VerifyingKey_verify__doc__},
@@ -160,9 +156,8 @@ VerifyingKey_construct() {
     return self;
 }
 
-static char SigningKey__doc__[] = "\
-An RSA signing key.\n\
-";
+PyDoc_STRVAR(SigningKey__doc__,
+"An RSA signing key.");
 
 typedef struct {
     PyObject_HEAD
@@ -205,9 +200,8 @@ SigningKey_sign(SigningKey *self, PyObject *msgobj) {
     return reinterpret_cast<PyObject*>(result);
 }
 
-static char SigningKey_sign__doc__[] = "\
-Return a signature on the argument.\n\
-";
+PyDoc_STRVAR(SigningKey_sign__doc__,
+"Return a signature on the argument.");
 
 static PyObject *
 SigningKey_get_verifying_key(SigningKey *self, PyObject *dummy) {
@@ -222,9 +216,8 @@ SigningKey_get_verifying_key(SigningKey *self, PyObject *dummy) {
         return NULL;
 }
 
-static char SigningKey_get_verifying_key__doc__[] = "\
-Return the corresponding verifying key.\n\
-";
+PyDoc_STRVAR(SigningKey_get_verifying_key__doc__,
+"Return the corresponding verifying key.");
 
 static PyObject *
 SigningKey_serialize(SigningKey *self, PyObject *dummy) {
@@ -238,10 +231,9 @@ SigningKey_serialize(SigningKey *self, PyObject *dummy) {
     return reinterpret_cast<PyObject*>(result);
 }
 
-static char SigningKey_serialize__doc__[] = "\
-Return a string containing the key material.  The string can be passed to \n\
-create_signing_key_from_string() to instantiate a new copy of this key.\n\
-";
+PyDoc_STRVAR(SigningKey_serialize__doc__,
+"Return a string containing the key material.  The string can be passed to \n\
+create_signing_key_from_string() to instantiate a new copy of this key.");
 
 static PyMethodDef SigningKey_methods[] = {
     {"sign", reinterpret_cast<PyCFunction>(SigningKey_sign), METH_O, SigningKey_sign__doc__},
@@ -320,8 +312,8 @@ generate_from_seed(PyObject *self, PyObject *args, PyObject *kwdict) {
     return reinterpret_cast<PyObject*>(signer);
 }
 
-static char generate_from_seed__doc__[] = "\
-Create a signing key deterministically from the given seed.\n\
+PyDoc_STRVAR(generate_from_seed__doc__,
+"Create a signing key deterministically from the given seed.\n\
 \n\
 This implies that if someone can guess the seed then they can learn the signing key.\n\
 See also generate().\n\
@@ -330,8 +322,7 @@ See also generate().\n\
 @param seed seed\n\
 \n\
 @precondition size >= 1536\n\
-@precondition len(seed) >= 8\n\
-";
+@precondition len(seed) >= 8");
 
 static PyObject *
 generate(PyObject *self, PyObject *args, PyObject *kwdict) {
@@ -355,9 +346,8 @@ generate(PyObject *self, PyObject *args, PyObject *kwdict) {
     return reinterpret_cast<PyObject*>(signer);
 }
 
-static char generate__doc__[] = "\
-Create a signing key using the operating system's random number generator.\n\
-";
+PyDoc_STRVAR(generate__doc__,
+"Create a signing key using the operating system's random number generator.");
 
 static PyObject *
 create_verifying_key_from_string(PyObject *self, PyObject *args, PyObject *kwdict) {
@@ -380,9 +370,8 @@ create_verifying_key_from_string(PyObject *self, PyObject *args, PyObject *kwdic
     return reinterpret_cast<PyObject*>(verifier);
 }
 
-static char create_verifying_key_from_string__doc__[] = "\
-Create a verifying key from its serialized state.\n\
-";
+PyDoc_STRVAR(create_verifying_key_from_string__doc__,
+"Create a verifying key from its serialized state.");
 
 static PyObject *
 create_signing_key_from_string(PyObject *self, PyObject *args, PyObject *kwdict) {
@@ -405,9 +394,8 @@ create_signing_key_from_string(PyObject *self, PyObject *args, PyObject *kwdict)
     return reinterpret_cast<PyObject*>(verifier);
 }
 
-static char create_signing_key_from_string__doc__[] = "\
-Create a signing key from its serialized state.\n\
-";
+PyDoc_STRVAR(create_signing_key_from_string__doc__,
+"Create a signing key from its serialized state.");
 
 static PyMethodDef rsa_functions[] = { 
     {"generate_from_seed", reinterpret_cast<PyCFunction>(generate_from_seed), METH_KEYWORDS, generate_from_seed__doc__},
