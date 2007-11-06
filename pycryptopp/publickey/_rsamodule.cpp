@@ -60,7 +60,7 @@ typedef struct {
 } VerifyingKey;
 
 PyDoc_STRVAR(VerifyingKey__doc__,
-"An RSA verifying key.");
+"an RSA verifying key");
 
 static void
 VerifyingKey_dealloc(VerifyingKey* self) {
@@ -157,7 +157,7 @@ VerifyingKey_construct() {
 }
 
 PyDoc_STRVAR(SigningKey__doc__,
-"An RSA signing key.");
+"an RSA signing key");
 
 typedef struct {
     PyObject_HEAD
