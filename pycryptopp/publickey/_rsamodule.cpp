@@ -284,7 +284,7 @@ SigningKey_construct() {
 
 static const int MIN_KEY_SIZE_BITS=1536; /* recommended minimum by NESSIE in 2003 */
 static PyObject *
-generate_from_seed(PyObject *self, PyObject *args, PyObject *kwdict) {
+generate_from_seed(PyObject *dummy, PyObject *args, PyObject *kwdict) {
     static const char *kwlist[] = {
         "size",
         "seed",
@@ -325,7 +325,7 @@ See also generate().\n\
 @precondition len(seed) >= 8");
 
 static PyObject *
-generate(PyObject *self, PyObject *args, PyObject *kwdict) {
+generate(PyObject *dummy, PyObject *args, PyObject *kwdict) {
     static const char *kwlist[] = {
         "size",
         NULL
@@ -350,7 +350,7 @@ PyDoc_STRVAR(generate__doc__,
 "Create a signing key using the operating system's random number generator.");
 
 static PyObject *
-create_verifying_key_from_string(PyObject *self, PyObject *args, PyObject *kwdict) {
+create_verifying_key_from_string(PyObject *dummy, PyObject *args, PyObject *kwdict) {
     static const char *kwlist[] = {
         "serializedverifyingkey",
         NULL
@@ -374,7 +374,7 @@ PyDoc_STRVAR(create_verifying_key_from_string__doc__,
 "Create a verifying key from its serialized state.");
 
 static PyObject *
-create_signing_key_from_string(PyObject *self, PyObject *args, PyObject *kwdict) {
+create_signing_key_from_string(PyObject *dummy, PyObject *args, PyObject *kwdict) {
     static const char *kwlist[] = {
         "serializedsigningkey",
         NULL
