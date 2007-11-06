@@ -80,11 +80,7 @@ VerifyingKey_dealloc(VerifyingKey* self) {
 
 static PyObject *
 VerifyingKey_verify(VerifyingKey *self, PyObject *args, PyObject *kwdict) {
-    static const char *kwlist[] = {
-        "msg",
-        "signature",
-        NULL
-    };
+    static const char *kwlist[] = { "msg", "signature", NULL };
     const char *msg;
     size_t msgsize;
     const char *signature;
@@ -109,7 +105,7 @@ Return whether the signature is a valid signature on the msg.\n\
 ";
 
 static PyObject *
-VerifyingKey_serialize(VerifyingKey *self, PyObject *args, PyObject *kwdict) {
+VerifyingKey_serialize(VerifyingKey *self, PyObject *dummy) {
     std::string outstr;
     StringSink ss(outstr);
     self->k->DEREncode(ss);
@@ -126,8 +122,8 @@ create_verifying_key_from_string() to instantiate a new copy of this key.\n\
 ";
 
 static PyMethodDef VerifyingKey_methods[] = {
-    {"verify", reinterpret_cast<PyCFunction>(VerifyingKey_verify), METH_VARARGS, VerifyingKey_verify__doc__},
-    {"serialize", reinterpret_cast<PyCFunction>(VerifyingKey_serialize), METH_VARARGS, VerifyingKey_serialize__doc__},
+    {"verify", reinterpret_cast<PyCFunction>(VerifyingKey_verify), METH_KEYWORDS, VerifyingKey_verify__doc__},
+    {"serialize", reinterpret_cast<PyCFunction>(VerifyingKey_serialize), METH_NOARGS, VerifyingKey_serialize__doc__},
     {NULL},
 };
 
@@ -199,15 +195,10 @@ SigningKey_dealloc(SigningKey* self) {
 }
 
 static PyObject *
-SigningKey_sign(SigningKey *self, PyObject *args, PyObject *kwdict) {
-    static const char *kwlist[] = {
-        "msg",
-        NULL
-    };
+SigningKey_sign(SigningKey *self, PyObject *msgobj) {
     const char *msg;
     size_t msgsize;
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#:sign", const_cast<char**>(kwlist), &msg, &msgsize))
-        return NULL;
+    PyString_AsStringAndSize(msgobj, const_cast<char**>(&msg), reinterpret_cast<int*>(&msgsize));
 
     size_t sigsize = self->k->SignatureLength();
     PyStringObject* result = reinterpret_cast<PyStringObject*>(PyString_FromStringAndSize(NULL, sigsize));
@@ -235,7 +226,7 @@ Return a signature on the argument.\n\
 ";
 
 static PyObject *
-SigningKey_get_verifying_key(SigningKey *self, PyObject *args, PyObject *kwdict) {
+SigningKey_get_verifying_key(SigningKey *self, PyObject *dummy) {
     VerifyingKey *verifier = reinterpret_cast<VerifyingKey*>(VerifyingKey_new(&VerifyingKey_type, NULL, NULL));
     if (verifier == NULL)
         return NULL;
@@ -252,7 +243,7 @@ Return the corresponding verifying key.\n\
 ";
 
 static PyObject *
-SigningKey_serialize(SigningKey *self, PyObject *args, PyObject *kwdict) {
+SigningKey_serialize(SigningKey *self, PyObject *dummy) {
     std::string outstr;
     StringSink ss(outstr);
     self->k->DEREncode(ss);
@@ -269,9 +260,9 @@ create_signing_key_from_string() to instantiate a new copy of this key.\n\
 ";
 
 static PyMethodDef SigningKey_methods[] = {
-    {"sign", reinterpret_cast<PyCFunction>(SigningKey_sign), METH_VARARGS, SigningKey_sign__doc__},
-    {"get_verifying_key", reinterpret_cast<PyCFunction>(SigningKey_get_verifying_key), METH_VARARGS, SigningKey_get_verifying_key__doc__},
-    {"serialize", reinterpret_cast<PyCFunction>(SigningKey_serialize), METH_VARARGS, SigningKey_serialize__doc__},
+    {"sign", reinterpret_cast<PyCFunction>(SigningKey_sign), METH_O, SigningKey_sign__doc__},
+    {"get_verifying_key", reinterpret_cast<PyCFunction>(SigningKey_get_verifying_key), METH_NOARGS, SigningKey_get_verifying_key__doc__},
+    {"serialize", reinterpret_cast<PyCFunction>(SigningKey_serialize), METH_NOARGS, SigningKey_serialize__doc__},
     {NULL},
 };
 
@@ -436,11 +427,11 @@ static char create_signing_key_from_string__doc__[] = "\
 Create a signing key from its serialized state.\n\
 ";
 
-static PyMethodDef rsa_methods[] = { 
-    {"generate_from_seed", reinterpret_cast<PyCFunction>(generate_from_seed), METH_VARARGS, generate_from_seed__doc__},
-    {"generate", reinterpret_cast<PyCFunction>(generate), METH_VARARGS, generate__doc__},
-    {"create_verifying_key_from_string", reinterpret_cast<PyCFunction>(create_verifying_key_from_string), METH_VARARGS, create_verifying_key_from_string__doc__},
-    {"create_signing_key_from_string", reinterpret_cast<PyCFunction>(create_signing_key_from_string), METH_VARARGS, create_signing_key_from_string__doc__},
+static PyMethodDef rsa_functions[] = { 
+    {"generate_from_seed", reinterpret_cast<PyCFunction>(generate_from_seed), METH_KEYWORDS, generate_from_seed__doc__},
+    {"generate", reinterpret_cast<PyCFunction>(generate), METH_KEYWORDS, generate__doc__},
+     {"create_verifying_key_from_string", reinterpret_cast<PyCFunction>(create_verifying_key_from_string), METH_KEYWORDS, create_verifying_key_from_string__doc__},
+     {"create_signing_key_from_string", reinterpret_cast<PyCFunction>(create_signing_key_from_string), METH_KEYWORDS, create_signing_key_from_string__doc__},
     {NULL, NULL, 0, NULL}  /* sentinel */
 };
 
@@ -457,7 +448,7 @@ init_rsa(void) {
     if (PyType_Ready(&SigningKey_type) < 0)
         return;
 
-    module = Py_InitModule3("_rsa", rsa_methods, rsa__doc__);
+    module = Py_InitModule3("_rsa", rsa_functions, rsa__doc__);
     if (module == NULL)
       return;
 
