@@ -117,6 +117,17 @@ class SignAndVerify(unittest.TestCase):
         self._help_test_sign_and_failcheck(signer, newverifier, "a")
         self._help_test_sign_and_failcheck_random(signer, newverifier)
         
+    def test_serialize_and_deserialize_signing_key_and_test(self):
+        signer = rsa.generate(KEYSIZE)
+        verifier = signer.get_verifying_key()
+        serstr = signer.serialize()
+        signer = None
+        newsigner = rsa.create_signing_key_from_string(serstr)
+        self._help_test_sign_and_check(newsigner, verifier, "a")
+        self._help_test_sign_and_check_random(newsigner, verifier)
+        self._help_test_sign_and_failcheck(newsigner, verifier, "a")
+        self._help_test_sign_and_failcheck_random(newsigner, verifier)
+        
     
 if __name__ == "__main__":
     unittest.main()
