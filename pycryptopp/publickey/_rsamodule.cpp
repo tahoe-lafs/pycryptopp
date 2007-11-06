@@ -282,22 +282,24 @@ SigningKey_construct() {
     return self;
 }
 
-static const int MIN_KEY_SIZE_BITS=1536; /* recommended minimum by NESSIE in 2003 */
-static PyObject *
+// static const int MIN_KEY_SIZE_BITS=3675; /* according to Lenstra 2001 "Unbelievable security: Matching AES security using public key systems", you should use RSA keys of length 3675 bits if you want it to be as hard to factor your RSA key as to brute-force your AES-128 key in the year 2030. */
+static const int MIN_KEY_SIZE_BITS=522; /* minimum that can do PSS-SHA256 -- totally insecure and allowed only for faster unit tests */
+
+static PyObject*
 generate_from_seed(PyObject *dummy, PyObject *args, PyObject *kwdict) {
     static const char *kwlist[] = {
-        "size",
+        "sizeinbits",
         "seed",
         NULL
     };
-    int size;
+    int sizeinbits;
     const char* seed;
     int seedlen;
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "is#:generate_from_seed", const_cast<char**>(kwlist), &size, &seed, &seedlen))
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "is#:generate_from_seed", const_cast<char**>(kwlist), &sizeinbits, &seed, &seedlen))
         return NULL;
 
-    if (size < MIN_KEY_SIZE_BITS)
-        return raise_rsa_error("Precondition violation: size in bits is required to be >= %u, but it was %d", MIN_KEY_SIZE_BITS, size);
+    if (sizeinbits < MIN_KEY_SIZE_BITS)
+        return raise_rsa_error("Precondition violation: size in bits is required to be >= %u, but it was %d", MIN_KEY_SIZE_BITS, sizeinbits);
 
     if (seedlen < 8)
         return raise_rsa_error("Precondition violation: seed is required to be of length >= %u, but it was %d", 8, seedlen);
@@ -308,7 +310,7 @@ generate_from_seed(PyObject *dummy, PyObject *args, PyObject *kwdict) {
     SigningKey *signer = SigningKey_construct();
     if (signer == NULL)
         return NULL;
-    signer->k = new RSASS<PSS, SHA256>::Signer(randPool, size);
+    signer->k = new RSASS<PSS, SHA256>::Signer(randPool, sizeinbits);
     return reinterpret_cast<PyObject*>(signer);
 }
 
@@ -318,31 +320,31 @@ PyDoc_STRVAR(generate_from_seed__doc__,
 This implies that if someone can guess the seed then they can learn the signing key.\n\
 See also generate().\n\
 \n\
-@param size length of the key in bits\n\
+@param sizeinbits size of the key in bits\n\
 @param seed seed\n\
 \n\
-@precondition size >= 1536\n\
+@precondition sizeinbits >= 1536\n\
 @precondition len(seed) >= 8");
 
 static PyObject *
 generate(PyObject *dummy, PyObject *args, PyObject *kwdict) {
     static const char *kwlist[] = {
-        "size",
+        "sizeinbits",
         NULL
     };
-    int size;
+    int sizeinbits;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "i:generate", const_cast<char**>(kwlist), &size))
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "i:generate", const_cast<char**>(kwlist), &sizeinbits))
         return NULL;
 
-    if (size < MIN_KEY_SIZE_BITS)
-        return raise_rsa_error("Precondition violation: size in bits is required to be >= %u, but it was %d", MIN_KEY_SIZE_BITS, size);
+    if (sizeinbits < MIN_KEY_SIZE_BITS)
+        return raise_rsa_error("Precondition violation: size in bits is required to be >= %u, but it was %d", MIN_KEY_SIZE_BITS, sizeinbits);
 
     AutoSeededRandomPool osrng(false);
     SigningKey *signer = SigningKey_construct();
     if (signer == NULL)
         return NULL;
-    signer->k = new RSASS<PSS, SHA256>::Signer(osrng, size);
+    signer->k = new RSASS<PSS, SHA256>::Signer(osrng, sizeinbits);
     return reinterpret_cast<PyObject*>(signer);
 }
 

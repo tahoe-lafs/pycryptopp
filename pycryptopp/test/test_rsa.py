@@ -23,7 +23,7 @@ def ab(x): # debuggery
 def randstr(n):
     return ''.join(map(chr, map(random.randrange, [0]*n, [256]*n)))
 
-KEYSIZE=1536
+KEYSIZE=522 # 522 bits is far too few for actual security -- it is used only for faster unit tests
 class Signer(unittest.TestCase):
     def test_generate_from_seed_bad_seed(self):
         try:
@@ -33,7 +33,7 @@ class Signer(unittest.TestCase):
         else:
             self.fail("Should have raised error from seed being too short.")
         try:
-            signer = rsa.generate_from_seed(size=KEYSIZE, seed="aaa")
+            signer = rsa.generate_from_seed(sizeinbits=KEYSIZE, seed="aaa")
         except rsa.Error, le:
             self.failUnless("seed is required to be of length >=" in str(le), le)
         else:
@@ -41,13 +41,13 @@ class Signer(unittest.TestCase):
 
     def test_generate_from_seed_bad_size(self):
         try:
-            signer = rsa.generate_from_seed(1535, "aaaaaaaa")
+            signer = rsa.generate_from_seed(KEYSIZE-1, "aaaaaaaa")
         except rsa.Error, le:
             self.failUnless("size in bits is required to be >=" in str(le), le)
         else:
             self.fail("Should have raised error from size being too small.")
         try:
-            signer = rsa.generate_from_seed(size=1535, seed="aaaaaaaa")
+            signer = rsa.generate_from_seed(sizeinbits=KEYSIZE-1, seed="aaaaaaaa")
         except rsa.Error, le:
             self.failUnless("size in bits is required to be >=" in str(le), le)
         else:
@@ -56,18 +56,18 @@ class Signer(unittest.TestCase):
     def test_generate_from_seed(self):
         signer = rsa.generate_from_seed(KEYSIZE, "aaaaaaaa")
         # Hooray!  It didn't raise an exception!  We win!
-        signer = rsa.generate_from_seed(size=KEYSIZE, seed="aaaaaaaa")
+        signer = rsa.generate_from_seed(sizeinbits=KEYSIZE, seed="aaaaaaaa")
         # Hooray!  It didn't raise an exception!  We win!
 
     def test_generate_bad_size(self):
         try:
-            signer = rsa.generate(1535)
+            signer = rsa.generate(KEYSIZE-1)
         except rsa.Error, le:
             self.failUnless("size in bits is required to be >=" in str(le), le)
         else:
             self.fail("Should have raised error from size being too small.")
         try:
-            signer = rsa.generate(size=1535)
+            signer = rsa.generate(sizeinbits=KEYSIZE-1)
         except rsa.Error, le:
             self.failUnless("size in bits is required to be >=" in str(le), le)
         else:
@@ -76,7 +76,7 @@ class Signer(unittest.TestCase):
     def test_generate(self):
         signer = rsa.generate(KEYSIZE)
         # Hooray!  It didn't raise an exception!  We win!
-        signer = rsa.generate(size=KEYSIZE)
+        signer = rsa.generate(sizeinbits=KEYSIZE)
         # Hooray!  It didn't raise an exception!  We win!
 
     def test_sign(self):
