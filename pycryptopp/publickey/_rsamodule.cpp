@@ -228,7 +228,7 @@ SigningKey_sign(SigningKey *self, PyObject *args, PyObject *kwdict) {
     if (!result)
         return NULL;
 
-    AutoSeededRandomPool randpool;
+    AutoSeededRandomPool randpool(false);
     size_t siglengthwritten = self->k->SignMessage(
         randpool,
         reinterpret_cast<const byte*>(msg),
@@ -368,7 +368,7 @@ generate(PyObject *self, PyObject *args, PyObject *kwdict) {
     if (size < MIN_KEY_SIZE_BITS)
         return raise_rsa_error("Precondition violation: size in bits is required to be >= %u, but it was %d", MIN_KEY_SIZE_BITS, size);
 
-    AutoSeededRandomPool osrng;
+    AutoSeededRandomPool osrng(false);
     SigningKey *signer = reinterpret_cast<SigningKey*>(SigningKey_new(&SigningKey_type, NULL, NULL));
     if (signer == NULL)
         return NULL;
