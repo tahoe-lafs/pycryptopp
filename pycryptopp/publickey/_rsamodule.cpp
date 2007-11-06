@@ -64,13 +64,6 @@ typedef struct {
     RSASS<PSS, SHA256>::Verifier *k;
 } VerifyingKey;
 
-static PyObject *
-VerifyingKey_new(PyTypeObject *type, PyObject *args, PyObject *kwdict) {
-    VerifyingKey *self = (VerifyingKey*)type->tp_alloc(type, 0);
-    self->k = NULL;
-    return (PyObject *)self;
-}
-
 static void
 VerifyingKey_dealloc(VerifyingKey* self) {
     if (self->k != NULL)
@@ -157,17 +150,15 @@ static PyTypeObject VerifyingKey_type = {
     0,		               /* tp_iter */
     0,		               /* tp_iternext */
     VerifyingKey_methods,             /* tp_methods */
-    0,                         /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
-    0,                         /* tp_dictoffset */
-    0,                         /* tp_init */
-    0,                         /* tp_alloc */
-    VerifyingKey_new,                 /* tp_new */
 };
+
+/** This function is only for internal use by _rsamodule.cpp. */
+static VerifyingKey*
+VerifyingKey_construct() {
+    VerifyingKey *self = reinterpret_cast<VerifyingKey*>(VerifyingKey_type.tp_alloc(&VerifyingKey_type, 0));
+    self->k = NULL;
+    return self;
+}
 
 static char SigningKey__doc__[] = "\
 An RSA signing key.\n\
@@ -179,13 +170,6 @@ typedef struct {
     /* internal */
     RSASS<PSS, SHA256>::Signer *k;
 } SigningKey;
-
-static PyObject *
-SigningKey_new(PyTypeObject *type, PyObject *args, PyObject *kwdict) {
-    SigningKey *self = (SigningKey*)type->tp_alloc(type, 0);
-    self->k = NULL;
-    return (PyObject *)self;
-}
 
 static void
 SigningKey_dealloc(SigningKey* self) {
@@ -227,7 +211,7 @@ Return a signature on the argument.\n\
 
 static PyObject *
 SigningKey_get_verifying_key(SigningKey *self, PyObject *dummy) {
-    VerifyingKey *verifier = reinterpret_cast<VerifyingKey*>(VerifyingKey_new(&VerifyingKey_type, NULL, NULL));
+    VerifyingKey *verifier = reinterpret_cast<VerifyingKey*>(VerifyingKey_construct());
     if (verifier == NULL)
         return NULL;
 
@@ -295,18 +279,16 @@ static PyTypeObject SigningKey_type = {
     0,		               /* tp_weaklistoffset */
     0,		               /* tp_iter */
     0,		               /* tp_iternext */
-    SigningKey_methods,             /* tp_methods */
-    0,                         /* tp_members */
-    0,                         /* tp_getset */
-    0,                         /* tp_base */
-    0,                         /* tp_dict */
-    0,                         /* tp_descr_get */
-    0,                         /* tp_descr_set */
-    0,                         /* tp_dictoffset */
-    0,                         /* tp_init */
-    0,                         /* tp_alloc */
-    SigningKey_new,                 /* tp_new */
+    SigningKey_methods             /* tp_methods */
 };
+
+/** This function is only for internal use by _rsamodule.cpp. */
+static SigningKey*
+SigningKey_construct() {
+    SigningKey *self = reinterpret_cast<SigningKey*>(SigningKey_type.tp_alloc(&SigningKey_type, 0));
+    self->k = NULL;
+    return self;
+}
 
 static const int MIN_KEY_SIZE_BITS=1536; /* recommended minimum by NESSIE in 2003 */
 static PyObject *
@@ -331,7 +313,7 @@ generate_from_seed(PyObject *self, PyObject *args, PyObject *kwdict) {
     RandomPool randPool;
     randPool.Put((byte *)seed, seedlen); /* In Crypto++ v5.5.2, the recommended interface is "IncorporateEntropy()", but "Put()" is supported for backwards compatibility.  In Crypto++ v5.2 (the version that comes with Ubuntu dapper), only "Put()" is available. */
 
-    SigningKey *signer = reinterpret_cast<SigningKey*>(SigningKey_new(&SigningKey_type, NULL, NULL));
+    SigningKey *signer = SigningKey_construct();
     if (signer == NULL)
         return NULL;
     signer->k = new RSASS<PSS, SHA256>::Signer(randPool, size);
@@ -366,7 +348,7 @@ generate(PyObject *self, PyObject *args, PyObject *kwdict) {
         return raise_rsa_error("Precondition violation: size in bits is required to be >= %u, but it was %d", MIN_KEY_SIZE_BITS, size);
 
     AutoSeededRandomPool osrng(false);
-    SigningKey *signer = reinterpret_cast<SigningKey*>(SigningKey_new(&SigningKey_type, NULL, NULL));
+    SigningKey *signer = SigningKey_construct();
     if (signer == NULL)
         return NULL;
     signer->k = new RSASS<PSS, SHA256>::Signer(osrng, size);
@@ -389,7 +371,7 @@ create_verifying_key_from_string(PyObject *self, PyObject *args, PyObject *kwdic
     if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#:create_verifying_key_from_string", const_cast<char**>(kwlist), &serializedverifyingkey, &serializedverifyingkeysize))
         return NULL;
 
-    VerifyingKey *verifier = reinterpret_cast<VerifyingKey*>(VerifyingKey_new(&VerifyingKey_type, NULL, NULL));
+    VerifyingKey *verifier = reinterpret_cast<VerifyingKey*>(VerifyingKey_construct());
     if (verifier == NULL)
         return NULL;
     StringSource ss(reinterpret_cast<const byte*>(serializedverifyingkey), serializedverifyingkeysize, true);
@@ -414,7 +396,7 @@ create_signing_key_from_string(PyObject *self, PyObject *args, PyObject *kwdict)
     if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#:create_signing_key_from_string", const_cast<char**>(kwlist), &serializedsigningkey, &serializedsigningkeysize))
         return NULL;
 
-    SigningKey *verifier = reinterpret_cast<SigningKey*>(SigningKey_new(&SigningKey_type, NULL, NULL));
+    SigningKey *verifier = SigningKey_construct();
     if (verifier == NULL)
         return NULL;
     StringSource ss(reinterpret_cast<const byte*>(serializedsigningkey), serializedsigningkeysize, true);
