@@ -89,7 +89,7 @@ VerifyingKey_verify(VerifyingKey *self, PyObject *args, PyObject *kwdict) {
     size_t msgsize;
     const char *signature;
     size_t signaturesize;
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#s#", const_cast<char**>(kwlist), &msg, &msgsize, &signature, &signaturesize))
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#s#:verify", const_cast<char**>(kwlist), &msg, &msgsize, &signature, &signaturesize))
         return NULL;
 
     size_t sigsize = self->k->SignatureLength();
@@ -206,7 +206,7 @@ SigningKey_sign(SigningKey *self, PyObject *args, PyObject *kwdict) {
     };
     const char *msg;
     size_t msgsize;
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#", const_cast<char**>(kwlist), &msg, &msgsize))
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#:sign", const_cast<char**>(kwlist), &msg, &msgsize))
         return NULL;
 
     size_t sigsize = self->k->SignatureLength();
@@ -328,7 +328,7 @@ generate_from_seed(PyObject *self, PyObject *args, PyObject *kwdict) {
     int size;
     const char* seed;
     int seedlen;
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "is#", const_cast<char**>(kwlist), &size, &seed, &seedlen))
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "is#:generate_from_seed", const_cast<char**>(kwlist), &size, &seed, &seedlen))
         return NULL;
 
     if (size < MIN_KEY_SIZE_BITS)
@@ -368,7 +368,7 @@ generate(PyObject *self, PyObject *args, PyObject *kwdict) {
     };
     int size;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "i", const_cast<char**>(kwlist), &size))
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "i:generate", const_cast<char**>(kwlist), &size))
         return NULL;
 
     if (size < MIN_KEY_SIZE_BITS)
@@ -395,7 +395,7 @@ create_verifying_key_from_string(PyObject *self, PyObject *args, PyObject *kwdic
     const char *serializedverifyingkey;
     size_t serializedverifyingkeysize;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#", const_cast<char**>(kwlist), &serializedverifyingkey, &serializedverifyingkeysize))
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#:create_verifying_key_from_string", const_cast<char**>(kwlist), &serializedverifyingkey, &serializedverifyingkeysize))
         return NULL;
 
     VerifyingKey *verifier = reinterpret_cast<VerifyingKey*>(VerifyingKey_new(&VerifyingKey_type, NULL, NULL));
@@ -420,7 +420,7 @@ create_signing_key_from_string(PyObject *self, PyObject *args, PyObject *kwdict)
     const char *serializedsigningkey;
     size_t serializedsigningkeysize;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#", const_cast<char**>(kwlist), &serializedsigningkey, &serializedsigningkeysize))
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#:create_signing_key_from_string", const_cast<char**>(kwlist), &serializedsigningkey, &serializedsigningkeysize))
         return NULL;
 
     SigningKey *verifier = reinterpret_cast<SigningKey*>(SigningKey_new(&SigningKey_type, NULL, NULL));
