@@ -31,7 +31,7 @@ typedef int Py_ssize_t;
 USING_NAMESPACE(CryptoPP)
 
 static char rsa__doc__[] = "\
-pycryptopp - Python wrappers around Crypto++ \n\
+rsa -- RSA-PSS-SHA256 signatures\n\
 \n\
 To create a new RSA signing key from the operating system's random number generator, call generate().\n\
 To create a new RSA signing key from a seed, call generate_from_seed().\n\
@@ -70,11 +70,8 @@ typedef struct {
 
 static PyObject *
 VerifyingKey_new(PyTypeObject *type, PyObject *args, PyObject *kwdict) {
-    VerifyingKey *self;
-
-    self = (VerifyingKey*)type->tp_alloc(type, 0);
+    VerifyingKey *self = (VerifyingKey*)type->tp_alloc(type, 0);
     self->k = NULL;
-
     return (PyObject *)self;
 }
 
@@ -195,11 +192,8 @@ typedef struct {
 
 static PyObject *
 SigningKey_new(PyTypeObject *type, PyObject *args, PyObject *kwdict) {
-    SigningKey *self;
-
-    self = (SigningKey*)type->tp_alloc(type, 0);
+    SigningKey *self = (SigningKey*)type->tp_alloc(type, 0);
     self->k = NULL;
-
     return (PyObject *)self;
 }
 
