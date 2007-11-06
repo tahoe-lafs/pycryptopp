@@ -10,4 +10,4 @@ except ImportError:
     # know what our version is. This should not usually happen.
     pass
 
-import publickey# , ciphers, hashes
+import publickey, hash# , ciphers
