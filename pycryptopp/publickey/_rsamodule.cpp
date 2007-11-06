@@ -52,15 +52,15 @@ raise_rsa_error(const char *format, ...) {
     return NULL;
 }
 
-PyDoc_STRVAR(VerifyingKey__doc__,
-"An RSA verifying key.");
-
 typedef struct {
     PyObject_HEAD
 
     /* internal */
     RSASS<PSS, SHA256>::Verifier *k;
 } VerifyingKey;
+
+PyDoc_STRVAR(VerifyingKey__doc__,
+"An RSA verifying key.");
 
 static void
 VerifyingKey_dealloc(VerifyingKey* self) {
