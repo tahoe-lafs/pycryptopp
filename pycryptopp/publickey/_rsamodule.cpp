@@ -198,7 +198,7 @@ SigningKey_sign(SigningKey *self, PyObject *msgobj) {
     if (siglengthwritten < sigsize)
         fprintf(stderr, "%s: %d: %s: %s", __FILE__, __LINE__, __func__, "INTERNAL ERROR: signature was shorter than expected.");
     else if (siglengthwritten > sigsize) {
-        fprintf(stderr, "%s: %d: %s: %s", __FILE__, __LINE__, __func__, "INTERNAL ERROR: signature was longer than expected, so unallocated memory was overwritten.");
+        fprintf(stderr, "%s: %d: %s: %s", __FILE__, __LINE__, __func__, "INTERNAL ERROR: signature was longer than expected, so invalid memory was overwritten.");
         abort();
     }
 
