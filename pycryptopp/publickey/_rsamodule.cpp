@@ -1,8 +1,8 @@
 /**
  * _rsamodule.cpp -- Python wrappers around Crypto++'s RSA-PSS-SHA256
  * more precisely:
- * <a href="http://www.weidai.com/scan-mirror/sig.html#sem_PSS-MGF1">PSS-MGF1</a>* <a href="http://www.weidai.com/scan-mirror/sig.html#sem_PSS-MGF1">PSS-MGF1</a>
- * with SHA-256 as the hash function
+ * <a href="http://www.weidai.com/scan-mirror/sig.html#sem_PSS-MGF1">PSS-MGF1</a>
+ * with RSA as the public key algorithm and SHA-256 as the hash function
  */
 
 #include <Python.h>
