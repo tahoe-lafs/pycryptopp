@@ -54,12 +54,14 @@ typedef struct {
     PyObject_HEAD
 
     /* internal */
-    CryptoPP::SHA256 h;
+    CryptoPP::SHA256* h;
     PyStringObject* digest;
 } SHA256;
 
 PyDoc_STRVAR(SHA256__doc__,
-"A SHA256 hash object.");
+"a SHA256 hash object\n\
+Its constructor takes an optional string, which has the same effect as\n\
+calling .update() with that string.");
 
 static PyObject *
 SHA256_update(SHA256* self, PyObject* msgobj) {
@@ -69,7 +71,7 @@ SHA256_update(SHA256* self, PyObject* msgobj) {
     const char *msg;
     size_t msgsize;
     PyString_AsStringAndSize(msgobj, const_cast<char**>(&msg), reinterpret_cast<int*>(&msgsize));
-    self->h.Update(reinterpret_cast<const byte*>(msg), msgsize);
+    self->h->Update(reinterpret_cast<const byte*>(msg), msgsize);
     Py_RETURN_NONE;
 }
 
@@ -80,10 +82,10 @@ a single call with the concatenation of all the messages.");
 static PyObject *
 SHA256_digest(SHA256* self, PyObject* dummy) {
     if (!self->digest) {
-        self->digest = reinterpret_cast<PyStringObject*>(PyString_FromStringAndSize(NULL, self->h.DigestSize()));
+        self->digest = reinterpret_cast<PyStringObject*>(PyString_FromStringAndSize(NULL, self->h->DigestSize()));
         if (!self->digest)
             return NULL;
-        self->h.Final(reinterpret_cast<byte*>(PyString_AS_STRING(self->digest)));
+        self->h->Final(reinterpret_cast<byte*>(PyString_AS_STRING(self->digest)));
     }
 
     Py_INCREF(self->digest);
@@ -100,13 +102,41 @@ static PyMethodDef SHA256_methods[] = {
     {NULL},
 };
 
+static PyObject *
+SHA256_new(PyTypeObject* type, PyObject *args, PyObject *kwdict) {
+    SHA256* self = reinterpret_cast<SHA256*>(type->tp_alloc(type, 0));
+    self->h = new CryptoPP::SHA256();
+    self->digest = NULL;
+    return reinterpret_cast<PyObject*>(self);
+}
+
+static void
+SHA256_dealloc(SHA256* self) {
+    Py_XDECREF(self->digest);
+    delete self->h;
+    self->ob_type->tp_free((PyObject*)self);
+}
+
+static PyObject *
+SHA256_init(SHA256* self, PyObject *args, PyObject *kwdict) {
+    static char *kwlist[] = { "msg", NULL };
+    const char *msg = NULL;
+    size_t msgsize;
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "|s#", const_cast<char**>(kwlist), &msg, &msgsize))
+        return NULL;
+
+    if (msg)
+        self->h->Update(reinterpret_cast<const byte*>(msg), msgsize);
+    return 0;
+}
+
 static PyTypeObject SHA256_type = {
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
     "_sha256.SHA256", /*tp_name*/
     sizeof(SHA256),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
-    0,                         /*tp_dealloc*/
+    reinterpret_cast<destructor>(SHA256_dealloc), /*tp_dealloc*/
     0,                         /*tp_print*/
     0,                         /*tp_getattr*/
     0,                         /*tp_setattr*/
@@ -130,28 +160,20 @@ static PyTypeObject SHA256_type = {
     0,		               /* tp_iter */
     0,		               /* tp_iternext */
     SHA256_methods,      /* tp_methods */
+    0,                         /* tp_members */
+    0,                         /* tp_getset */
+    0,                         /* tp_base */
+    0,                         /* tp_dict */
+    0,                         /* tp_descr_get */
+    0,                         /* tp_descr_set */
+    0,                         /* tp_dictoffset */
+    reinterpret_cast<initproc>(SHA256_init),               /* tp_init */
+    0,                         /* tp_alloc */
+    SHA256_new,                /* tp_new */
 };
 
-static PyObject *
-SHA256_new(PyObject* dummy, PyObject *args, PyObject *kwdict) {
-    static char *kwlist[] = { "string", NULL };
-    const char *initmsg;
-    size_t initmsgsize;
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#", const_cast<char**>(kwlist), &initmsg, &initmsgsize))
-        return NULL;
-
-    SHA256* self = reinterpret_cast<SHA256*>(SHA256_type.tp_alloc(&SHA256_type, 0));
-
-    self->h.Update(reinterpret_cast<const byte*>(initmsg), initmsgsize);
-    return reinterpret_cast<PyObject*>(self);
-}
-
-PyDoc_STRVAR(SHA256_new__doc__,
-"Return a new SHA256 hash object, optionally initialized with a string.");
-
 static struct PyMethodDef sha256_functions[] = {
-    {"SHA256", reinterpret_cast<PyCFunction>(SHA256_new), METH_KEYWORDS, SHA256_new__doc__},
-    {NULL,	NULL}		 /* Sentinel */
+    {NULL,     NULL}            /* Sentinel */
 };
 
 #ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
