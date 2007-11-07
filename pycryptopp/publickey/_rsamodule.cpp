@@ -17,14 +17,12 @@ typedef int Py_ssize_t;
 #include "crypto++/filters.h"
 #include "crypto++/osrng.h"
 #include "crypto++/pssr.h"
-#include "crypto++/randpool.h"
 #include "crypto++/rsa.h"
 #else
 // for upstream Crypto++ library
 #include "cryptopp/filters.h"
 #include "cryptopp/osrng.h"
 #include "cryptopp/pssr.h"
-#include "cryptopp/randpool.h"
 #include "cryptopp/rsa.h"
 #endif
 
