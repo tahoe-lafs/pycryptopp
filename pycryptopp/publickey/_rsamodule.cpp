@@ -122,7 +122,7 @@ static PyTypeObject VerifyingKey_type = {
     "_rsa.VerifyingKey", /*tp_name*/
     sizeof(VerifyingKey),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
-    (destructor)VerifyingKey_dealloc, /*tp_dealloc*/
+    reinterpret_cast<destructor>(VerifyingKey_dealloc), /*tp_dealloc*/
     0,                         /*tp_print*/
     0,                         /*tp_getattr*/
     0,                         /*tp_setattr*/
