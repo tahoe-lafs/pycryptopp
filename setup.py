@@ -85,7 +85,6 @@ trove_classifiers=[
     "Programming Language :: C++",
     "Programming Language :: Python",
     "Topic :: Software Development :: Libraries",
-# XXX ADD SOME
     ]
 
 try:
@@ -118,17 +117,15 @@ ext_modules.append(
     )
 
 setup(name='pycryptopp',
-      # install_requires=['something>=1.0.0',],
       version=verstr,
       description='Python wrappers for the Crypto++ library',
-      long_description='So far the only thing it offers is RSA-PSS-SHA256 signatures.',
+      long_description='So far the only things it offers are RSA-PSS-SHA256 signatures and SHA-256 hashes.',
       author='Zooko O\'Whielacronx',
       author_email='zooko@zooko.com',
       url='http://allmydata.org/source/pycryptopp',
       license='Open Software License 3.0 --  http://www.opensource.org/licenses/osl-3.0.php',
       packages=find_packages(),
       classifiers=trove_classifiers,
-      # XXXentry_points = { 'console_scripts': [ 'zfec = zfec.cmdline_zfec:main', 'zunfec = zfec.cmdline_zunfec:main' ] },
       ext_modules=ext_modules,
       test_suite="pycryptopp.test",
       zip_safe=False, # I prefer unzipped for easier access.
