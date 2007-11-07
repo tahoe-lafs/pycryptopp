@@ -55,10 +55,19 @@ for inclpath in ["/usr/include/cryptopp", "/usr/local/include/cryptopp", "/usr/i
             libraries.append("crypto++")
         else:
             libraries.append("cryptopp")
-    incldir = os.path.dirname(inclpath)
-    include_dirs.append(incldir)
-    libdir = os.path.join(os.path.dirname(incldir), "lib")
-    library_dirs.append(libdir)
+        incldir = os.path.dirname(inclpath)
+        include_dirs.append(incldir)
+        libdir = os.path.join(os.path.dirname(incldir), "lib")
+        library_dirs.append(libdir)
+        break
+    # Didn't find any -- just use /usr/local/{include,lib} and
+    # "-lcryptopp".  Note that when using cygwin build tools
+    # (including gcc) to build Windows-native binaries, the
+    # os.path.exists() will not see the /usr/local/include/cryptopp
+    # directory but the subsequent call to g++ will.
+    libraries.append("cryptopp")
+    include_dirs.append("/usr/local/include")
+    library_dirs.append("/usr/local/lib")
 
 trove_classifiers=[
     "Environment :: Console",
