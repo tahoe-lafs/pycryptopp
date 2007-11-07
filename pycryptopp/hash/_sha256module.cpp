@@ -188,7 +188,7 @@ init_sha256(void) {
         return;
 
     module = Py_InitModule3("_sha256", sha256_functions, sha256__doc__);
-    if (module == NULL)
+    if (!module)
       return;
 
     Py_INCREF(&SHA256_type);

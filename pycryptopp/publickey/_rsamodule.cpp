@@ -168,7 +168,7 @@ typedef struct {
 
 static void
 SigningKey_dealloc(SigningKey* self) {
-    if (self->k != NULL)
+    if (self->k)
         delete self->k;
     self->ob_type->tp_free((PyObject*)self);
 }
@@ -206,11 +206,11 @@ PyDoc_STRVAR(SigningKey_sign__doc__,
 static PyObject *
 SigningKey_get_verifying_key(SigningKey *self, PyObject *dummy) {
     VerifyingKey *verifier = reinterpret_cast<VerifyingKey*>(VerifyingKey_construct());
-    if (verifier == NULL)
+    if (!verifier)
         return NULL;
 
     verifier->k = new RSASS<PSS, SHA256>::Verifier(*(self->k));
-    if (verifier->k != NULL)
+    if (verifier->k)
         return reinterpret_cast<PyObject*>(verifier);
     else
         return NULL;
@@ -308,7 +308,7 @@ generate_from_seed(PyObject *dummy, PyObject *args, PyObject *kwdict) {
     randPool.Put((byte *)seed, seedlen); /* In Crypto++ v5.5.2, the recommended interface is "IncorporateEntropy()", but "Put()" is supported for backwards compatibility.  In Crypto++ v5.2 (the version that comes with Ubuntu dapper), only "Put()" is available. */
 
     SigningKey *signer = SigningKey_construct();
-    if (signer == NULL)
+    if (!signer)
         return NULL;
     signer->k = new RSASS<PSS, SHA256>::Signer(randPool, sizeinbits);
     return reinterpret_cast<PyObject*>(signer);
@@ -342,7 +342,7 @@ generate(PyObject *dummy, PyObject *args, PyObject *kwdict) {
 
     AutoSeededRandomPool osrng(false);
     SigningKey *signer = SigningKey_construct();
-    if (signer == NULL)
+    if (!signer)
         return NULL;
     signer->k = new RSASS<PSS, SHA256>::Signer(osrng, sizeinbits);
     return reinterpret_cast<PyObject*>(signer);
@@ -364,7 +364,7 @@ create_verifying_key_from_string(PyObject *dummy, PyObject *args, PyObject *kwdi
         return NULL;
 
     VerifyingKey *verifier = reinterpret_cast<VerifyingKey*>(VerifyingKey_construct());
-    if (verifier == NULL)
+    if (!verifier)
         return NULL;
     StringSource ss(reinterpret_cast<const byte*>(serializedverifyingkey), serializedverifyingkeysize, true);
 
@@ -388,7 +388,7 @@ create_signing_key_from_string(PyObject *dummy, PyObject *args, PyObject *kwdict
         return NULL;
 
     SigningKey *verifier = SigningKey_construct();
-    if (verifier == NULL)
+    if (!verifier)
         return NULL;
     StringSource ss(reinterpret_cast<const byte*>(serializedsigningkey), serializedsigningkeysize, true);
 
@@ -421,7 +421,7 @@ init_rsa(void) {
         return;
 
     module = Py_InitModule3("_rsa", rsa_functions, rsa__doc__);
-    if (module == NULL)
+    if (!module)
       return;
 
     Py_INCREF(&SigningKey_type);
