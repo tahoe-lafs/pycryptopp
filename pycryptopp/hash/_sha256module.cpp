@@ -4,6 +4,10 @@
 
 #include <Python.h>
 
+#if (PY_VERSION_HEX < 0x02050000)
+typedef int Py_ssize_t;
+#endif
+
 /* from Crypto++ */
 #ifdef USE_NAME_CRYPTO_PLUS_PLUS
 // for Debian (and Ubuntu, and their many derivatives)
@@ -70,7 +74,7 @@ SHA256_update(SHA256* self, PyObject* msgobj) {
 
     const char *msg;
     size_t msgsize;
-    PyString_AsStringAndSize(msgobj, const_cast<char**>(&msg), reinterpret_cast<int*>(&msgsize));
+    PyString_AsStringAndSize(msgobj, const_cast<char**>(&msg), reinterpret_cast<Py_ssize_t*>(&msgsize));
     self->h->Update(reinterpret_cast<const byte*>(msg), msgsize);
     Py_RETURN_NONE;
 }

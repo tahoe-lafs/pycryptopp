@@ -7,6 +7,10 @@
 
 #include <Python.h>
 
+#if (PY_VERSION_HEX < 0x02050000)
+typedef int Py_ssize_t;
+#endif
+
 /* from Crypto++ */
 #ifdef USE_NAME_CRYPTO_PLUS_PLUS
 // for Debian (and Ubuntu, and their many derivatives)
@@ -177,7 +181,7 @@ static PyObject *
 SigningKey_sign(SigningKey *self, PyObject *msgobj) {
     const char *msg;
     size_t msgsize;
-    PyString_AsStringAndSize(msgobj, const_cast<char**>(&msg), reinterpret_cast<int*>(&msgsize));
+    PyString_AsStringAndSize(msgobj, const_cast<char**>(&msg), reinterpret_cast<Py_ssize_t*>(&msgsize));
 
     size_t sigsize = self->k->SignatureLength();
     PyStringObject* result = reinterpret_cast<PyStringObject*>(PyString_FromStringAndSize(NULL, sigsize));
