@@ -60,11 +60,16 @@ for inclpath in ["/usr/include/cryptopp", "/usr/local/include/cryptopp", "/usr/i
         libdir = os.path.join(os.path.dirname(incldir), "lib")
         library_dirs.append(libdir)
         break
-    # Didn't find any -- just use /usr/local/{include,lib} and
-    # "-lcryptopp".  Note that when using cygwin build tools
-    # (including gcc) to build Windows-native binaries, the
-    # os.path.exists() will not see the /usr/local/include/cryptopp
-    # directory but the subsequent call to g++ will.
+
+if not libraries:
+    print "Did not locate libcrypto++ or libcryptopp in the usual places."
+    print "Adding /usr/local/{include,lib} and -lcryptopp in the hopes"
+    print "that they will work."
+
+    # Note that when using cygwin build tools (including gcc) to build
+    # Windows-native binaries, the os.path.exists() will not see the
+    # /usr/local/include/cryptopp directory but the subsequent call to g++
+    # will.
     libraries.append("cryptopp")
     include_dirs.append("/usr/local/include")
     library_dirs.append("/usr/local/lib")
