@@ -91,7 +91,7 @@ PyDoc_STRVAR(SHA256_digest__doc__,
 method (including the initial message if any) so far.");
 
 static PyMethodDef SHA256_methods[] = {
-    {"update", reinterpret_cast<PyCFunction>(SHA256_update), METH_VARARGS, SHA256_update__doc__},
+    {"update", reinterpret_cast<PyCFunction>(SHA256_update), METH_O, SHA256_update__doc__},
     {"digest", reinterpret_cast<PyCFunction>(SHA256_digest), METH_NOARGS, SHA256_digest__doc__},
     {NULL},
 };
