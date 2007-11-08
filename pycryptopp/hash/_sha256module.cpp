@@ -28,21 +28,7 @@ To get an RSA verifying key from an RSA signing key, call get_verifying_key() on
 To deserialize an RSA verifying key from a string, call create_verifying_key_from_string().\n\
 ";
 
-/* NOTE: if the complete expansion of the args (by vsprintf) exceeds 1024 then memory will be invalidly overwritten. */
-/* (We don't use vsnprintf because Microsoft standard libraries don't support it.) */
 static PyObject *sha256_error;
-static PyObject *
-raise_sha256_error(const char *format, ...) {
-    char exceptionMsg[1024];
-    va_list ap;
-
-    va_start (ap, format);
-    vsprintf (exceptionMsg, format, ap); /* Make sure that this can't exceed 1024 chars! */
-    va_end (ap);
-    exceptionMsg[1023]='\0';
-    PyErr_SetString (sha256_error, exceptionMsg);
-    return NULL;
-}
 
 typedef struct {
     PyObject_HEAD
@@ -60,11 +46,21 @@ calling .update() with that string.");
 static PyObject *
 SHA256_update(SHA256* self, PyObject* msgobj) {
     if (self->digest)
-        return raise_sha256_error("Precondition violation: once .digest() has been called you are required to never call .update() again.");
+        return PyErr_Format(sha256_error, "Precondition violation: once .digest() has been called you are required to never call .update() again.");
+    if (!PyString_CheckExact(msgobj)) {
+        PyStringObject* typerepr = reinterpret_cast<PyStringObject*>(PyObject_Repr(reinterpret_cast<PyObject*>(msgobj->ob_type)));
+        if (typerepr) {
+            PyErr_Format(sha256_error, "Precondition violation: you are required to pass a Python string object (not a unicode, a subclass of string, or anything else), but you passed %s.", PyString_AS_STRING(reinterpret_cast<PyObject*>(typerepr)));
+            Py_DECREF(typerepr);
+        } else
+            PyErr_Format(sha256_error, "Precondition violation: you are required to pass a Python string object (not a unicode, a subclass of string, or anything else).");
+        return NULL;
+    }
 
     const char *msg;
     size_t msgsize;
-    PyString_AsStringAndSize(msgobj, const_cast<char**>(&msg), reinterpret_cast<Py_ssize_t*>(&msgsize));
+    if (PyString_AsStringAndSize(msgobj, const_cast<char**>(&msg), reinterpret_cast<Py_ssize_t*>(&msgsize)))
+        return NULL;
     self->h->Update(reinterpret_cast<const byte*>(msg), msgsize);
     Py_RETURN_NONE;
 }
