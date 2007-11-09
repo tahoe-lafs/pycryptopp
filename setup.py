@@ -94,7 +94,8 @@ trove_classifiers=[
 
 try:
     import os
-    os.system("darcsver")
+    (cin, cout, cerr,)= os.popen3("darcsver")
+    print cout.read()
 except Exception, le:
     pass
 import re
