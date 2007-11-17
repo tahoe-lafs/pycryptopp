@@ -10,10 +10,8 @@ typedef int Py_ssize_t;
 
 /* from Crypto++ */
 #ifdef USE_NAME_CRYPTO_PLUS_PLUS
-// for Debian (and Ubuntu, and their many derivatives)
 #include "crypto++/sha.h"
 #else
-// for upstream Crypto++ library
 #include "cryptopp/sha.h"
 #endif
 

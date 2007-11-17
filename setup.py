@@ -43,7 +43,9 @@ if DEBUGMODE:
 # This is because the upstream Crypto++ GNUmakefile and the Microsoft Visual
 # Studio projects produce include directory and library named "cryptopp", but
 # Debian (and hence Ubuntu, and a lot of other derivative distributions)
-# changed that name to "crypto++".
+# changed that name to "crypto++".  This changed in Debian package of
+# libcrypto++ version 5.5-5, 2007-11-11, so once everyone has upgraded past
+# that version then we can eliminate this detection code.
 
 # So this will very likely do what you want, but if it doesn't (because you
 # have more than one version of Crypto++ installed it guessed wrong about which
