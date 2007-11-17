@@ -50,7 +50,7 @@ PyDoc_STRVAR(VerifyingKey__doc__,
 
 static void
 VerifyingKey_dealloc(VerifyingKey* self) {
-    if (self->k != NULL)
+    if (self->k)
         delete self->k;
     self->ob_type->tp_free((PyObject*)self);
 }
@@ -62,7 +62,7 @@ VerifyingKey_verify(VerifyingKey *self, PyObject *args, PyObject *kwdict) {
     size_t msgsize;
     const char *signature;
     size_t signaturesize;
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#s#:verify", const_cast<char**>(kwlist), &msg, &msgsize, &signature, &signaturesize))
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "t#t#:verify", const_cast<char**>(kwlist), &msg, &msgsize, &signature, &signaturesize))
         return NULL;
 
     size_t sigsize = self->k->SignatureLength();
@@ -138,6 +138,8 @@ static PyTypeObject VerifyingKey_type = {
 static VerifyingKey*
 VerifyingKey_construct() {
     VerifyingKey *self = reinterpret_cast<VerifyingKey*>(VerifyingKey_type.tp_alloc(&VerifyingKey_type, 0));
+    if (!self)
+        return NULL;
     self->k = NULL;
     return self;
 }
@@ -196,10 +198,9 @@ SigningKey_get_verifying_key(SigningKey *self, PyObject *dummy) {
         return NULL;
 
     verifier->k = new RSASS<PSS, SHA256>::Verifier(*(self->k));
-    if (verifier->k)
-        return reinterpret_cast<PyObject*>(verifier);
-    else
-        return NULL;
+    if (!verifier->k)
+        return PyErr_NoMemory();
+    return reinterpret_cast<PyObject*>(verifier);
 }
 
 PyDoc_STRVAR(SigningKey_get_verifying_key__doc__,
@@ -264,6 +265,8 @@ static PyTypeObject SigningKey_type = {
 static SigningKey*
 SigningKey_construct() {
     SigningKey *self = reinterpret_cast<SigningKey*>(SigningKey_type.tp_alloc(&SigningKey_type, 0));
+    if (!self)
+        return NULL;
     self->k = NULL;
     return self;
 }
@@ -281,7 +284,7 @@ generate_from_seed(PyObject *dummy, PyObject *args, PyObject *kwdict) {
     int sizeinbits;
     const char* seed;
     int seedlen;
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "is#:generate_from_seed", const_cast<char**>(kwlist), &sizeinbits, &seed, &seedlen))
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "it#:generate_from_seed", const_cast<char**>(kwlist), &sizeinbits, &seed, &seedlen))
         return NULL;
 
     if (sizeinbits < MIN_KEY_SIZE_BITS)
@@ -297,6 +300,8 @@ generate_from_seed(PyObject *dummy, PyObject *args, PyObject *kwdict) {
     if (!signer)
         return NULL;
     signer->k = new RSASS<PSS, SHA256>::Signer(randPool, sizeinbits);
+    if (!signer->k)
+        return PyErr_NoMemory();
     return reinterpret_cast<PyObject*>(signer);
 }
 
@@ -331,6 +336,8 @@ generate(PyObject *dummy, PyObject *args, PyObject *kwdict) {
     if (!signer)
         return NULL;
     signer->k = new RSASS<PSS, SHA256>::Signer(osrng, sizeinbits);
+    if (!signer->k)
+        return PyErr_NoMemory();
     return reinterpret_cast<PyObject*>(signer);
 }
 
@@ -346,7 +353,7 @@ create_verifying_key_from_string(PyObject *dummy, PyObject *args, PyObject *kwdi
     const char *serializedverifyingkey;
     size_t serializedverifyingkeysize;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#:create_verifying_key_from_string", const_cast<char**>(kwlist), &serializedverifyingkey, &serializedverifyingkeysize))
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "t#:create_verifying_key_from_string", const_cast<char**>(kwlist), &serializedverifyingkey, &serializedverifyingkeysize))
         return NULL;
 
     VerifyingKey *verifier = reinterpret_cast<VerifyingKey*>(VerifyingKey_construct());
@@ -355,6 +362,8 @@ create_verifying_key_from_string(PyObject *dummy, PyObject *args, PyObject *kwdi
     StringSource ss(reinterpret_cast<const byte*>(serializedverifyingkey), serializedverifyingkeysize, true);
 
     verifier->k = new RSASS<PSS, SHA256>::Verifier(ss);
+    if (!verifier->k)
+        return PyErr_NoMemory();
     return reinterpret_cast<PyObject*>(verifier);
 }
 
@@ -370,7 +379,7 @@ create_signing_key_from_string(PyObject *dummy, PyObject *args, PyObject *kwdict
     const char *serializedsigningkey;
     size_t serializedsigningkeysize;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "s#:create_signing_key_from_string", const_cast<char**>(kwlist), &serializedsigningkey, &serializedsigningkeysize))
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "t#:create_signing_key_from_string", const_cast<char**>(kwlist), &serializedsigningkey, &serializedsigningkeysize))
         return NULL;
 
     SigningKey *verifier = SigningKey_construct();
@@ -379,6 +388,8 @@ create_signing_key_from_string(PyObject *dummy, PyObject *args, PyObject *kwdict
     StringSource ss(reinterpret_cast<const byte*>(serializedsigningkey), serializedsigningkeysize, true);
 
     verifier->k = new RSASS<PSS, SHA256>::Signer(ss);
+    if (!verifier->k)
+        return PyErr_NoMemory();
     return reinterpret_cast<PyObject*>(verifier);
 }
 

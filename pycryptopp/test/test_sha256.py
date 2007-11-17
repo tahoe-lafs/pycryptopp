@@ -53,12 +53,12 @@ class SHA256(unittest.TestCase):
         d = s.digest()
         self.failUnless(b2a_hex(d) == h_5fd4)
 
+    def test_constructor_type_check(self):
+        self.failUnlessRaises(TypeError, sha256.SHA256, None)
+                              
     def test_update_type_check(self):
         h = sha256.SHA256()
-        try:
-            h.update(None)
-        except sha256.Error, le:
-            self.failUnless("recondition violation: you are required to pass a Python string" in str(le), le)
+        self.failUnlessRaises(TypeError, h.update, None)
 
     def test_digest_twice(self):
         h = sha256.SHA256()

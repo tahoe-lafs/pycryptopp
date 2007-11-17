@@ -45,15 +45,6 @@ static PyObject *
 SHA256_update(SHA256* self, PyObject* msgobj) {
     if (self->digest)
         return PyErr_Format(sha256_error, "Precondition violation: once .digest() has been called you are required to never call .update() again.");
-    if (!PyString_CheckExact(msgobj)) {
-        PyStringObject* typerepr = reinterpret_cast<PyStringObject*>(PyObject_Repr(reinterpret_cast<PyObject*>(msgobj->ob_type)));
-        if (typerepr) {
-            PyErr_Format(sha256_error, "Precondition violation: you are required to pass a Python string object (not a unicode, a subclass of string, or anything else), but you passed %s.", PyString_AS_STRING(reinterpret_cast<PyObject*>(typerepr)));
-            Py_DECREF(typerepr);
-        } else
-            PyErr_Format(sha256_error, "Precondition violation: you are required to pass a Python string object (not a unicode, a subclass of string, or anything else).");
-        return NULL;
-    }
 
     const char *msg;
     size_t msgsize;
@@ -93,7 +84,11 @@ static PyMethodDef SHA256_methods[] = {
 static PyObject *
 SHA256_new(PyTypeObject* type, PyObject *args, PyObject *kwdict) {
     SHA256* self = reinterpret_cast<SHA256*>(type->tp_alloc(type, 0));
+    if (!self)
+        return NULL;
     self->h = new CryptoPP::SHA256();
+    if (!self->h)
+        return PyErr_NoMemory();
     self->digest = NULL;
     return reinterpret_cast<PyObject*>(self);
 }
@@ -105,16 +100,16 @@ SHA256_dealloc(SHA256* self) {
     self->ob_type->tp_free((PyObject*)self);
 }
 
-static PyObject *
-SHA256_init(SHA256* self, PyObject *args, PyObject *kwdict) {
+static int
+SHA256_init(PyObject* self, PyObject *args, PyObject *kwdict) {
     static char *kwlist[] = { "msg", NULL };
     const char *msg = NULL;
     size_t msgsize;
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "|s#", const_cast<char**>(kwlist), &msg, &msgsize))
-        return NULL;
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "|t#", const_cast<char**>(kwlist), &msg, &msgsize))
+        return -1;
 
     if (msg)
-        self->h->Update(reinterpret_cast<const byte*>(msg), msgsize);
+        reinterpret_cast<SHA256*>(self)->h->Update(reinterpret_cast<const byte*>(msg), msgsize);
     return 0;
 }
 
@@ -155,7 +150,8 @@ static PyTypeObject SHA256_type = {
     0,                         /* tp_descr_get */
     0,                         /* tp_descr_set */
     0,                         /* tp_dictoffset */
-    reinterpret_cast<initproc>(SHA256_init),               /* tp_init */
+    //reinterpret_cast<initproc>(SHA256_init),               /* tp_init */
+    SHA256_init,               /* tp_init */
     0,                         /* tp_alloc */
     SHA256_new,                /* tp_new */
 };
