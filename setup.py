@@ -127,6 +127,10 @@ ext_modules.append(
     Extension('pycryptopp.hash._sha256', ['pycryptopp/hash/_sha256module.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
     )
 
+ext_modules.append(
+    Extension('pycryptopp.cipher._aes', ['pycryptopp/cipher/_aesmodule.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
+    )
+
 setup(name='pycryptopp',
       version=verstr,
       description='Python wrappers for the Crypto++ library',
