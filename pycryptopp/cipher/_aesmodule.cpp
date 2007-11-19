@@ -97,7 +97,7 @@ AES_init(PyObject* self, PyObject *args, PyObject *kwdict) {
     if (!PyArg_ParseTupleAndKeywords(args, kwdict, "t#", const_cast<char**>(kwlist), &key, &keysize))
         return -1;
     if (keysize != static_cast<size_t>(CryptoPP::AES::DEFAULT_KEYLENGTH)) {
-        PyErr_Format(aes_error, "Precondition violation: key size is expected to be the default for AES, which is %u, but a key of size %u was provided.", CryptoPP::AES::DEFAULT_KEYLENGTH, keysize);
+        PyErr_Format(aes_error, "Precondition violation: key size is expected to be the default for AES, which is %d, but a key of size %d was provided.", CryptoPP::AES::DEFAULT_KEYLENGTH, keysize);
         return -1;
     }
 

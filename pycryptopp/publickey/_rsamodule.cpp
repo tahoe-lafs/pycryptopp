@@ -67,7 +67,7 @@ VerifyingKey_verify(VerifyingKey *self, PyObject *args, PyObject *kwdict) {
 
     size_t sigsize = self->k->SignatureLength();
     if (sigsize != signaturesize)
-        return PyErr_Format(rsa_error, "Precondition violation: signatures are required to be of size %u, but it was %u", sigsize, signaturesize);
+        return PyErr_Format(rsa_error, "Precondition violation: signatures are required to be of size %d, but it was %d", sigsize, signaturesize);
 
     assert (signaturesize == sigsize);
 
@@ -288,10 +288,10 @@ generate_from_seed(PyObject *dummy, PyObject *args, PyObject *kwdict) {
         return NULL;
 
     if (sizeinbits < MIN_KEY_SIZE_BITS)
-        return PyErr_Format(rsa_error, "Precondition violation: size in bits is required to be >= %u, but it was %d", MIN_KEY_SIZE_BITS, sizeinbits);
+        return PyErr_Format(rsa_error, "Precondition violation: size in bits is required to be >= %d, but it was %d", MIN_KEY_SIZE_BITS, sizeinbits);
 
     if (seedlen < 8)
-        return PyErr_Format(rsa_error, "Precondition violation: seed is required to be of length >= %u, but it was %d", 8, seedlen);
+        return PyErr_Format(rsa_error, "Precondition violation: seed is required to be of length >= %d, but it was %d", 8, seedlen);
 
     RandomPool randPool;
     randPool.Put((byte *)seed, seedlen); /* In Crypto++ v5.5.2, the recommended interface is "IncorporateEntropy()", but "Put()" is supported for backwards compatibility.  In Crypto++ v5.2 (the version that comes with Ubuntu dapper), only "Put()" is available. */
@@ -329,7 +329,7 @@ generate(PyObject *dummy, PyObject *args, PyObject *kwdict) {
         return NULL;
 
     if (sizeinbits < MIN_KEY_SIZE_BITS)
-        return PyErr_Format(rsa_error, "Precondition violation: size in bits is required to be >= %u, but it was %d", MIN_KEY_SIZE_BITS, sizeinbits);
+        return PyErr_Format(rsa_error, "Precondition violation: size in bits is required to be >= %d, but it was %d", MIN_KEY_SIZE_BITS, sizeinbits);
 
     AutoSeededRandomPool osrng(false);
     SigningKey *signer = SigningKey_construct();
