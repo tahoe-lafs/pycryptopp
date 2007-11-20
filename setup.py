@@ -6,16 +6,16 @@
 # Author: Zooko Wilcox-O'Hearn
 
 import os, sys
-try:
-    from ez_setup import use_setuptools
-except ImportError:
-    pass
-else:
-    if 'cygwin' in sys.platform.lower():
-        min_version='0.6c6'
-    else:
-        min_version='0.6a9'
-    use_setuptools(min_version=min_version, download_delay=0)
+# try:
+#     from ez_setup import use_setuptools
+# except ImportError:
+#     pass
+# else:
+#     if 'cygwin' in sys.platform.lower():
+#         min_version='0.6c6'
+#     else:
+#         min_version='0.6a9'
+#     use_setuptools(min_version=min_version, download_delay=0)
 
 from setuptools import Extension, find_packages, setup
 
