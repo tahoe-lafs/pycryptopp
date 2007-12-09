@@ -134,7 +134,7 @@ ext_modules.append(
 setup(name='pycryptopp',
       version=verstr,
       description='Python wrappers for the Crypto++ library',
-      long_description='So far the only things it offers are RSA-PSS-SHA256 signatures and SHA-256 hashes.',
+      long_description='So far the only things it offers are RSA-PSS-SHA256 signatures, SHA-256 hashes, and AES-CTR with initial counter value of 0.',
       author='Zooko O\'Whielacronx',
       author_email='zooko@zooko.com',
       url='http://allmydata.org/source/pycryptopp',

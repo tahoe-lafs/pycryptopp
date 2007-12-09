@@ -396,7 +396,7 @@ create_signing_key_from_string(PyObject *dummy, PyObject *args, PyObject *kwdict
 PyDoc_STRVAR(create_signing_key_from_string__doc__,
 "Create a signing key from its serialized state.");
 
-static PyMethodDef rsa_functions[] = { 
+static PyMethodDef rsa_functions[] = {
     {"generate_from_seed", reinterpret_cast<PyCFunction>(generate_from_seed), METH_KEYWORDS, generate_from_seed__doc__},
     {"generate", reinterpret_cast<PyCFunction>(generate), METH_KEYWORDS, generate__doc__},
      {"create_verifying_key_from_string", reinterpret_cast<PyCFunction>(create_verifying_key_from_string), METH_KEYWORDS, create_verifying_key_from_string__doc__},
