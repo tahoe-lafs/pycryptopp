@@ -1,5 +1,5 @@
 /**
- * _aesmodule.cpp -- Python wrappers around Crypto++'s AES-CTR
+ * aesmodule.cpp -- Python wrappers around Crypto++'s AES-CTR
  */
 
 #include <Python.h>
@@ -114,7 +114,7 @@ AES_init(PyObject* self, PyObject *args, PyObject *kwdict) {
 static PyTypeObject AES_type = {
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
-    "_aes.AES", /*tp_name*/
+    "aes.AES", /*tp_name*/
     sizeof(AES),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
     AES_dealloc, /*tp_dealloc*/
@@ -161,14 +161,14 @@ static struct PyMethodDef aes_functions[] = {
 #define PyMODINIT_FUNC void
 #endif
 PyMODINIT_FUNC
-init_aes(void) {
+initaes(void) {
     PyObject *module;
     PyObject *module_dict;
 
     if (PyType_Ready(&AES_type) < 0)
         return;
 
-    module = Py_InitModule3("_aes", aes_functions, aes__doc__);
+    module = Py_InitModule3("aes", aes_functions, aes__doc__);
     if (!module)
       return;
 
@@ -177,6 +177,6 @@ init_aes(void) {
     PyModule_AddObject(module, "AES", (PyObject *)&AES_type);
 
     module_dict = PyModule_GetDict(module);
-    aes_error = PyErr_NewException("_aes.Error", NULL, NULL);
+    aes_error = PyErr_NewException("aes.Error", NULL, NULL);
     PyDict_SetItemString(module_dict, "Error", aes_error);
 }

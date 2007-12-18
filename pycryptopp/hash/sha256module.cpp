@@ -1,5 +1,5 @@
 /**
- * _sha256module.cpp -- Python wrappers around Crypto++'s SHA-256
+ * sha256module.cpp -- Python wrappers around Crypto++'s SHA-256
  */
 
 #include <Python.h>
@@ -116,7 +116,7 @@ SHA256_init(PyObject* self, PyObject *args, PyObject *kwdict) {
 static PyTypeObject SHA256_type = {
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
-    "_sha256.SHA256", /*tp_name*/
+    "sha256.SHA256", /*tp_name*/
     sizeof(SHA256),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
     reinterpret_cast<destructor>(SHA256_dealloc), /*tp_dealloc*/
@@ -164,14 +164,14 @@ static struct PyMethodDef sha256_functions[] = {
 #define PyMODINIT_FUNC void
 #endif
 PyMODINIT_FUNC
-init_sha256(void) {
+initsha256(void) {
     PyObject *module;
     PyObject *module_dict;
 
     if (PyType_Ready(&SHA256_type) < 0)
         return;
 
-    module = Py_InitModule3("_sha256", sha256_functions, sha256__doc__);
+    module = Py_InitModule3("sha256", sha256_functions, sha256__doc__);
     if (!module)
       return;
 
@@ -180,6 +180,6 @@ init_sha256(void) {
     PyModule_AddObject(module, "SHA256", (PyObject *)&SHA256_type);
 
     module_dict = PyModule_GetDict(module);
-    sha256_error = PyErr_NewException("_sha256.Error", NULL, NULL);
+    sha256_error = PyErr_NewException("sha256.Error", NULL, NULL);
     PyDict_SetItemString(module_dict, "Error", sha256_error);
 }

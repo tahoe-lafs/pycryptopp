@@ -1,5 +1,5 @@
 /**
- * _rsamodule.cpp -- Python wrappers around Crypto++'s RSA-PSS-SHA256
+ * rsamodule.cpp -- Python wrappers around Crypto++'s RSA-PSS-SHA256
  * more precisely:
  * <a href="http://www.weidai.com/scan-mirror/sig.html#sem_PSS-MGF1">PSS-MGF1</a>
  * with RSA as the public key algorithm and SHA-256 as the hash function
@@ -105,7 +105,7 @@ static PyMethodDef VerifyingKey_methods[] = {
 static PyTypeObject VerifyingKey_type = {
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
-    "_rsa.VerifyingKey", /*tp_name*/
+    "rsa.VerifyingKey", /*tp_name*/
     sizeof(VerifyingKey),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
     reinterpret_cast<destructor>(VerifyingKey_dealloc), /*tp_dealloc*/
@@ -134,7 +134,7 @@ static PyTypeObject VerifyingKey_type = {
     VerifyingKey_methods,             /* tp_methods */
 };
 
-/** This function is only for internal use by _rsamodule.cpp. */
+/** This function is only for internal use by rsamodule.cpp. */
 static VerifyingKey*
 VerifyingKey_construct() {
     VerifyingKey *self = reinterpret_cast<VerifyingKey*>(VerifyingKey_type.tp_alloc(&VerifyingKey_type, 0));
@@ -232,7 +232,7 @@ static PyMethodDef SigningKey_methods[] = {
 static PyTypeObject SigningKey_type = {
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
-    "_rsa.SigningKey", /*tp_name*/
+    "rsa.SigningKey", /*tp_name*/
     sizeof(SigningKey),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
     (destructor)SigningKey_dealloc, /*tp_dealloc*/
@@ -261,7 +261,7 @@ static PyTypeObject SigningKey_type = {
     SigningKey_methods             /* tp_methods */
 };
 
-/** This function is only for internal use by _rsamodule.cpp. */
+/** This function is only for internal use by rsamodule.cpp. */
 static SigningKey*
 SigningKey_construct() {
     SigningKey *self = reinterpret_cast<SigningKey*>(SigningKey_type.tp_alloc(&SigningKey_type, 0));
@@ -408,7 +408,7 @@ static PyMethodDef rsa_functions[] = {
 #define PyMODINIT_FUNC void
 #endif
 PyMODINIT_FUNC
-init_rsa(void) {
+initrsa(void) {
     PyObject *module;
     PyObject *module_dict;
 
@@ -417,7 +417,7 @@ init_rsa(void) {
     if (PyType_Ready(&SigningKey_type) < 0)
         return;
 
-    module = Py_InitModule3("_rsa", rsa_functions, rsa__doc__);
+    module = Py_InitModule3("rsa", rsa_functions, rsa__doc__);
     if (!module)
       return;
 
@@ -428,6 +428,6 @@ init_rsa(void) {
     PyModule_AddObject(module, "VerifyingKey", (PyObject *)&VerifyingKey_type);
 
     module_dict = PyModule_GetDict(module);
-    rsa_error = PyErr_NewException("_rsa.Error", NULL, NULL);
+    rsa_error = PyErr_NewException("rsa.Error", NULL, NULL);
     PyDict_SetItemString(module_dict, "Error", rsa_error);
 }
