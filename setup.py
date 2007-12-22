@@ -6,16 +6,20 @@
 # Author: Zooko Wilcox-O'Hearn
 
 import os, sys
-# try:
-#     from ez_setup import use_setuptools
-# except ImportError:
-#     pass
-# else:
-#     if 'cygwin' in sys.platform.lower():
-#         min_version='0.6c6'
-#     else:
-#         min_version='0.6a9'
-#     use_setuptools(min_version=min_version, download_delay=0)
+
+miscdeps=os.path.join('misc', 'dependencies')
+
+try:
+    from ez_setup import use_setuptools
+except ImportError:
+    pass
+else:
+    if 'cygwin' in sys.platform.lower():
+        min_version='0.6c6'
+    else:
+        min_version='0.6a9'
+    download_base = "file:"+os.path.join('misc', 'dependencies')+os.path.sep
+    use_setuptools(min_version=min_version, download_delay=0, download_base=download_base, to_dir=miscdeps)
 
 from setuptools import Extension, find_packages, setup
 
@@ -131,6 +135,8 @@ ext_modules.append(
     Extension('pycryptopp.cipher.aes', ['pycryptopp/cipher/aesmodule.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
     )
 
+dependency_links=[os.path.join(miscdeps, t) for t in os.listdir(miscdeps) if t.endswith(".tar")]
+
 setup(name='pycryptopp',
       version=verstr,
       description='Python wrappers for the Crypto++ library',
@@ -141,10 +147,11 @@ setup(name='pycryptopp',
       license='Open Software License 3.0 --  http://www.opensource.org/licenses/osl-3.0.php',
       packages=find_packages(),
       include_package_data=True,
+      dependency_links=dependency_links,
       setup_requires=['setuptools_darcs >= 1.0.5',],
       classifiers=trove_classifiers,
       ext_modules=ext_modules,
       test_suite="pycryptopp.test",
       zip_safe=False, # I prefer unzipped for easier access.
-      dependency_links=["setuptools-0.6c7-py2.5.egg",],
+      extras_require={'autoversioning':'pyutil >= 1.3.8'}, # for darcsver
       )
