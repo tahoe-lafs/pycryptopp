@@ -85,6 +85,9 @@ if not libraries:
 
 trove_classifiers=[
     "Environment :: Console",
+    "License :: OSI Approved :: GNU General Public License (GPL)", 
+    "License :: DFSG approved",
+    "License :: Other/Proprietary License",
     "Intended Audience :: Developers",
     "Operating System :: Microsoft",
     "Operating System :: Microsoft :: Windows",
@@ -144,7 +147,7 @@ setup(name='pycryptopp',
       author='Zooko O\'Whielacronx',
       author_email='zooko@zooko.com',
       url='http://allmydata.org/source/pycryptopp',
-      license='Open Software License 3.0 --  http://www.opensource.org/licenses/osl-3.0.php',
+      license='GNU GPL',
       packages=find_packages(),
       include_package_data=True,
       dependency_links=dependency_links,
