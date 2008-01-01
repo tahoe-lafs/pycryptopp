@@ -20,6 +20,13 @@ development headers.  To build it run "./setup.py build".  To test it run
 create a binary package run "./setup.py bdist_egg".  There are more features of
 setup.py -- see the documentation of setuptools [3] for details.
 
+Note: on Mac OS X, it doesn't work to install Crypto++ into the standard "/usr"
+PREFIX, e.g. by running "make install" in the cryptopp directory -- you'll get
+an error message like "/usr/bin/ld: can't locate file for: -lcryptopp" when you
+try to build pycryptopp.  However, it does work to run "make install
+PREFIX=/usr/local".  This appears to be a strange feature of the Mac OS X
+version of gcc.
+
 DOCUMENTATION
 
 The documentation is in the docstrings.  From within a Python interpreter use
