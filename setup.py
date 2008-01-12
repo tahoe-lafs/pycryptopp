@@ -4,6 +4,7 @@
 #
 # Copyright (C) 2007 Allmydata, Inc.
 # Author: Zooko Wilcox-O'Hearn
+# See README.txt for licensing information.
 
 import os, re, sys
 
