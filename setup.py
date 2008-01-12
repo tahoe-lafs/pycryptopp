@@ -5,7 +5,7 @@
 # Copyright (C) 2007 Allmydata, Inc.
 # Author: Zooko Wilcox-O'Hearn
 
-import os, sys
+import os, re, sys
 
 miscdeps=os.path.join(os.getcwd(), 'misc', 'dependencies')
 
@@ -104,13 +104,6 @@ trove_classifiers=[
     "Topic :: Software Development :: Libraries",
     ]
 
-try:
-    import os
-    (cin, cout, cerr,)= os.popen3("darcsver --quiet")
-    print cout.read()
-except Exception, le:
-    pass
-import re
 VERSIONFILE = "pycryptopp/_version.py"
 verstr = "unknown"
 VSRE = re.compile("^verstr = ['\"]([^'\"]*)['\"]", re.M)
@@ -139,6 +132,18 @@ ext_modules.append(
     )
 
 dependency_links=[os.path.join(miscdeps, t) for t in os.listdir(miscdeps) if t.endswith(".tar")]
+setup_requires = []
+
+# darcsver is needed only if you want "./setup.py darcsver" to write a new
+# version stamp in pycryptopp/_version.py, with a version number derived from
+# darcs history.  http://pypi.python.org/pypi/darcsver
+setup_requires.append('darcsver >= 1.0.0')
+
+# setuptools_darcs is required only if you want to use "./setup.py sdist",
+# "./setup.py bdist", and the other "dist" commands -- it is necessary for them
+# to produce complete distributions, which need to include all files that are
+# under darcs revision control.  http://pypi.python.org/pypi/setuptools_darcs
+setup_requires.append('setuptools_darcs >= 1.0.5')
 
 setup(name='pycryptopp',
       version=verstr,
@@ -150,11 +155,10 @@ setup(name='pycryptopp',
       license='GNU GPL',
       packages=find_packages(),
       include_package_data=True,
+      setup_requires=setup_requires,
       dependency_links=dependency_links,
-      setup_requires=['setuptools_darcs >= 1.0.5',],
       classifiers=trove_classifiers,
       ext_modules=ext_modules,
       test_suite="pycryptopp.test",
       zip_safe=False, # I prefer unzipped for easier access.
-      extras_require={'autoversioning':'pyutil >= 1.3.8'}, # for darcsver
       )
