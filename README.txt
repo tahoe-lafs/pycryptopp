@@ -14,11 +14,13 @@ version 1.0.
 
 BUILDING
 
-To build this package from source requires the Crypto++ library including
-development headers.  To build it run "./setup.py build".  To test it run
-"./setup.py test".  To install it into your system run "./setup.py install".  To
-create a binary package run "./setup.py bdist_egg".  There are more features of
-setup.py -- see the documentation of setuptools [3] for details.
+To build this package from source requires the Crypto++ library, version 5.2.1
+or newer, including development headers.  (Development of pycryptopp was done
+primarily with Crypto++ v5.5.2.)  To build it run "./setup.py build".  To test
+it run "./setup.py test".  To install it into your system run "./setup.py
+install".  To create a binary package run "./setup.py bdist_egg".  There are
+more features of setup.py -- see the documentation of setuptools [3] for
+details.
 
 Note: on Mac OS X, it doesn't work to install Crypto++ into the standard "/usr"
 PREFIX, e.g. by running "make install" in the cryptopp directory -- you'll get
