@@ -14,12 +14,9 @@ try:
 except ImportError:
     pass
 else:
-    if 'cygwin' in sys.platform.lower():
-        min_version='0.6c6'
-    else:
-        min_version='0.6a9'
-    download_base = "file:"+os.path.join('misc', 'dependencies')+os.path.sep
-    use_setuptools(min_version=min_version, download_delay=0, download_base=download_base, to_dir=miscdeps)
+    # On cygwin there was a permissions error that was fixed in 0.6c6.
+    min_version='0.6c6'
+    use_setuptools(min_version='0.6c6', download_delay=0, download_base=miscdeps, to_dir=miscdeps)
 
 from setuptools import Extension, find_packages, setup
 
