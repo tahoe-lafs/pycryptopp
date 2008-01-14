@@ -134,7 +134,8 @@ setup_requires = []
 # darcsver is needed only if you want "./setup.py darcsver" to write a new
 # version stamp in pycryptopp/_version.py, with a version number derived from
 # darcs history.  http://pypi.python.org/pypi/darcsver
-setup_requires.append('darcsver >= 1.0.0')
+if "darcsver" in sys.argv[1:]:
+    setup_requires.append('darcsver >= 1.0.0')
 
 # setuptools_darcs is required only if you want to use "./setup.py sdist",
 # "./setup.py bdist", and the other "dist" commands -- it is necessary for them
