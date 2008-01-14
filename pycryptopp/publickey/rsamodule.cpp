@@ -67,7 +67,7 @@ VerifyingKey_verify(VerifyingKey *self, PyObject *args, PyObject *kwdict) {
 
     size_t sigsize = self->k->SignatureLength();
     if (sigsize != signaturesize)
-        return PyErr_Format(rsa_error, "Precondition violation: signatures are required to be of size %d, but it was %d", sigsize, signaturesize);
+        return PyErr_Format(rsa_error, "Precondition violation: signatures are required to be of size %zu, but it was %zu", sigsize, signaturesize);
 
     assert (signaturesize == sigsize);
 
