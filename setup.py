@@ -38,19 +38,19 @@ if DEBUGMODE:
     extra_link_args.append("-g")
     undef_macros.append('NDEBUG')
 
-# Check for a directory starting with "/usr/include" or "/usr/local/include"
-# and ending with "cryptopp" or "crypto++".
+# Check for a directory starting with "/usr/include" or "/usr/local/include" and
+# ending with "cryptopp" or "crypto++".
 
 # This is because the upstream Crypto++ GNUmakefile and the Microsoft Visual
 # Studio projects produce include directory and library named "cryptopp", but
-# Debian (and hence Ubuntu, and a lot of other derivative distributions)
-# changed that name to "crypto++".  This changed in Debian package of
-# libcrypto++ version 5.5-5, 2007-11-11, so once everyone has upgraded past
-# that version then we can eliminate this detection code.
+# Debian (and hence Ubuntu, and a lot of other derivative distributions) changed
+# that name to "crypto++".  In Debian package libcrypto++ version 5.5.2-1,
+# 2007-12-11, they added symlinks from "cryptopp", so once everyone has upgraded
+# past that version then we can eliminate this detection code.
 
-# So this will very likely do what you want, but if it doesn't (because you
-# have more than one version of Crypto++ installed it guessed wrong about which
-# one you wanted to build against) and then you have to read this code and
+# So this will very likely do what you want, but if it doesn't (perhaps because
+# you have more than one version of Crypto++ installed it guessed wrong about
+# which one you wanted to build against) and then you have to read this code and
 # understand what it is doing.
 
 for inclpath in ["/usr/local/include/cryptopp", "/usr/include/cryptopp", "/usr/include/crypto++", "/usr/local/include/crypto++", ]:
