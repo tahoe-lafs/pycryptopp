@@ -141,7 +141,10 @@ if "darcsver" in sys.argv[1:]:
 # "./setup.py bdist", and the other "dist" commands -- it is necessary for them
 # to produce complete distributions, which need to include all files that are
 # under darcs revision control.  http://pypi.python.org/pypi/setuptools_darcs
-setup_requires.append('setuptools_darcs >= 1.0.5')
+for arg in sys.argv[1:]:
+    if arg[1:5] == "dist":
+        setup_requires.append('setuptools_darcs >= 1.0.5')
+        break
 
 setup(name='pycryptopp',
       version=verstr,
