@@ -8,15 +8,13 @@
 
 import os, re, sys
 
-miscdeps=os.path.join(os.getcwd(), 'misc', 'dependencies')
-
 try:
     from ez_setup import use_setuptools
 except ImportError:
     pass
 else:
     # On cygwin there was a permissions error that was fixed in 0.6c6.
-    use_setuptools(min_version='0.6c6', download_delay=0, to_dir=miscdeps)
+    use_setuptools(min_version='0.6c6')
 
 from setuptools import Extension, find_packages, setup
 
@@ -49,9 +47,9 @@ if DEBUGMODE:
 # past that version then we can eliminate this detection code.
 
 # So this will very likely do what you want, but if it doesn't (perhaps because
-# you have more than one version of Crypto++ installed it guessed wrong about
-# which one you wanted to build against) and then you have to read this code and
-# understand what it is doing.
+# you have more than one version of Crypto++ installed and it guessed wrong
+# about which one you wanted to build against) and then you have to read this
+# code and understand what it is doing.
 
 for inclpath in ["/usr/local/include/cryptopp", "/usr/include/cryptopp", "/usr/include/crypto++", "/usr/local/include/crypto++", ]:
     if os.path.exists(inclpath):
@@ -103,13 +101,13 @@ trove_classifiers=[
 
 VERSIONFILE = "pycryptopp/_version.py"
 verstr = "unknown"
-VSRE = re.compile("^verstr = ['\"]([^'\"]*)['\"]", re.M)
 try:
     verstrline = open(VERSIONFILE, "rt").read()
 except EnvironmentError:
     pass # Okay, there is no version file.
 else:
-    mo = VSRE.search(verstrline)
+    VSRE = r"^verstr = ['\"]([^'\"]*)['\"]"
+    mo = re.search(VSRE, verstrline, re.M)
     if mo:
         verstr = mo.group(1)
     else:
@@ -128,23 +126,22 @@ ext_modules.append(
     Extension('pycryptopp.cipher.aes', ['pycryptopp/cipher/aesmodule.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
     )
 
+miscdeps=os.path.join(os.getcwd(), 'misc', 'dependencies')
 dependency_links=[os.path.join(miscdeps, t) for t in os.listdir(miscdeps) if t.endswith(".tar")]
 setup_requires = []
 
 # darcsver is needed only if you want "./setup.py darcsver" to write a new
 # version stamp in pycryptopp/_version.py, with a version number derived from
 # darcs history.  http://pypi.python.org/pypi/darcsver
-if "darcsver" in sys.argv[1:]:
+if 'darcsver' in sys.argv[1:]:
     setup_requires.append('darcsver >= 1.0.0')
 
-# setuptools_darcs is required only if you want to use "./setup.py sdist",
-# "./setup.py bdist", and the other "dist" commands -- it is necessary for them
-# to produce complete distributions, which need to include all files that are
-# under darcs revision control.  http://pypi.python.org/pypi/setuptools_darcs
-for arg in sys.argv[1:]:
-    if arg[1:5] == "dist":
-        setup_requires.append('setuptools_darcs >= 1.0.5')
-        break
+# setuptools_darcs is required to produce complete distributions (such as
+# with "sdist" or "bdist_egg"), unless there is a PKG-INFO file present which
+# contains the complete list of the required files.
+# http://pypi.python.org/pypi/setuptools_darcs
+if not os.path.exists('PKG-INFO'):
+    setup_requires.append('setuptools_darcs >= 1.0.5')
 
 setup(name='pycryptopp',
       version=verstr,
