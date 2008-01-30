@@ -51,7 +51,7 @@ if DEBUGMODE:
 # about which one you wanted to build against) and then you have to read this
 # code and understand what it is doing.
 
-for inclpath in ["/usr/local/include/cryptopp", "/usr/include/cryptopp", "/usr/include/crypto++", "/usr/local/include/crypto++", ]:
+for inclpath in ["/usr/include/crypto++", "/usr/local/include/crypto++", "/usr/local/include/cryptopp", "/usr/include/cryptopp"]:
     if os.path.exists(inclpath):
         if inclpath.endswith("crypto++"):
             print "\"%s\" detected, so we will use the Debian name \"crypto++\" to identify the library instead of the upstream name \"cryptopp\"." % (inclpath,)
