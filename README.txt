@@ -41,6 +41,12 @@ CONTACT
 I intend to set up a mailing list, but until I do please post to the
 cryptopp-users mailing list [4] with comments about this package.
 
+BOOK REVIEW
+
+If you are not already acquainted with modern cryptography, buy a copy of
+Ferguson and Schneier's book "Practical Cryptography" and read it.  It is easy
+going and will increase your understanding greatly.
+
 ACKNOWLEDGEMENTS
 
 Thanks to Wei Dai and the contributors to Crypto++, Andrew M. Kuchling for his

@@ -33,11 +33,22 @@ typedef struct {
 PyDoc_STRVAR(AES__doc__,
 "An AES cipher object.\n\
 \n\
-This object encrypts/decrypts in CTR mode, using a counter that is initialized \
-to zero when you instantiate the object.  Successive calls to .process() will \
-use the current counter value and increment it.\
+This object encrypts/decrypts in CTR mode, using a counter that is initialized\n\
+to zero when you instantiate the object.  Successive calls to .process() will\n\
+use the current counter value and increment it.\n\
 \n\
-@param key: the symmetric encryption key\
+Note that you must never encrypt different data with the same key, or you\n\
+will leak information about your data.  Therefore the only safe way to use\n\
+this class is to use a different AES key every time you are going to encrypt\n\
+different data.  A good way to generate a different AES key is using AES, like\n\
+this:\n\
+\n\
+    onetimekey = AES(key=masterkey).process(nonce)\n\
+\n\
+Where 'masterkey' is a secret key used only for generating onetimekeys this\
+way, and 'nonce' is a value that is guaranteed to never repeat.\
+\n\
+@param key: the symmetric encryption key; a string of exactly 16 bytes\
 ");
 
 static PyObject *
