@@ -103,7 +103,7 @@ AES_dealloc(PyObject* self) {
 
 static int
 AES_init(PyObject* self, PyObject *args, PyObject *kwdict) {
-  static char *kwlist[] = { "key", "iv", NULL };
+    static const char *kwlist[] = { "key", "iv", NULL };
     const char *key = NULL;
     Py_ssize_t keysize = 0;
     const char *iv = NULL;
@@ -198,6 +198,6 @@ initaes(void) {
     PyModule_AddObject(module, "AES", (PyObject *)&AES_type);
 
     module_dict = PyModule_GetDict(module);
-    aes_error = PyErr_NewException("aes.Error", NULL, NULL);
+    aes_error = PyErr_NewException(const_cast<char*>("aes.Error"), NULL, NULL);
     PyDict_SetItemString(module_dict, "Error", aes_error);
 }

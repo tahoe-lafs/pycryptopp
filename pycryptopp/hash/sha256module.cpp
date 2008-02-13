@@ -119,7 +119,7 @@ SHA256_dealloc(SHA256* self) {
 
 static int
 SHA256_init(PyObject* self, PyObject *args, PyObject *kwdict) {
-    static char *kwlist[] = { "msg", NULL };
+    static const char *kwlist[] = { "msg", NULL };
     const char *msg = NULL;
     size_t msgsize = 0;
     if (!PyArg_ParseTupleAndKeywords(args, kwdict, "|t#", const_cast<char**>(kwlist), &msg, &msgsize))
@@ -197,6 +197,6 @@ initsha256(void) {
     PyModule_AddObject(module, "SHA256", (PyObject *)&SHA256_type);
 
     module_dict = PyModule_GetDict(module);
-    sha256_error = PyErr_NewException("sha256.Error", NULL, NULL);
+    sha256_error = PyErr_NewException(const_cast<char*>("sha256.Error"), NULL, NULL);
     PyDict_SetItemString(module_dict, "Error", sha256_error);
 }

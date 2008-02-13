@@ -436,6 +436,6 @@ initrsa(void) {
     PyModule_AddObject(module, "VerifyingKey", (PyObject *)&VerifyingKey_type);
 
     module_dict = PyModule_GetDict(module);
-    rsa_error = PyErr_NewException("rsa.Error", NULL, NULL);
+    rsa_error = PyErr_NewException(const_cast<char*>("rsa.Error"), NULL, NULL);
     PyDict_SetItemString(module_dict, "Error", rsa_error);
 }
