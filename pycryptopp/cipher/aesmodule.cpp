@@ -105,7 +105,7 @@ static int
 AES_init(PyObject* self, PyObject *args, PyObject *kwdict) {
   static char *kwlist[] = { "key", "iv", NULL };
     const char *key = NULL;
-    Py_ssize_t keysize;
+    Py_ssize_t keysize = 0;
     const char *iv = NULL;
     Py_ssize_t ivsize = 0;
     if (!PyArg_ParseTupleAndKeywords(args, kwdict, "t#|t#:AES.__init__", const_cast<char**>(kwlist), &key, &keysize, &iv, &ivsize))

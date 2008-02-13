@@ -59,15 +59,18 @@ static PyObject *
 VerifyingKey_verify(VerifyingKey *self, PyObject *args, PyObject *kwdict) {
     static const char *kwlist[] = { "msg", "signature", NULL };
     const char *msg;
-    size_t msgsize;
+    Py_ssize_t msgsize;
     const char *signature;
-    size_t signaturesize;
+    Py_ssize_t signaturesize = 0;
     if (!PyArg_ParseTupleAndKeywords(args, kwdict, "t#t#:verify", const_cast<char**>(kwlist), &msg, &msgsize, &signature, &signaturesize))
         return NULL;
+    assert (msgsize >= 0);
+    assert (signaturesize >= 0);
 
-    size_t sigsize = self->k->SignatureLength();
+    Py_ssize_t sigsize = self->k->SignatureLength();
     if (sigsize != signaturesize)
         return PyErr_Format(rsa_error, "Precondition violation: signatures are required to be of size %zu, but it was %zu", sigsize, signaturesize);
+    assert (sigsize >= 0);
 
     assert (signaturesize == sigsize);
 
@@ -164,16 +167,18 @@ SigningKey_dealloc(SigningKey* self) {
 static PyObject *
 SigningKey_sign(SigningKey *self, PyObject *msgobj) {
     const char *msg;
-    size_t msgsize;
+    Py_ssize_t msgsize;
     PyString_AsStringAndSize(msgobj, const_cast<char**>(&msg), reinterpret_cast<Py_ssize_t*>(&msgsize));
+    assert (msgsize >= 0);
 
-    size_t sigsize = self->k->SignatureLength();
+    Py_ssize_t sigsize = self->k->SignatureLength();
     PyStringObject* result = reinterpret_cast<PyStringObject*>(PyString_FromStringAndSize(NULL, sigsize));
     if (!result)
         return NULL;
+    assert (sigsize >= 0);
 
     AutoSeededRandomPool randpool(false);
-    size_t siglengthwritten = self->k->SignMessage(
+    Py_ssize_t siglengthwritten = self->k->SignMessage(
         randpool,
         reinterpret_cast<const byte*>(msg),
         msgsize,
@@ -184,6 +189,7 @@ SigningKey_sign(SigningKey *self, PyObject *msgobj) {
         fprintf(stderr, "%s: %d: %s: %s", __FILE__, __LINE__, "SigningKey_sign", "INTERNAL ERROR: signature was longer than expected, so invalid memory was overwritten.");
         abort();
     }
+    assert (siglengthwritten >= 0);
 
     return reinterpret_cast<PyObject*>(result);
 }
@@ -351,10 +357,11 @@ create_verifying_key_from_string(PyObject *dummy, PyObject *args, PyObject *kwdi
         NULL
     };
     const char *serializedverifyingkey;
-    size_t serializedverifyingkeysize;
+    Py_ssize_t serializedverifyingkeysize = 0;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwdict, "t#:create_verifying_key_from_string", const_cast<char**>(kwlist), &serializedverifyingkey, &serializedverifyingkeysize))
         return NULL;
+    assert (serializedverifyingkeysize >= 0);
 
     VerifyingKey *verifier = reinterpret_cast<VerifyingKey*>(VerifyingKey_construct());
     if (!verifier)
@@ -377,10 +384,11 @@ create_signing_key_from_string(PyObject *dummy, PyObject *args, PyObject *kwdict
         NULL
     };
     const char *serializedsigningkey;
-    size_t serializedsigningkeysize;
+    Py_ssize_t serializedsigningkeysize = 0;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwdict, "t#:create_signing_key_from_string", const_cast<char**>(kwlist), &serializedsigningkey, &serializedsigningkeysize))
         return NULL;
+    assert (serializedsigningkeysize >= 0);
 
     SigningKey *verifier = SigningKey_construct();
     if (!verifier)
