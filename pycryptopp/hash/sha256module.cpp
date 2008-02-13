@@ -11,19 +11,16 @@ typedef int Py_ssize_t;
 /* from Crypto++ */
 #ifdef USE_NAME_CRYPTO_PLUS_PLUS
 #include "crypto++/sha.h"
+#include "crypto++/hex.h"
+#include "crypto++/filters.h"
 #else
 #include "cryptopp/sha.h"
+#include "cryptopp/hex.h"
+#include "cryptopp/filters.h"
 #endif
 
 static char sha256__doc__[] = "\
-sha256 hash function\n\
-\n\
-To create a new RSA signing key from the operating system's random number generator, call generate().\n\
-To create a new RSA signing key from a seed, call generate_from_seed().\n\
-To deserialize an RSA signing key from a string, call create_signing_key_from_string().\n\
-\n\
-To get an RSA verifying key from an RSA signing key, call get_verifying_key() on the signing key.\n\
-To deserialize an RSA verifying key from a string, call create_verifying_key_from_string().\n\
+sha256 hash function\
 ";
 
 static PyObject *sha256_error;
@@ -47,8 +44,8 @@ SHA256_update(SHA256* self, PyObject* msgobj) {
         return PyErr_Format(sha256_error, "Precondition violation: once .digest() has been called you are required to never call .update() again.");
 
     const char *msg;
-    size_t msgsize;
-    if (PyString_AsStringAndSize(msgobj, const_cast<char**>(&msg), reinterpret_cast<Py_ssize_t*>(&msgsize)))
+    Py_ssize_t msgsize;
+    if (PyString_AsStringAndSize(msgobj, const_cast<char**>(&msg), &msgsize))
         return NULL;
     self->h->Update(reinterpret_cast<const byte*>(msg), msgsize);
     Py_RETURN_NONE;
@@ -73,11 +70,31 @@ SHA256_digest(SHA256* self, PyObject* dummy) {
 
 PyDoc_STRVAR(SHA256_digest__doc__,
 "Return the binary digest of the messages that were passed to the update()\n\
-method (including the initial message if any) so far.");
+method (including the initial message if any).");
+
+static PyObject *
+SHA256_hexdigest(SHA256* self, PyObject* dummy) {
+	PyObject* digest = SHA256_digest(self, NULL);
+	if (!digest)
+		return NULL;
+	Py_ssize_t dsize = PyString_GET_SIZE(digest);
+	PyStringObject* hexdigest = reinterpret_cast<PyStringObject*>(PyString_FromStringAndSize(NULL, dsize*2));
+	CryptoPP::ArraySink* as = new CryptoPP::ArraySink(reinterpret_cast<byte*>(PyString_AS_STRING(hexdigest)), dsize*2);
+	CryptoPP::HexEncoder enc;
+	enc.Attach(as);
+	enc.Put(reinterpret_cast<const byte*>(PyString_AS_STRING(digest)), static_cast<size_t>(dsize));
+
+    return reinterpret_cast<PyObject*>(hexdigest);
+}
+
+PyDoc_STRVAR(SHA256_hexdigest__doc__,
+"Return the hex-encoded digest of the messages that were passed to the update()\n\
+method (including the initial message if any).");
 
 static PyMethodDef SHA256_methods[] = {
     {"update", reinterpret_cast<PyCFunction>(SHA256_update), METH_O, SHA256_update__doc__},
     {"digest", reinterpret_cast<PyCFunction>(SHA256_digest), METH_NOARGS, SHA256_digest__doc__},
+    {"hexdigest", reinterpret_cast<PyCFunction>(SHA256_hexdigest), METH_NOARGS, SHA256_digest__doc__},
     {NULL},
 };
 
