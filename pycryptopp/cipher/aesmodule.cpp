@@ -27,7 +27,7 @@ typedef struct {
     PyObject_HEAD
 
     /* internal */
-	CryptoPP::CTR_Mode<CryptoPP::AES>::Encryption * e;
+    CryptoPP::CTR_Mode<CryptoPP::AES>::Encryption * e;
 } AES;
 
 PyDoc_STRVAR(AES__doc__,
@@ -64,9 +64,10 @@ AES_process(AES* self, PyObject* msgobj) {
     }
 
     const char *msg;
-    size_t msgsize;
-    if (PyString_AsStringAndSize(msgobj, const_cast<char**>(&msg), reinterpret_cast<Py_ssize_t*>(&msgsize)))
+    Py_ssize_t msgsize;
+    if (PyString_AsStringAndSize(msgobj, const_cast<char**>(&msg), &msgsize))
         return NULL;
+    assert (msgsize >= 0);
 
     PyStringObject* result = reinterpret_cast<PyStringObject*>(PyString_FromStringAndSize(NULL, msgsize));
     if (!result)
@@ -102,20 +103,28 @@ AES_dealloc(PyObject* self) {
 
 static int
 AES_init(PyObject* self, PyObject *args, PyObject *kwdict) {
-    static char *kwlist[] = { "key", NULL };
+  static char *kwlist[] = { "key", "iv", NULL };
     const char *key = NULL;
-    size_t keysize;
-    size_t DEFAULT_KEYLENGTH = static_cast<size_t>(CryptoPP::AES::DEFAULT_KEYLENGTH);
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "t#", const_cast<char**>(kwlist), &key, &keysize))
+    Py_ssize_t keysize;
+    const char *iv = NULL;
+    Py_ssize_t ivsize = 0;
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "t#|t#:AES.__init__", const_cast<char**>(kwlist), &key, &keysize, &iv, &ivsize))
         return -1;
-    if (keysize != DEFAULT_KEYLENGTH) {
-        PyErr_Format(aes_error, "Precondition violation: key size is expected to be the default for AES, which is %zu, but a key of size %zu was provided.", DEFAULT_KEYLENGTH, keysize);
+    assert (keysize >= 0);
+    assert (ivsize >= 0);
+
+    if (!iv) {
+        // default IV of 0
+        byte defaultiv[CryptoPP::AES::BLOCKSIZE];
+        memset(defaultiv, 0, CryptoPP::AES::BLOCKSIZE);
+        iv = reinterpret_cast<const char*>(defaultiv);
+    }
+    try {
+        reinterpret_cast<AES*>(self)->e = new CryptoPP::CTR_Mode<CryptoPP::AES>::Encryption(reinterpret_cast<const byte*>(key), keysize, reinterpret_cast<const byte*>(iv));
+    } catch (CryptoPP::InvalidKeyLength le) {
+        PyErr_Format(aes_error, "Precondition violation: you are required to pass a valid key size.  Crypto++ gave this exception: %s", le.what());
         return -1;
     }
-
-    byte iv[CryptoPP::AES::DEFAULT_KEYLENGTH];
-    memset(iv, 0, CryptoPP::AES::DEFAULT_KEYLENGTH);
-    reinterpret_cast<AES*>(self)->e = new CryptoPP::CTR_Mode<CryptoPP::AES>::Encryption(reinterpret_cast<const byte*>(key), keysize, iv);
     if (!reinterpret_cast<AES*>(self)->e) {
         PyErr_NoMemory();
         return -1;
