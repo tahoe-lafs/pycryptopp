@@ -94,7 +94,7 @@ method (including the initial message if any).");
 static PyMethodDef SHA256_methods[] = {
     {"update", reinterpret_cast<PyCFunction>(SHA256_update), METH_O, SHA256_update__doc__},
     {"digest", reinterpret_cast<PyCFunction>(SHA256_digest), METH_NOARGS, SHA256_digest__doc__},
-    {"hexdigest", reinterpret_cast<PyCFunction>(SHA256_hexdigest), METH_NOARGS, SHA256_digest__doc__},
+    {"hexdigest", reinterpret_cast<PyCFunction>(SHA256_hexdigest), METH_NOARGS, SHA256_hexdigest__doc__},
     {NULL},
 };
 
