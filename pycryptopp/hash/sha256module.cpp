@@ -74,15 +74,16 @@ method (including the initial message if any).");
 
 static PyObject *
 SHA256_hexdigest(SHA256* self, PyObject* dummy) {
-	PyObject* digest = SHA256_digest(self, NULL);
-	if (!digest)
-		return NULL;
-	Py_ssize_t dsize = PyString_GET_SIZE(digest);
-	PyStringObject* hexdigest = reinterpret_cast<PyStringObject*>(PyString_FromStringAndSize(NULL, dsize*2));
-	CryptoPP::ArraySink* as = new CryptoPP::ArraySink(reinterpret_cast<byte*>(PyString_AS_STRING(hexdigest)), dsize*2);
-	CryptoPP::HexEncoder enc;
-	enc.Attach(as);
-	enc.Put(reinterpret_cast<const byte*>(PyString_AS_STRING(digest)), static_cast<size_t>(dsize));
+    PyObject* digest = SHA256_digest(self, NULL);
+    if (!digest)
+        return NULL;
+    Py_ssize_t dsize = PyString_GET_SIZE(digest);
+    PyStringObject* hexdigest = reinterpret_cast<PyStringObject*>(PyString_FromStringAndSize(NULL, dsize*2));
+    CryptoPP::ArraySink* as = new CryptoPP::ArraySink(reinterpret_cast<byte*>(PyString_AS_STRING(hexdigest)), dsize*2);
+    CryptoPP::HexEncoder enc;
+    enc.Attach(as);
+    enc.Put(reinterpret_cast<const byte*>(PyString_AS_STRING(digest)), static_cast<size_t>(dsize));
+    Py_DECREF(digest); digest = NULL;
 
     return reinterpret_cast<PyObject*>(hexdigest);
 }
