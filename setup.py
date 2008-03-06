@@ -136,6 +136,11 @@ setup_requires = []
 if 'darcsver' in sys.argv[1:]:
     setup_requires.append('darcsver >= 1.0.0')
 
+# setuptools_pyflakes is needed only if you want "./setup.py flakes" to run
+# pyflakes on all the pycryptopp modules.
+if 'flakes' in sys.argv[1:]:
+    setup_requires.append('setuptools_pyflakes >= 1.0.0')
+
 # setuptools_darcs is required to produce complete distributions (such as
 # with "sdist" or "bdist_egg"), unless there is a PKG-INFO file present which
 # contains the complete list of the required files.
