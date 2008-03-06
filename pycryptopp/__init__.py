@@ -12,3 +12,5 @@ except ImportError:
     pass
 
 import publickey, hash, cipher
+
+quiet_pyflakes=[__version__, publickey, hash, cipher]
