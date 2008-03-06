@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import cStringIO, os, random, re
+import os, random, re
 
 import unittest
 
