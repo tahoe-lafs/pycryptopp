@@ -119,6 +119,10 @@ ext_modules.append(
     )
 
 ext_modules.append(
+    Extension('pycryptopp.publickey.ecdsa', ['pycryptopp/publickey/ecdsamodule.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
+    )
+
+ext_modules.append(
     Extension('pycryptopp.hash.sha256', ['pycryptopp/hash/sha256module.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
     )
 
