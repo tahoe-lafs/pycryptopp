@@ -320,7 +320,7 @@ See also generate().\n\
 @param sizeinbits size of the key in bits\n\
 @param seed seed\n\
 \n\
-@precondition sizeinbits >= 1536\n\
+@precondition sizeinbits >= 522\n\
 @precondition len(seed) >= 8");
 
 static PyObject *
@@ -348,7 +348,11 @@ generate(PyObject *dummy, PyObject *args, PyObject *kwdict) {
 }
 
 PyDoc_STRVAR(generate__doc__,
-"Create a signing key using the operating system's random number generator.");
+"Create a signing key using the operating system's random number generator.\n\
+\n\
+@param sizeinbits size of the key in bits\n\
+\n\
+@precondition sizeinbits >= 522");
 
 static PyObject *
 create_verifying_key_from_string(PyObject *dummy, PyObject *args, PyObject *kwdict) {
@@ -407,8 +411,8 @@ PyDoc_STRVAR(create_signing_key_from_string__doc__,
 static PyMethodDef rsa_functions[] = {
     {"generate_from_seed", reinterpret_cast<PyCFunction>(generate_from_seed), METH_KEYWORDS, generate_from_seed__doc__},
     {"generate", reinterpret_cast<PyCFunction>(generate), METH_KEYWORDS, generate__doc__},
-     {"create_verifying_key_from_string", reinterpret_cast<PyCFunction>(create_verifying_key_from_string), METH_KEYWORDS, create_verifying_key_from_string__doc__},
-     {"create_signing_key_from_string", reinterpret_cast<PyCFunction>(create_signing_key_from_string), METH_KEYWORDS, create_signing_key_from_string__doc__},
+    {"create_verifying_key_from_string", reinterpret_cast<PyCFunction>(create_verifying_key_from_string), METH_KEYWORDS, create_verifying_key_from_string__doc__},
+    {"create_signing_key_from_string", reinterpret_cast<PyCFunction>(create_signing_key_from_string), METH_KEYWORDS, create_signing_key_from_string__doc__},
     {NULL, NULL, 0, NULL}  /* sentinel */
 };
 
