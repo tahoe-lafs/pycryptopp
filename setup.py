@@ -146,16 +146,16 @@ if 'flakes' in sys.argv[1:]:
     setup_requires.append('setuptools_pyflakes >= 1.0.0')
 
 # setuptools_darcs is required to produce complete distributions (such as
-# with "sdist" or "bdist_egg"), unless there is a PKG-INFO file present which
-# contains the complete list of the required files.
+# with "sdist" or "bdist_egg"), unless there is a 
+# pycryptopp.egg-info/SOURCES.txt file present which contains a complete list 
+# of needed files.
 # http://pypi.python.org/pypi/setuptools_darcs
-if not os.path.exists('PKG-INFO'):
-    setup_requires.append('setuptools_darcs >= 1.0.5')
+setup_requires.append('setuptools_darcs >= 1.0.5')
 
 setup(name='pycryptopp',
       version=verstr,
       description='Python wrappers for the Crypto++ library',
-      long_description='RSA-PSS-SHA256 signatures, SHA-256 hashes, and AES-CTR encryption.',
+      long_description='RSA-PSS-SHA256 signatures, ECDSA(1363)/EMSA1(SHA-256) signatures, SHA-256 hashes, and AES-CTR encryption',
       author='Zooko O\'Whielacronx',
       author_email='zooko@zooko.com',
       url='http://allmydata.org/source/pycryptopp',
