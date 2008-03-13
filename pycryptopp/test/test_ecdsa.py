@@ -25,6 +25,13 @@ def randstr(n):
 
 KEYSIZE=192 # The choices are 192 or 521 -- they are both secure, and 192 makes for faster unit tests.
 class Signer(unittest.TestCase):
+    def test_generate_from_same_seed_is_reproducible(self):
+        signer1 = ecdsa.generate_from_seed(KEYSIZE, "aaaaaaaa")
+        signer2 = ecdsa.generate_from_seed(KEYSIZE, "aaaaaaaa")
+
+        self.failUnlessEqual(signer1.serialize(), signer2.serialize())
+    test_generate_from_same_seed_is_reproducible.todo = "TODO: fix this so that generate_from_seed() is reproducible."
+
     def test_generate_from_seed_bad_seed(self):
         try:
             signer = ecdsa.generate_from_seed(KEYSIZE, "aaa")

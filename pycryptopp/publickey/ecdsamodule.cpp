@@ -33,7 +33,7 @@ PyDoc_STRVAR(ecdsa__doc__,
 "ecdsa -- ECDSA(1363)/EMSA1(SHA-256) signatures\n\
 \n\
 To create a new ECDSA signing key from the operating system's random number generator, call generate().\n\
-To create a new ECDSA signing key from a seed, call generate_from_seed().\n\
+To create a new ECDSA signing key deterministically from a seed, call generate_from_seed().\n\
 To deserialize an ECDSA signing key from a string, call create_signing_key_from_string().\n\
 \n\
 To get an ECDSA verifying key from an ECDSA signing key, call get_verifying_key() on the signing key.\n\

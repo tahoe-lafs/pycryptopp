@@ -30,7 +30,7 @@ PyDoc_STRVAR(rsa__doc__,
 "rsa -- RSA-PSS-SHA256 signatures\n\
 \n\
 To create a new RSA signing key from the operating system's random number generator, call generate().\n\
-To create a new RSA signing key from a seed, call generate_from_seed().\n\
+To create a new RSA signing key deterministically from a seed, call generate_from_seed().\n\
 To deserialize an RSA signing key from a string, call create_signing_key_from_string().\n\
 \n\
 To get an RSA verifying key from an RSA signing key, call get_verifying_key() on the signing key.\n\
