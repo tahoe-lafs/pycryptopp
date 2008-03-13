@@ -26,8 +26,8 @@ def randstr(n):
 KEYSIZE=522 # 522 bits is far too few for actual security -- it is used only for faster unit tests
 class Signer(unittest.TestCase):
     def test_generate_from_same_seed_is_reproducible(self):
-        signer1 = rsa.generate_from_seed(KEYSIZE, "aaaaaaaa")
-        signer2 = rsa.generate_from_seed(KEYSIZE, "aaaaaaaa")
+        signer1 = rsa.generate_from_seed(KEYSIZE, "aaaaaaaaaaaa")
+        signer2 = rsa.generate_from_seed(KEYSIZE, "aaaaaaaaaaaa")
 
         self.failUnlessEqual(signer1.serialize(), signer2.serialize())
     test_generate_from_same_seed_is_reproducible.todo = "TODO: fix this so that generate_from_seed() is reproducible."
