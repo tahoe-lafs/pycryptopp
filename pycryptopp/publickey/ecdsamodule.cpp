@@ -33,7 +33,6 @@ PyDoc_STRVAR(ecdsa__doc__,
 "ecdsa -- ECDSA(1363)/EMSA1(SHA-256) signatures\n\
 \n\
 To create a new ECDSA signing key from the operating system's random number generator, call generate().\n\
-To create a new ECDSA signing key deterministically from a seed, call generate_from_seed().\n\
 To deserialize an ECDSA signing key from a string, call create_signing_key_from_string().\n\
 \n\
 To get an ECDSA verifying key from an ECDSA signing key, call get_verifying_key() on the signing key.\n\
@@ -292,55 +291,6 @@ static const int SMALL_KEY_SIZE_BITS=192;
    the theory of elliptic curve cryptography. */
 static const int LARGE_KEY_SIZE_BITS=521;
 
-static PyObject*
-generate_from_seed(PyObject *dummy, PyObject *args, PyObject *kwdict) {
-    static const char *kwlist[] = {
-        "sizeinbits",
-        "seed",
-        NULL
-    };
-    int sizeinbits;
-    const char* seed;
-    int seedlen;
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "it#:generate_from_seed", const_cast<char**>(kwlist), &sizeinbits, &seed, &seedlen))
-        return NULL;
-
-    if (sizeinbits != SMALL_KEY_SIZE_BITS && sizeinbits != LARGE_KEY_SIZE_BITS)
-        return PyErr_Format(ecdsa_error, "Precondition violation: size in bits is required to be either %d or %d, but it was %d", SMALL_KEY_SIZE_BITS, LARGE_KEY_SIZE_BITS, sizeinbits);
-
-    if (seedlen < int(ceil(sizeinbits/16.0)))
-        return PyErr_Format(ecdsa_error, "Precondition violation: seed is required to be of length >= %d (which is sizeinbits / 16.0), but it was %d", int(ceil(sizeinbits/16.0)), seedlen);
-
-    RandomPool randPool;
-    randPool.Put((byte *)seed, seedlen); /* In Crypto++ v5.5.2, the recommended interface is "IncorporateEntropy()", but "Put()" is supported for backwards compatibility.  In Crypto++ v5.2 (the version that comes with Ubuntu dapper), only "Put()" is available. */
-
-    SigningKey *signer = SigningKey_construct();
-    if (!signer)
-        return NULL;
-    OID curve;
-    if (sizeinbits == 192)
-        curve = ASN1::secp192r1();
-    else
-        curve = ASN1::secp521r1();
-
-    signer->k = new ECDSA<ECP, SHA256>::Signer(randPool, curve);
-    if (!signer->k)
-        return PyErr_NoMemory();
-    return reinterpret_cast<PyObject*>(signer);
-}
-
-PyDoc_STRVAR(generate_from_seed__doc__,
-"Create a signing key deterministically from the given seed.\n\
-\n\
-This implies that if someone can guess the seed then they can learn the signing key.\n\
-See also generate().\n\
-\n\
-@param sizeinbits size of the key in bits\n\
-@param seed seed\n\
-\n\
-@precondition sizeinbits in (192, 521)\n\
-@precondition len(seed) >= ceil(sizeinbits/16.0)");
-
 static PyObject *
 generate(PyObject *dummy, PyObject *args, PyObject *kwdict) {
     static const char *kwlist[] = {
@@ -434,7 +384,6 @@ PyDoc_STRVAR(create_signing_key_from_string__doc__,
 "Create a signing key from its serialized state.");
 
 static PyMethodDef ecdsa_functions[] = {
-    {"generate_from_seed", reinterpret_cast<PyCFunction>(generate_from_seed), METH_KEYWORDS, generate_from_seed__doc__},
     {"generate", reinterpret_cast<PyCFunction>(generate), METH_KEYWORDS, generate__doc__},
     {"create_verifying_key_from_string", reinterpret_cast<PyCFunction>(create_verifying_key_from_string), METH_KEYWORDS, create_verifying_key_from_string__doc__},
     {"create_signing_key_from_string", reinterpret_cast<PyCFunction>(create_signing_key_from_string), METH_KEYWORDS, create_signing_key_from_string__doc__},

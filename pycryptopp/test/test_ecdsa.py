@@ -25,47 +25,6 @@ def randstr(n):
 
 KEYSIZE=192 # The choices are 192 or 521 -- they are both secure, and 192 makes for faster unit tests.
 class Signer(unittest.TestCase):
-    def test_generate_from_same_seed_is_reproducible(self):
-        signer1 = ecdsa.generate_from_seed(KEYSIZE, "aaaaaaaaaaaa")
-        signer2 = ecdsa.generate_from_seed(KEYSIZE, "aaaaaaaaaaaa")
-
-        self.failUnlessEqual(signer1.serialize(), signer2.serialize())
-    test_generate_from_same_seed_is_reproducible.todo = "TODO: fix this so that generate_from_seed() is reproducible."
-
-    def test_generate_from_seed_bad_seed(self):
-        try:
-            signer = ecdsa.generate_from_seed(KEYSIZE, "aaa")
-        except ecdsa.Error, le:
-            self.failUnless("seed is required to be of length >=" in str(le), le)
-        else:
-            self.fail("Should have raised error from seed being too short.")
-        try:
-            signer = ecdsa.generate_from_seed(sizeinbits=KEYSIZE, seed="aaa")
-        except ecdsa.Error, le:
-            self.failUnless("seed is required to be of length >=" in str(le), le)
-        else:
-            self.fail("Should have raised error from seed being too short.")
-
-    def test_generate_from_seed_bad_size(self):
-        try:
-            signer = ecdsa.generate_from_seed(KEYSIZE-1, "aaaaaaaa")
-        except ecdsa.Error, le:
-            self.failUnless("size in bits is required to be " in str(le), le)
-        else:
-            self.fail("Should have raised error from size being too small.")
-        try:
-            signer = ecdsa.generate_from_seed(sizeinbits=KEYSIZE-1, seed="aaaaaaaa")
-        except ecdsa.Error, le:
-            self.failUnless("size in bits is required to be " in str(le), le)
-        else:
-            self.fail("Should have raised error from size being too small.")
-
-    def test_generate_from_seed(self):
-        signer = ecdsa.generate_from_seed(KEYSIZE, "aaaaaaaaaaaa")
-        # Hooray!  It didn't raise an exception!  We win!
-        signer = ecdsa.generate_from_seed(sizeinbits=KEYSIZE, seed="aaaaaaaaaaaa")
-        # Hooray!  It didn't raise an exception!  We win!
-
     def test_generate_bad_size(self):
         try:
             signer = ecdsa.generate(KEYSIZE-1)

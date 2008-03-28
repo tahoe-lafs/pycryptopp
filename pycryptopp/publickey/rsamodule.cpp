@@ -30,7 +30,6 @@ PyDoc_STRVAR(rsa__doc__,
 "rsa -- RSA-PSS-SHA256 signatures\n\
 \n\
 To create a new RSA signing key from the operating system's random number generator, call generate().\n\
-To create a new RSA signing key deterministically from a seed, call generate_from_seed().\n\
 To deserialize an RSA signing key from a string, call create_signing_key_from_string().\n\
 \n\
 To get an RSA verifying key from an RSA signing key, call get_verifying_key() on the signing key.\n\
@@ -280,49 +279,6 @@ SigningKey_construct() {
 // static const int MIN_KEY_SIZE_BITS=3675; /* according to Lenstra 2001 "Unbelievable security: Matching AES security using public key systems", you should use RSA keys of length 3675 bits if you want it to be as hard to factor your RSA key as to brute-force your AES-128 key in the year 2030. */
 static const int MIN_KEY_SIZE_BITS=522; /* minimum that can do PSS-SHA256 -- totally insecure and allowed only for faster unit tests */
 
-static PyObject*
-generate_from_seed(PyObject *dummy, PyObject *args, PyObject *kwdict) {
-    static const char *kwlist[] = {
-        "sizeinbits",
-        "seed",
-        NULL
-    };
-    int sizeinbits;
-    const char* seed;
-    int seedlen;
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "it#:generate_from_seed", const_cast<char**>(kwlist), &sizeinbits, &seed, &seedlen))
-        return NULL;
-
-    if (sizeinbits < MIN_KEY_SIZE_BITS)
-        return PyErr_Format(rsa_error, "Precondition violation: size in bits is required to be >= %d, but it was %d", MIN_KEY_SIZE_BITS, sizeinbits);
-
-    if (seedlen < 8)
-        return PyErr_Format(rsa_error, "Precondition violation: seed is required to be of length >= %d, but it was %d", 8, seedlen);
-
-    RandomPool randPool;
-    randPool.Put((byte *)seed, seedlen); /* In Crypto++ v5.5.2, the recommended interface is "IncorporateEntropy()", but "Put()" is supported for backwards compatibility.  In Crypto++ v5.2 (the version that comes with Ubuntu dapper), only "Put()" is available. */
-
-    SigningKey *signer = SigningKey_construct();
-    if (!signer)
-        return NULL;
-    signer->k = new RSASS<PSS, SHA256>::Signer(randPool, sizeinbits);
-    if (!signer->k)
-        return PyErr_NoMemory();
-    return reinterpret_cast<PyObject*>(signer);
-}
-
-PyDoc_STRVAR(generate_from_seed__doc__,
-"Create a signing key deterministically from the given seed.\n\
-\n\
-This implies that if someone can guess the seed then they can learn the signing key.\n\
-See also generate().\n\
-\n\
-@param sizeinbits size of the key in bits\n\
-@param seed seed\n\
-\n\
-@precondition sizeinbits >= 522\n\
-@precondition len(seed) >= 8");
-
 static PyObject *
 generate(PyObject *dummy, PyObject *args, PyObject *kwdict) {
     static const char *kwlist[] = {
@@ -409,7 +365,6 @@ PyDoc_STRVAR(create_signing_key_from_string__doc__,
 "Create a signing key from its serialized state.");
 
 static PyMethodDef rsa_functions[] = {
-    {"generate_from_seed", reinterpret_cast<PyCFunction>(generate_from_seed), METH_KEYWORDS, generate_from_seed__doc__},
     {"generate", reinterpret_cast<PyCFunction>(generate), METH_KEYWORDS, generate__doc__},
     {"create_verifying_key_from_string", reinterpret_cast<PyCFunction>(create_verifying_key_from_string), METH_KEYWORDS, create_verifying_key_from_string__doc__},
     {"create_signing_key_from_string", reinterpret_cast<PyCFunction>(create_signing_key_from_string), METH_KEYWORDS, create_signing_key_from_string__doc__},

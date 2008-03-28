@@ -24,48 +24,8 @@ def randstr(n):
     return ''.join(map(chr, map(random.randrange, [0]*n, [256]*n)))
 
 KEYSIZE=522 # 522 bits is far too few for actual security -- it is used only for faster unit tests
+
 class Signer(unittest.TestCase):
-    def test_generate_from_same_seed_is_reproducible(self):
-        signer1 = rsa.generate_from_seed(KEYSIZE, "aaaaaaaaaaaa")
-        signer2 = rsa.generate_from_seed(KEYSIZE, "aaaaaaaaaaaa")
-
-        self.failUnlessEqual(signer1.serialize(), signer2.serialize())
-    test_generate_from_same_seed_is_reproducible.todo = "TODO: fix this so that generate_from_seed() is reproducible."
-
-    def test_generate_from_seed_bad_seed(self):
-        try:
-            signer = rsa.generate_from_seed(KEYSIZE, "aaa")
-        except rsa.Error, le:
-            self.failUnless("seed is required to be of length >=" in str(le), le)
-        else:
-            self.fail("Should have raised error from seed being too short.")
-        try:
-            signer = rsa.generate_from_seed(sizeinbits=KEYSIZE, seed="aaa")
-        except rsa.Error, le:
-            self.failUnless("seed is required to be of length >=" in str(le), le)
-        else:
-            self.fail("Should have raised error from seed being too short.")
-
-    def test_generate_from_seed_bad_size(self):
-        try:
-            signer = rsa.generate_from_seed(KEYSIZE-1, "aaaaaaaa")
-        except rsa.Error, le:
-            self.failUnless("size in bits is required to be >=" in str(le), le)
-        else:
-            self.fail("Should have raised error from size being too small.")
-        try:
-            signer = rsa.generate_from_seed(sizeinbits=KEYSIZE-1, seed="aaaaaaaa")
-        except rsa.Error, le:
-            self.failUnless("size in bits is required to be >=" in str(le), le)
-        else:
-            self.fail("Should have raised error from size being too small.")
-
-    def test_generate_from_seed(self):
-        signer = rsa.generate_from_seed(KEYSIZE, "aaaaaaaa")
-        # Hooray!  It didn't raise an exception!  We win!
-        signer = rsa.generate_from_seed(sizeinbits=KEYSIZE, seed="aaaaaaaa")
-        # Hooray!  It didn't raise an exception!  We win!
-
     def test_generate_bad_size(self):
         try:
             signer = rsa.generate(KEYSIZE-1)
