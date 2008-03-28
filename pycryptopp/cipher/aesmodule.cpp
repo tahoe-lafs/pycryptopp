@@ -107,18 +107,15 @@ AES_init(PyObject* self, PyObject *args, PyObject *kwdict) {
     const char *key = NULL;
     Py_ssize_t keysize = 0;
     const char *iv = NULL;
+    const char defaultiv[CryptoPP::AES::BLOCKSIZE] = {0};
     Py_ssize_t ivsize = 0;
     if (!PyArg_ParseTupleAndKeywords(args, kwdict, "t#|t#:AES.__init__", const_cast<char**>(kwlist), &key, &keysize, &iv, &ivsize))
         return -1;
     assert (keysize >= 0);
     assert (ivsize >= 0);
 
-    if (!iv) {
-        // default IV of 0
-        byte defaultiv[CryptoPP::AES::BLOCKSIZE];
-        memset(defaultiv, 0, CryptoPP::AES::BLOCKSIZE);
-        iv = reinterpret_cast<const char*>(defaultiv);
-    }
+    if (!iv)
+        iv = defaultiv;
     try {
         reinterpret_cast<AES*>(self)->e = new CryptoPP::CTR_Mode<CryptoPP::AES>::Encryption(reinterpret_cast<const byte*>(key), keysize, reinterpret_cast<const byte*>(iv));
     } catch (CryptoPP::InvalidKeyLength le) {
