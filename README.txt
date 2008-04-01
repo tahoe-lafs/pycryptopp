@@ -4,37 +4,28 @@ pycryptopp [1] is a python wrapper around the Crypto++ library [2].
 
 LICENCE
 
-You may use this package under the GNU General Public License, version 2 or, at
-your option, any later version.  You may use this package under the Transitive
-Grace Period Public Licence, version 1.0.  (You may choose to use this package
-under the terms of either licence, at your option.)  See the file COPYING.GPL
-for the terms of the GNU General Public License, version 2.  See the file
-COPYING.TGPPL.html for the terms of the Transitive Grace Period Public Licence,
-version 1.0.
+You may use this package under the GNU General Public License, version
+2 or, at your option, any later version.  You may use this package
+under the Transitive Grace Period Public Licence, version 1.0.  (You
+may choose to use this package under the terms of either licence, at
+your option.)  See the file COPYING.GPL for the terms of the GNU
+General Public License, version 2.  See the file COPYING.TGPPL.html
+for the terms of the Transitive Grace Period Public Licence, version
+1.0.
 
 BUILDING
 
-To build this package from source requires the Crypto++ library, version 5.2.1
-or newer, including development headers.  (Development of pycryptopp was done
-primarily with Crypto++ v5.5.2.)  To build it run "./setup.py build".  To test
-it run "./setup.py test".  To install it into your system run "./setup.py
-install".  To create a binary package run "./setup.py bdist_egg".  There are
-more features of setup.py -- see the documentation of setuptools [3] for
-details.
-
-Note: on Mac OS X, it doesn't work to install Crypto++ into the standard "/usr"
-PREFIX, e.g. by running "make install" in the cryptopp directory -- you'll get
-an error message like "/usr/bin/ld: can't locate file for: -lcryptopp" when you
-try to build pycryptopp.  However, it does work to run "make install
-PREFIX=/usr/local".  This appears to be a strange feature of the Mac OS X
-version of gcc.
+To build it run "./setup.py build".  To test it run "./setup.py test".
+To install it into your system run "./setup.py install".  To create a
+binary package run "./setup.py bdist_egg".  There are more features of
+setup.py -- see the documentation of setuptools [3] for details.
 
 DOCUMENTATION
 
-The documentation is in the docstrings.  From within a Python interpreter use
-"help(pycryptopp)", "help(pycryptopp.cipher)", and "help(pycryptopp.cipher.aes)"
-and so on.  From a command-line, use "pydoc pycryptopp", "pydoc
-pycryptopp.cipher", and so on.
+The documentation is in the docstrings.  From within a Python
+interpreter use "help(pycryptopp)", "help(pycryptopp.cipher)", and
+"help(pycryptopp.cipher.aes)" and so on.  From a command-line, use
+"pydoc pycryptopp", "pydoc pycryptopp.cipher", and so on.
 
 CONTACT
 
@@ -43,20 +34,22 @@ cryptopp-users mailing list [4] with comments about this package.
 
 BOOK REVIEW
 
-If you are not already acquainted with modern cryptography, buy a copy of
-Ferguson and Schneier's book "Practical Cryptography" and read it.  It is easy
-going and will increase your understanding greatly.
+If you are not already acquainted with modern cryptography, buy a copy
+of Ferguson and Schneier's book "Practical Cryptography" and read it.
+It is easy going and will increase your understanding greatly.
 
 ACKNOWLEDGEMENTS
 
-Thanks to Wei Dai and the contributors to Crypto++, Andrew M. Kuchling for his
-"pycrypto" library which inspired this one, and Brian Warner for help on Python
-packaging questions and a million other things besides.
+Thanks to Wei Dai and the contributors to Crypto++, Andrew M. Kuchling
+for his "pycrypto" library which inspired this one, and Brian Warner
+for help on Python packaging questions and a million other things
+besides.
 
 
 Zooko O'Whielacronx
 Boulder, Colorado
-December 17, 2007
+April 1, 2008
+(There is nothing funny in this README.txt)
 
 [1] http://pypi.python.org/pypi/pycryptopp
 [2] http://cryptopp.com
