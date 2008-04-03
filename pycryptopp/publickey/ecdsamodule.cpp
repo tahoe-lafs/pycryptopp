@@ -209,14 +209,14 @@ PyDoc_STRVAR(SigningKey_get_verifying_key__doc__,
 
 static PyObject *
 SigningKey_serialize(SigningKey *self, PyObject *dummy) {
-    std::string outstr;
-    StringSink ss(outstr);
-    self->k->DEREncode(ss);
-    PyStringObject* result = reinterpret_cast<PyStringObject*>(PyString_FromStringAndSize(outstr.c_str(), outstr.size()));
-    if (!result)
-        return NULL;
+    Py_ssize_t len = self->k->GetKey().GetGroupParameters().GetSubgroupOrder().ByteCount();
+    PyObject* result = PyString_FromStringAndSize(NULL, len);
 
-    return reinterpret_cast<PyObject*>(result);
+    const DL_PrivateKey_EC<ECP>& privkey = dynamic_cast<const DL_PrivateKey_EC<ECP>&>(self->k->GetPrivateKey());
+
+    privkey.GetPrivateExponent().Encode(reinterpret_cast<byte*>(PyString_AS_STRING(result)), len);
+
+    return result;
 }
 
 PyDoc_STRVAR(SigningKey_serialize__doc__,
@@ -360,14 +360,22 @@ create_signing_key_from_string(PyObject *dummy, PyObject *args, PyObject *kwdict
 
     if (!PyArg_ParseTupleAndKeywords(args, kwdict, "t#:create_signing_key_from_string", const_cast<char**>(kwlist), &serializedsigningkey, &serializedsigningkeysize))
         return NULL;
-    assert (serializedsigningkeysize >= 0);
+    if (serializedsigningkeysize != 24 && serializedsigningkeysize != 66)
+        return PyErr_Format(ecdsa_error, "Precondition violation: size in bytes of the serialized signing key is required to be either %d (for %d-bit keys) or %d (for %d-bit keys), but it was %d", 24, SMALL_KEY_SIZE_BITS, 66, LARGE_KEY_SIZE_BITS, serializedsigningkeysize);
+
 
     SigningKey *verifier = SigningKey_construct();
     if (!verifier)
         return NULL;
-    StringSource ss(reinterpret_cast<const byte*>(serializedsigningkey), serializedsigningkeysize, true);
 
-    verifier->k = new ECDSA<ECP, SHA256>::Signer(ss);
+    OID curve;
+    if (serializedsigningkeysize == 24)
+        curve = ASN1::secp192r1();
+    else
+        curve = ASN1::secp521r1();
+    Integer privexponent(reinterpret_cast<const byte*>(serializedsigningkey), serializedsigningkeysize);
+
+    verifier->k = new ECDSA<ECP, SHA256>::Signer(curve, privexponent);
     if (!verifier->k)
         return PyErr_NoMemory();
     return reinterpret_cast<PyObject*>(verifier);
