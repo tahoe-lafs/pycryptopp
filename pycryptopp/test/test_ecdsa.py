@@ -4,9 +4,6 @@ import random
 
 import unittest
 
-global VERBOSE
-VERBOSE=False
-
 from pycryptopp.publickey import ecdsa
 
 from base64 import b32encode
