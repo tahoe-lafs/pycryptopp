@@ -22,10 +22,11 @@ setup.py -- see the documentation of setuptools [3] for details.
 
 DOCUMENTATION
 
-The documentation is in the docstrings.  From within a Python
-interpreter use "help(pycryptopp)", "help(pycryptopp.cipher)", and
-"help(pycryptopp.cipher.aes)" and so on.  From a command-line, use
-"pydoc pycryptopp", "pydoc pycryptopp.cipher", and so on.
+The documentation is in the docstrings.  From a command-line, use
+"pydoc pycryptopp", "pydoc pycryptopp.cipher", and so on.  From within
+a Python interpreter use "help(pycryptopp)",
+"help(pycryptopp.cipher)", and "help(pycryptopp.cipher.aes)" and so
+on.
 
 CONTACT
 
@@ -41,15 +42,15 @@ It is easy going and will increase your understanding greatly.
 ACKNOWLEDGEMENTS
 
 Thanks to Wei Dai and the contributors to Crypto++, Andrew M. Kuchling
-for his "pycrypto" library which inspired this one, and Brian Warner
-for help on Python packaging questions and a million other things
-besides.
+for his "pycrypto" library which inspired this one, Brian Warner for
+help on Python packaging questions, inspiration, and a million other
+things besides, and Greg Hazel for Windows porting and fixing a
+critical bug.
 
 
 Zooko O'Whielacronx
 Boulder, Colorado
-April 1, 2008
-(There is nothing funny in this README.txt)
+April 24, 2008
 
 [1] http://pypi.python.org/pypi/pycryptopp
 [2] http://cryptopp.com
