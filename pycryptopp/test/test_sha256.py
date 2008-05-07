@@ -11,6 +11,11 @@ VERBOSE=False
 
 from pycryptopp.hash import sha256
 
+from pkg_resources import resource_string
+
+def resource_string_lines(pkgname, resname):
+    return split_on_newlines(resource_string(pkgname, resname))
+
 from base64 import b32encode
 def ab(x): # debuggery
     if len(x) >= 3:
@@ -81,6 +86,17 @@ class SHA256(unittest.TestCase):
 
 VECTS_RE=re.compile("\nLen = ([0-9]+)\nMsg = ([0-9a-f]+)\nMD = ([0-9a-f]+)")
 
+# split_on_newlines() copied from pyutil.strutil
+def split_on_newlines(s):
+    """
+    Splits s on all of the three newline sequences: "\r\n", "\r", or "\n".
+    """
+    res = []
+    for x in s.split('\r\n'):
+        for y in x.split('\r'):
+           res.extend(y.split('\n'))
+    return res
+
 class SHSVectors(unittest.TestCase):
     """
     All of the SHA-256 test vectors from the NIST SHS, in the files distributed
@@ -88,13 +104,12 @@ class SHSVectors(unittest.TestCase):
     unpacked and in a subdirectory named 'vectors').
     """
     def test_short(self):
-        return self._test_vect_file(open(os.path.join('pycryptopp', 'test', 'vectors', 'SHA256ShortMsg.txt'), 'rU'))
+        return self._test_vect(resource_string(__name__, 'vectors/SHA256ShortMsg.txt'))
 
     def test_long(self):
-        return self._test_vect_file(open(os.path.join('pycryptopp', 'test', 'vectors', 'SHA256LongMsg.txt'), 'rU'))
+        return self._test_vect(resource_string(__name__, 'vectors/SHA256LongMsg.txt'))
 
-    def _test_vect_file(self, infile):
-        vects_str = infile.read()
+    def _test_vect(self, vects_str):
         for mo in VECTS_RE.finditer(vects_str):
             msglenbits = int(mo.group(1))
             assert msglenbits % 8 == 0
@@ -107,15 +122,15 @@ class SHSVectors(unittest.TestCase):
             self.failUnlessEqual(computed_md, md)
 
     def test_monte(self):
-        infile = open(os.path.join('pycryptopp', 'test', 'vectors', 'SHA256Monte.txt'), 'rU')
-        for line in infile:
+        inlines = resource_string_lines(__name__, 'vectors/SHA256Monte.txt')
+        for line in inlines:
             line = line.strip()
             if line[:7] == 'Seed = ':
                 seed = a2b_hex(line[7:])
                 break
 
         j = 0
-        for line in infile:
+        for line in inlines:
             line = line.strip()
             if line[:8] == 'COUNT = ':
                 assert int(line[8:]) == j

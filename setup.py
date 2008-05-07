@@ -93,6 +93,7 @@ ext_modules.append(
 miscdeps=os.path.join(os.getcwd(), 'misc', 'dependencies')
 dependency_links=[os.path.join(miscdeps, t) for t in os.listdir(miscdeps) if t.endswith(".tar")]
 setup_requires = []
+install_requires = ['setuptools >= 0.6a9'] # for pkg_resources for loading test vectors for unit tests
 
 # darcsver is needed only if you want "./setup.py darcsver" to write a new
 # version stamp in pycryptopp/_version.py, with a version number derived from
@@ -123,6 +124,7 @@ setup(name='pycryptopp',
       packages=find_packages(),
       include_package_data=True,
       setup_requires=setup_requires,
+      install_requires=install_requires,
       dependency_links=dependency_links,
       classifiers=trove_classifiers,
       ext_modules=ext_modules,

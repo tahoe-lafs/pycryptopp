@@ -11,6 +11,8 @@ VERBOSE=False
 
 from pycryptopp.cipher import aes
 
+from pkg_resources import resource_string, resource_listdir
+
 from base64 import b32encode
 def ab(x): # debuggery
     if len(x) >= 3:
@@ -69,13 +71,10 @@ NIST_KAT_VECTS_RE=re.compile("\nCOUNT = ([0-9]+)\nKEY = ([0-9a-f]+)\nPLAINTEXT =
 
 class AES_from_NIST_KAT(unittest.TestCase):
     def test_NIST_KAT(self):
-        katdir=os.path.join('pycryptopp', 'test', 'vectors', 'KAT_AES')
-        for fn in os.listdir(katdir):
-            f = open(os.path.join(katdir, fn), 'rU')
-            self._test_KAT_file(f)
+        for vectname in resource_listdir(__name__, 'vectors/KAT_AES'):
+            self._test_KAT_file(resource_string(__name__, '/'.join(['vectors/KAT_AES', vectname])))
 
-    def _test_KAT_file(self, f):
-        vects_str =  f.read()
+    def _test_KAT_file(self, vects_str):
         for mo in NIST_KAT_VECTS_RE.finditer(vects_str):
             key = a2b_hex(mo.group(2))
             plaintext = a2b_hex(mo.group(3))
