@@ -113,12 +113,11 @@ if 'flakes' in sys.argv[1:]:
 # http://pypi.python.org/pypi/setuptools_darcs
 setup_requires.append('setuptools_darcs >= 1.0.5')
 
-doc_files=['COPYING.GPL', 'COPYING.TGPPL.html', 'README.txt']
-data_files=[]
+data_fnames=['COPYING.GPL', 'COPYING.TGPPL.html', 'README.txt']
 # In case we are building for a .deb with stdeb's sdist_dsc command, we put the
 # docs in "share/doc/python-pycryptopp".
 doc_loc = "share/doc/python-pycryptopp"
-data_files.append((doc_loc, doc_files))
+data_files = [(doc_loc, data_fnames)]
 
 setup(name='pycryptopp',
       version=verstr,
