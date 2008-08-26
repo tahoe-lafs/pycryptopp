@@ -6,7 +6,7 @@
 # Author: Zooko Wilcox-O'Hearn
 # See README.txt for licensing information.
 
-import os, re, subprocess, sys
+import os, platform, re, subprocess, sys
 
 try:
     from ez_setup import use_setuptools
@@ -35,6 +35,9 @@ sp.stdin.close()
 sp.wait()
 if re.search("GNU assembler version (0|1|2.0)", sp.stderr.read()):
     define_macros.append(('CRYPTOPP_DISABLE_ASM', 1))
+
+if 'sunos' in platform.system().lower():
+    extra_compile_args.append('-Wa,--divide') # allow use of "/" operator
 
 cryptopp_src = [ os.path.join(CRYPTOPPDIR, x) for x in os.listdir(CRYPTOPPDIR) if x.endswith('.cpp') ]
 
