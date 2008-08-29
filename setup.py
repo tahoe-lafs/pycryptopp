@@ -122,22 +122,31 @@ data_fnames=['COPYING.GPL', 'COPYING.TGPPL.html', 'README.txt']
 doc_loc = "share/doc/python-pycryptopp"
 data_files = [(doc_loc, data_fnames)]
 
-setup(name='pycryptopp',
-      version=verstr,
-      description='Python wrappers for the Crypto++ library',
-      long_description='RSA-PSS-SHA256 signatures, ECDSA(1363)/EMSA1(SHA-256) signatures, SHA-256 hashes, and AES-CTR encryption',
-      author='Zooko O\'Whielacronx',
-      author_email='zooko@zooko.com',
-      url='http://allmydata.org/trac/pycryptopp',
-      license='GNU GPL',
-      packages=find_packages(),
-      include_package_data=True,
-      data_files=data_files,
-      setup_requires=setup_requires,
-      install_requires=install_requires,
-      dependency_links=dependency_links,
-      classifiers=trove_classifiers,
-      ext_modules=ext_modules,
-      # test_suite="pycryptopp.test", # somebody out there says "test_suite must be a list", which contradicts setuptools's "test_suite must be a string" :-(
-      zip_safe=False, # I prefer unzipped for easier access.
-      )
+def _setup(test_suite):
+    setup(name='pycryptopp',
+          version=verstr,
+          description='Python wrappers for the Crypto++ library',
+          long_description='RSA-PSS-SHA256 signatures, ECDSA(1363)/EMSA1(SHA-256) signatures, SHA-256 hashes, and AES-CTR encryption',
+          author='Zooko O\'Whielacronx',
+          author_email='zooko@zooko.com',
+          url='http://allmydata.org/trac/pycryptopp',
+          license='GNU GPL',
+          packages=find_packages(),
+          include_package_data=True,
+          data_files=data_files,
+          setup_requires=setup_requires,
+          install_requires=install_requires,
+          dependency_links=dependency_links,
+          classifiers=trove_classifiers,
+          ext_modules=ext_modules,
+          test_suite=test_suite,
+          zip_safe=False, # I prefer unzipped for easier access.
+          )
+
+import distutils.errors
+try:
+    _setup(test_suite="pycryptopp.test")
+except distutils.errors.DistutilsSetupError, le:
+    # to work around a bug in Elisa
+    if "test_suite must be a list" in str(le):
+        _setup(test_suite=["pycryptopp.test"])
