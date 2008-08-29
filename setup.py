@@ -146,7 +146,7 @@ def _setup(test_suite):
 import distutils.errors
 try:
     _setup(test_suite="pycryptopp.test")
-except distutils.errors.DistutilsSetupError, le:
+except BaseException, le:
     # to work around a bug in Elisa
     if "test_suite must be a list" in str(le):
         _setup(test_suite=["pycryptopp.test"])
