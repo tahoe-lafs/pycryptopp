@@ -138,6 +138,6 @@ setup(name='pycryptopp',
       dependency_links=dependency_links,
       classifiers=trove_classifiers,
       ext_modules=ext_modules,
-      test_suite="pycryptopp.test",
+      # test_suite="pycryptopp.test", # somebody out there says "test_suite must be a list", which contradicts setuptools's "test_suite must be a string" :-(
       zip_safe=False, # I prefer unzipped for easier access.
       )
