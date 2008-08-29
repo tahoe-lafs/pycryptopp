@@ -143,7 +143,6 @@ def _setup(test_suite):
           zip_safe=False, # I prefer unzipped for easier access.
           )
 
-import distutils.errors
 try:
     _setup(test_suite="pycryptopp.test")
 except BaseException, le:
