@@ -145,7 +145,7 @@ def _setup(test_suite):
 
 try:
     _setup(test_suite="pycryptopp.test")
-except BaseException, le:
+except Exception, le:
     # to work around a bug in Elisa
     if "test_suite must be a list" in str(le):
         _setup(test_suite=["pycryptopp.test"])
