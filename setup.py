@@ -20,7 +20,7 @@ from setuptools import Extension, find_packages, setup
 
 CRYPTOPPDIR=os.path.join('cryptopp', 'c5')
 
-extra_compile_args=[]
+extra_compile_args=["-w"]
 extra_link_args=[]
 define_macros=[]
 undef_macros=[]
