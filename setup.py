@@ -20,8 +20,18 @@ from setuptools import Extension, find_packages, setup
 
 CRYPTOPPDIR=os.path.join('cryptopp', 'c5')
 
+DEBUG=False
+if "--debug" in sys.argv:
+    DEBUG=True
+    sys.argv.remove("--debug")
+
 extra_compile_args=["-w"]
+if DEBUG:
+    extra_compile_args.append("-O0")
+    extra_compile_args.append("-g")
 extra_link_args=[]
+if DEBUG:
+    extra_link_args.append("-g")
 define_macros=[]
 undef_macros=[]
 libraries=[]
