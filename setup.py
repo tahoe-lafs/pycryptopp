@@ -72,7 +72,8 @@ trove_classifiers=[
     "Topic :: Software Development :: Libraries",
     ]
 
-VERSIONFILE = "pycryptopp/_version.py"
+PKG='pycryptopp'
+VERSIONFILE = PKG+"_version.py"
 verstr = "unknown"
 try:
     verstrline = open(VERSIONFILE, "rt").read()
@@ -127,19 +128,20 @@ if 'flakes' in sys.argv[1:]:
 setup_requires.append('setuptools_darcs >= 1.0.5')
 
 data_fnames=['COPYING.GPL', 'COPYING.TGPPL.html', 'README.txt']
+
 # In case we are building for a .deb with stdeb's sdist_dsc command, we put the
 # docs in "share/doc/python-pycryptopp".
-doc_loc = "share/doc/python-pycryptopp"
+doc_loc = "share/doc/python-" + PKG
 data_files = [(doc_loc, data_fnames)]
 
 def _setup(test_suite):
-    setup(name='pycryptopp',
+    setup(name=PKG,
           version=verstr,
           description='Python wrappers for the Crypto++ library',
           long_description='RSA-PSS-SHA256 signatures, ECDSA(1363)/EMSA1(SHA-256) signatures, SHA-256 hashes, and AES-CTR encryption',
           author='Zooko O\'Whielacronx',
           author_email='zooko@zooko.com',
-          url='http://allmydata.org/trac/pycryptopp',
+          url='http://allmydata.org/trac/' + PKG,
           license='GNU GPL',
           packages=find_packages(),
           include_package_data=True,
@@ -153,9 +155,12 @@ def _setup(test_suite):
           zip_safe=False, # I prefer unzipped for easier access.
           )
 
+test_suite_name=PKG+".test"
 try:
-    _setup(test_suite="pycryptopp.test")
-except Exception, le:
-    # to work around a bug in Elisa
+    _setup(test_suite=test_suite_name)
+except BaseException, le:
+    # to work around a bug in Elisa v0.3.5
     if "test_suite must be a list" in str(le):
-        _setup(test_suite=["pycryptopp.test"])
+        _setup(test_suite=[test_suite_name])
+    else:
+        raise
