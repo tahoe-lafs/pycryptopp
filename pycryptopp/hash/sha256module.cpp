@@ -9,9 +9,9 @@ typedef int Py_ssize_t;
 #endif
 
 /* from Crypto++ */
-#include "sha.h"
-#include "hex.h"
-#include "filters.h"
+#include <cryptopp/sha.h>
+#include <cryptopp/hex.h>
+#include <cryptopp/filters.h>
 
 static char sha256__doc__[] = "\
 sha256 hash function\

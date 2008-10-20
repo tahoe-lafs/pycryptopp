@@ -12,10 +12,10 @@ typedef int Py_ssize_t;
 #endif
 
 /* from Crypto++ */
-#include "filters.h"
-#include "osrng.h"
-#include "pssr.h"
-#include "rsa.h"
+#include <cryptopp/filters.h>
+#include <cryptopp/osrng.h>
+#include <cryptopp/pssr.h>
+#include <cryptopp/rsa.h>
 
 USING_NAMESPACE(CryptoPP)
 

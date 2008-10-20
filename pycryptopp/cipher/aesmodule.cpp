@@ -9,8 +9,8 @@ typedef int Py_ssize_t;
 #endif
 
 /* from Crypto++ */
-#include "modes.h"
-#include "aes.h"
+#include <cryptopp/modes.h>
+#include <cryptopp/aes.h>
 
 static char aes__doc__[] = "\
 aes counter mode cipher\

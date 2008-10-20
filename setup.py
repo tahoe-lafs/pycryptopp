@@ -18,38 +18,100 @@ else:
 
 from setuptools import Extension, find_packages, setup
 
-CRYPTOPPDIR=os.path.join('cryptopp', 'c5')
-
 DEBUG=False
 if "--debug" in sys.argv:
     DEBUG=True
     sys.argv.remove("--debug")
 
+DISABLE_EMBEDDED_CRYPTOPP=False
+if "--disable-embedded-cryptopp" in sys.argv:
+    DISABLE_EMBEDDED_CRYPTOPP=True
+    sys.argv.remove("--disable-embedded-cryptopp")
+
+# There are two ways that this setup.py script can build pycryptopp, either by using the
+# Crypto++ source code bundled in the pycryptopp source tree, or by linking to a copy of the
+# Crypto++ library that is already installed on the system.
+
 extra_compile_args=["-w"]
-if DEBUG:
-    extra_compile_args.append("-O0")
-    extra_compile_args.append("-g")
 extra_link_args=[]
-if DEBUG:
-    extra_link_args.append("-g")
 define_macros=[]
 undef_macros=[]
 libraries=[]
 ext_modules=[]
-include_dirs=[CRYPTOPPDIR]
+include_dirs=[]
 library_dirs=[]
+extra_srcs=[] # This is for Crypto++ .cpp files if they are needed.
 
-# Versions of GNU assembler older than 2.10 do not understand the kind of ASM that Crypto++ uses.
-sp = subprocess.Popen(['as', '-v'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-sp.stdin.close()
-sp.wait()
-if re.search("GNU assembler version (0|1|2.0)", sp.stderr.read()):
-    define_macros.append(('CRYPTOPP_DISABLE_ASM', 1))
+if DEBUG:
+    extra_compile_args.append("-O0")
+    extra_compile_args.append("-g")
+    extra_compile_args.append("-Wall")
+    extra_link_args.append("-g")
+    undef_macros.append('NDEBUG')
 
-if 'sunos' in platform.system().lower():
-    extra_compile_args.append('-Wa,--divide') # allow use of "/" operator
+if DISABLE_EMBEDDED_CRYPTOPP:
+    # Link with a Crypto++ library that is already installed on the system.
 
-cryptopp_src = [ os.path.join(CRYPTOPPDIR, x) for x in os.listdir(CRYPTOPPDIR) if x.endswith('.cpp') ]
+    # Check for a directory starting with "/usr/include" or "/usr/local/include" and
+    # ending with "cryptopp" or "crypto++".
+
+    # This is because the upstream Crypto++ GNUmakefile and the Microsoft Visual
+    # Studio projects produce include directory and library named "cryptopp", but
+    # Debian (and hence Ubuntu, and a lot of other derivative distributions) changed
+    # that name to "crypto++".  In Debian package libcrypto++ version 5.5.2-1,
+    # 2007-12-11, they added symlinks from "cryptopp", so once everyone has upgraded
+    # past that version then we can eliminate this detection code.
+
+    # So this will very likely do what you want, but if it doesn't (perhaps because
+    # you have more than one version of Crypto++ installed and it guessed wrong
+    # about which one you wanted to build against) and then you have to read this
+    # code and understand what it is doing.
+
+    for inclpath in ["/usr/include/crypto++", "/usr/local/include/crypto++", "/usr/local/include/cryptopp", "/usr/include/cryptopp"]:
+        if os.path.exists(inclpath):
+            if inclpath.endswith("crypto++"):
+                print "\"%s\" detected, so we will use the Debian name \"crypto++\" to identify the library instead of the upstream name \"cryptopp\"." % (inclpath,)
+                define_macros.append(("USE_NAME_CRYPTO_PLUS_PLUS", True,))
+                libraries.append("crypto++")
+            else:
+                libraries.append("cryptopp")
+            incldir = os.path.dirname(inclpath)
+            include_dirs.append(incldir)
+            libdir = os.path.join(os.path.dirname(incldir), "lib")
+            library_dirs.append(libdir)
+            break
+
+    if not libraries:
+        print "Did not locate libcrypto++ or libcryptopp in the usual places."
+        print "Adding /usr/local/{include,lib} and -lcryptopp in the hopes"
+        print "that they will work."
+
+        # Note that when using cygwin build tools (including gcc) to build
+        # Windows-native binaries, the os.path.exists() will not see the
+        # /usr/local/include/cryptopp directory but the subsequent call to g++
+        # will.
+        libraries.append("cryptopp")
+        include_dirs.append("/usr/local/include")
+        library_dirs.append("/usr/local/lib")
+
+else:
+    # Build the Crypto++ library which is included by source code in the pycryptopp tree and
+    # link against it.
+    CRYPTOPPDIR=os.path.join('cryptopp')
+    include_dirs.append(".")
+
+    # Versions of GNU assembler older than 2.10 do not understand the kind of ASM that Crypto++ uses.
+    sp = subprocess.Popen(['as', '-v'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+    sp.stdin.close()
+    sp.wait()
+    if re.search("GNU assembler version (0|1|2.0)", sp.stderr.read()):
+        define_macros.append(('CRYPTOPP_DISABLE_ASM', 1))
+
+    if 'sunos' in platform.system().lower():
+        extra_compile_args.append('-Wa,--divide') # allow use of "/" operator
+
+    cryptopp_src = [ os.path.join(CRYPTOPPDIR, x) for x in os.listdir(CRYPTOPPDIR) if x.endswith('.cpp') ]
+    extra_srcs.extend(cryptopp_src)
 
 trove_classifiers=[
     "Environment :: Console",
@@ -89,19 +151,19 @@ else:
         raise RuntimeError("if %s.py exists, it is required to be well-formed" % (VERSIONFILE,))
 
 ext_modules.append(
-    Extension('pycryptopp.publickey.rsa', cryptopp_src + ['pycryptopp/publickey/rsamodule.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
+    Extension('pycryptopp.publickey.rsa', extra_srcs + ['pycryptopp/publickey/rsamodule.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
     )
 
 ext_modules.append(
-    Extension('pycryptopp.publickey.ecdsa', cryptopp_src + ['pycryptopp/publickey/ecdsamodule.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
+    Extension('pycryptopp.publickey.ecdsa', extra_srcs + ['pycryptopp/publickey/ecdsamodule.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
     )
 
 ext_modules.append(
-    Extension('pycryptopp.hash.sha256', cryptopp_src + ['pycryptopp/hash/sha256module.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
+    Extension('pycryptopp.hash.sha256', extra_srcs + ['pycryptopp/hash/sha256module.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
     )
 
 ext_modules.append(
-    Extension('pycryptopp.cipher.aes', cryptopp_src + ['pycryptopp/cipher/aesmodule.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
+    Extension('pycryptopp.cipher.aes', extra_srcs + ['pycryptopp/cipher/aesmodule.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
     )
 
 miscdeps=os.path.join(os.getcwd(), 'misc', 'dependencies')

@@ -15,10 +15,10 @@ typedef int Py_ssize_t;
 #endif
 
 /* from Crypto++ */
-#include "filters.h"
-#include "osrng.h"
-#include "eccrypto.h"
-#include "oids.h"
+#include <cryptopp/filters.h>
+#include <cryptopp/osrng.h>
+#include <cryptopp/eccrypto.h>
+#include <cryptopp/oids.h>
 
 USING_NAMESPACE(CryptoPP)
 
