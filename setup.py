@@ -131,6 +131,9 @@ trove_classifiers=[
     "Programming Language :: C",
     "Programming Language :: C++",
     "Programming Language :: Python",
+    "Programming Language :: Python :: 2",
+    "Programming Language :: Python :: 2.4",
+    "Programming Language :: Python :: 2.5",
     "Topic :: Software Development :: Libraries",
     ]
 
