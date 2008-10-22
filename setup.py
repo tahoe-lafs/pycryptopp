@@ -101,11 +101,15 @@ else:
     include_dirs.append(".")
 
     # Versions of GNU assembler older than 2.10 do not understand the kind of ASM that Crypto++ uses.
-    sp = subprocess.Popen(['as', '-v'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-    sp.stdin.close()
-    sp.wait()
-    if re.search("GNU assembler version (0|1|2.0)", sp.stderr.read()):
-        define_macros.append(('CRYPTOPP_DISABLE_ASM', 1))
+    try:
+        sp = subprocess.Popen(['as', '-v'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        sp.stdin.close()
+        sp.wait()
+        if re.search("GNU assembler version (0|1|2.0)", sp.stderr.read()):
+            define_macros.append(('CRYPTOPP_DISABLE_ASM', 1))
+    except EnvironmentError:
+        # Okay, nevermind.  Maybe there isn't even an 'as' executable on this platform.
+        pass
 
     if 'sunos' in platform.system().lower():
         extra_compile_args.append('-Wa,--divide') # allow use of "/" operator
