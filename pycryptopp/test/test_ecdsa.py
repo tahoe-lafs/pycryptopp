@@ -4,7 +4,7 @@ import random
 
 import unittest
 
-from pycryptopp.publickey import ecdsa
+# from pycryptopp.publickey import ecdsa # ecdsa disabled for now
 
 from base64 import b32encode
 def ab(x): # debuggery
