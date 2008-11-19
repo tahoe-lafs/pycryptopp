@@ -22,7 +22,7 @@ def randstr(n):
 
 KEYSIZE=192 # The choices are 192 or 521 -- they are both secure, and 192 makes for faster unit tests.
 # class Signer(unittest.TestCase):
-class Signer(): # ecdsa disabled for now
+class Signer: # ecdsa disabled for now
     def test_generate_bad_size(self):
         try:
             signer = ecdsa.generate(KEYSIZE-1)
@@ -50,7 +50,7 @@ class Signer(): # ecdsa disabled for now
         # TODO: test against someone's official test vectors.
 
 # class SignAndVerify(unittest.TestCase):
-class SignAndVerify(): # ecdsa disabled for now
+class SignAndVerify: # ecdsa disabled for now
     def _help_test_sign_and_check(self, signer, verifier, msg):
         sig = signer.sign(msg)
         self.failUnlessEqual(len(sig), 2*((KEYSIZE+7)/8))
