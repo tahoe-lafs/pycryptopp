@@ -215,6 +215,7 @@ def _setup(test_suite):
           license='GNU GPL',
           packages=find_packages(),
           include_package_data=True,
+          exclude_package_data = { '': [ '*.cpp' ] },
           data_files=data_files,
           setup_requires=setup_requires,
           install_requires=install_requires,
