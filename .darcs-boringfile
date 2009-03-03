@@ -13,3 +13,5 @@
 ^darcsver.*.egg$
 ^pyutil.*.egg$
 
+^build($|/)
+^ez_setup\.pyc$
