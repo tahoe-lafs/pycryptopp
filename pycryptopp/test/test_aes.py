@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, random, re
+import random, re
 
 import unittest
 
