@@ -3,6 +3,7 @@
 # pycryptopp -- Python wrappers for Crypto++
 #
 # Copyright (C) 2008 Allmydata, Inc.
+# Copyright (C) 2009 Zooko Wilcox-O'Hearn
 # Author: Zooko Wilcox-O'Hearn
 # See README.txt for licensing information.
 
@@ -161,10 +162,9 @@ ext_modules.append(
     Extension('pycryptopp.publickey.rsa', extra_srcs + ['pycryptopp/publickey/rsamodule.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
     )
 
-# The current implementation of ecdsa seems to be buggy, and there is a completely different API for ecdsa in the works, so I'm commenting this out for now.
-# ext_modules.append(
-#     Extension('pycryptopp.publickey.ecdsa', extra_srcs + ['pycryptopp/publickey/ecdsamodule.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
-#     )
+ext_modules.append(
+    Extension('pycryptopp.publickey.ecdsa', extra_srcs + ['pycryptopp/publickey/ecdsamodule.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
+    )
 
 ext_modules.append(
     Extension('pycryptopp.hash.sha256', extra_srcs + ['pycryptopp/hash/sha256module.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)

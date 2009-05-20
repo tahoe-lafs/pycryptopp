@@ -1,9 +1,27 @@
 /**
+* Things to do:
+* Make it work and pass tests.
+* Make new KDF (standard, Crypto++-compatible).
+*  in C++
+*  in Python
+* use Crypto++ Randomize()'s
+* provide RNG class which is P1363-SHA-256
+
+* Profit!
+* Migrate pair-programming to Bespin.
+* Put a Tahoe backend under Bespin.
+*/
+
+/**
  * ecdsamodule.cpp -- Python wrappers around Crypto++'s
- * ECDSA(1363)/EMSA1(SHA-256), more precisely: <a
- * href="http://www.weidai.com/scan-mirror/sig.html#ECDSA">ECDSA</a> with GF(P)
- * ("ECP") as the elliptic curve group parameters and SHA-256 as the hash
- * function
+ * ECDSA(1363)/EMSA1(SHA-256) -- <a
+ * href="http://www.weidai.com/scan-mirror/sig.html#ECDSA">ECDSA</a>.
+ *
+ * The keys (192-bit) use the curve ASN1::secp192r1() and SHA-256 as the
+ * hash function.  The Key Derivation Protocol is P1363_KDF2<SHA256>
+ * http://www.users.zetnet.co.uk/hopwood/crypto/scan/prf.html#KDF2
+ * to generate private (signing) keys from unguessable seeds -- see
+ * source code for details and doc string for usage.
  */
 
 #include <Python.h>
@@ -20,23 +38,39 @@ typedef int Py_ssize_t;
 #include <crypto++/osrng.h>
 #include <crypto++/eccrypto.h>
 #include <crypto++/oids.h>
+#include <crypto++/tiger.h>
+#include <crypto++/sha.h>
+#include <crypto++/pubkey.h>
+// only needed for debugging -- the _dump() function
+#include <iostream>
+#include <crypto++/ecp.h>
+#include <crypto++/hex.h>
 #else
 #include <cryptopp/filters.h>
 #include <cryptopp/osrng.h>
 #include <cryptopp/eccrypto.h>
 #include <cryptopp/oids.h>
+#include <cryptopp/tiger.h>
+#include <cryptopp/sha.h>
+#include <cryptopp/pubkey.h>
+// only needed for debugging -- the _dump() function
+#include <iostream>
+#include <cryptopp/ecp.h>
+#include <cryptopp/hex.h>
 #endif
+
+static const int KEY_SIZE_BITS=192;
 
 USING_NAMESPACE(CryptoPP)
 
 PyDoc_STRVAR(ecdsa__doc__,
-"ecdsa -- ECDSA(1363)/EMSA1(SHA-256) signatures\n\
+"ecdsa -- ECDSA(1363)/EMSA1(Tiger) signatures\n\
 \n\
-To create a new ECDSA signing key from the operating system's random number generator, call generate().\n\
-To deserialize an ECDSA signing key from a string, call create_signing_key_from_string().\n\
+To create a new ECDSA signing key (deterministically from a 12-byte seed), construct an instance of the class, passing the seed as argument, i.e. SigningKey(seed).  If you call serialize() on that instance, you'll get that seed back.\n\
 \n\
-To get an ECDSA verifying key from an ECDSA signing key, call get_verifying_key() on the signing key.\n\
-To deserialize an ECDSA verifying key from a string, call create_verifying_key_from_string().");
+To get a verifying key from a signing key, call get_verifying_key() on the signing key instance.\n\
+\n\
+To deserialize an ECDSA verifying key from a string, call VerifyingKey(serialized_verifying_key).");
 
 static PyObject *ecdsa_error;
 
@@ -44,11 +78,48 @@ typedef struct {
     PyObject_HEAD
 
     /* internal */
-    ECDSA<ECP, SHA256>::Verifier *k;
+    ECDSA<ECP, Tiger>::Verifier *k;
 } VerifyingKey;
 
 PyDoc_STRVAR(VerifyingKey__doc__,
 "an ECDSA verifying key");
+
+static int
+VerifyingKey___init__(PyObject* self, PyObject* args, PyObject* kwdict) {
+    static const char *kwlist[] = { "serializedverifyingkey", NULL };
+    const char *serializedverifyingkey;
+    Py_ssize_t serializedverifyingkeysize = 0;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "t#:VerifyingKey__init__", const_cast<char**>(kwlist), &serializedverifyingkey, &serializedverifyingkeysize))
+        return NULL;
+    assert (serializedverifyingkeysize >= 0);
+
+    if (serializedverifyingkeysize != 25) {
+        PyErr_Format(ecdsa_error, "Precondition violation: size in bits is required to be %d (for %d-bit key), but it was %d", 25, KEY_SIZE_BITS, serializedverifyingkeysize);
+        return -1;
+    }
+
+    VerifyingKey *mself = reinterpret_cast<VerifyingKey*>(self);
+
+    StringSource ss(reinterpret_cast<const byte*>(serializedverifyingkey), serializedverifyingkeysize, true);
+
+    ECP::Element element;
+    DL_GroupParameters_EC<ECP> params(ASN1::secp192r1());
+    params.SetPointCompression(true);
+    try {
+        element = params.DecodeElement(reinterpret_cast<const byte*>(serializedverifyingkey), true);
+        mself->k = new ECDSA<ECP, Tiger>::Verifier(params, element);
+        if (!mself->k) {
+            PyErr_NoMemory();
+            return -1;
+        }
+    } catch (InvalidDataFormat le) {
+        PyErr_Format(ecdsa_error, "Serialized verifying key was corrupted.  Crypto++ gave this exception: %s", le.what());
+        return -1;
+    }
+
+    return 0;
+}
 
 static void
 VerifyingKey_dealloc(VerifyingKey* self) {
@@ -69,13 +140,6 @@ VerifyingKey_verify(VerifyingKey *self, PyObject *args, PyObject *kwdict) {
     assert (msgsize >= 0);
     assert (signaturesize >= 0);
 
-    Py_ssize_t sigsize = self->k->SignatureLength();
-    if (sigsize != signaturesize)
-        return PyErr_Format(ecdsa_error, "Precondition violation: signatures are required to be of size %zu, but it was %zu", sigsize, signaturesize);
-    assert (sigsize >= 0);
-
-    assert (signaturesize == sigsize);
-
     if (self->k->VerifyMessage(reinterpret_cast<const byte*>(msg), msgsize, reinterpret_cast<const byte*>(signature), signaturesize))
         Py_RETURN_TRUE;
     else
@@ -87,14 +151,19 @@ PyDoc_STRVAR(VerifyingKey_verify__doc__,
 
 static PyObject *
 VerifyingKey_serialize(VerifyingKey *self, PyObject *dummy) {
-    std::string outstr;
-    StringSink ss(outstr);
-    self->k->DEREncode(ss);
-    PyStringObject* result = reinterpret_cast<PyStringObject*>(PyString_FromStringAndSize(outstr.c_str(), outstr.size()));
+    const DL_PublicKey_EC<ECP>* pubkey;
+    pubkey = dynamic_cast<const DL_PublicKey_EC<ECP>*>(&(self->k->GetPublicKey()));
+    const DL_GroupParameters_EC<ECP>& params = pubkey->GetGroupParameters();
+
+    Py_ssize_t len = params.GetEncodedElementSize(true);
+//XXX   params.SetPointCompression(true);
+    PyObject* result = PyString_FromStringAndSize(NULL, len);
     if (!result)
         return NULL;
 
-    return reinterpret_cast<PyObject*>(result);
+    params.EncodeElement(true, pubkey->GetPublicElement(), reinterpret_cast<byte*>(PyString_AS_STRING(result)));
+
+    return result;
 }
 
 PyDoc_STRVAR(VerifyingKey_serialize__doc__,
@@ -113,7 +182,7 @@ static PyTypeObject VerifyingKey_type = {
     "ecdsa.VerifyingKey", /*tp_name*/
     sizeof(VerifyingKey),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
-    reinterpret_cast<destructor>(VerifyingKey_dealloc), /*tp_dealloc*/
+    (destructor)VerifyingKey_dealloc,                         /*tp_dealloc*/
     0,                         /*tp_print*/
     0,                         /*tp_getattr*/
     0,                         /*tp_setattr*/
@@ -130,24 +199,22 @@ static PyTypeObject VerifyingKey_type = {
     0,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
     VerifyingKey__doc__,           /* tp_doc */
-    0,		               /* tp_traverse */
-    0,		               /* tp_clear */
-    0,		               /* tp_richcompare */
-    0,		               /* tp_weaklistoffset */
-    0,		               /* tp_iter */
-    0,		               /* tp_iternext */
+    0,                               /* tp_traverse */
+    0,                               /* tp_clear */
+    0,                               /* tp_richcompare */
+    0,                               /* tp_weaklistoffset */
+    0,                               /* tp_iter */
+    0,                               /* tp_iternext */
     VerifyingKey_methods,             /* tp_methods */
+    0,                         /* tp_members */
+    0,                         /* tp_getset */
+    0,                         /* tp_base */
+    0,                         /* tp_dict */
+    0,                         /* tp_descr_get */
+    0,                         /* tp_descr_set */
+    0,                         /* tp_dictoffset */
+    VerifyingKey___init__,       /* tp_init */
 };
-
-/** This function is only for internal use by ecdsamodule.cpp. */
-static VerifyingKey*
-VerifyingKey_construct() {
-    VerifyingKey *self = reinterpret_cast<VerifyingKey*>(VerifyingKey_type.tp_alloc(&VerifyingKey_type, 0));
-    if (!self)
-        return NULL;
-    self->k = NULL;
-    return self;
-}
 
 PyDoc_STRVAR(SigningKey__doc__,
 "an ECDSA signing key");
@@ -156,7 +223,7 @@ typedef struct {
     PyObject_HEAD
 
     /* internal */
-    ECDSA<ECP, SHA256>::Signer *k;
+    ECDSA<ECP, Tiger>::Signer *k;
 } SigningKey;
 
 static void
@@ -166,6 +233,166 @@ SigningKey_dealloc(SigningKey* self) {
     self->ob_type->tp_free((PyObject*)self);
 }
 
+static const char* TAG_AND_SALT = "102:pycryptopp v0.5.3 key derivation algorithm using Tiger hash to generate ECDSA 192-bit secret exponents," \
+    "16:H1yGNvUONoc0FD1d,";
+static const size_t TAG_AND_SALT_len = 127;
+
+/** copied from Crypto++'s integer.cpp */
+/** The following is in Crypto++'s integer.cpp and we use them:
+* void Integer::Randomize(RandomNumberGenerator &rng, size_t nbits)
+* {
+* 	const size_t nbytes = nbits/8 + 1;
+* 	SecByteBlock buf(nbytes);
+* 	rng.GenerateBlock(buf, nbytes);
+* 	if (nbytes)
+* 		buf[0] = (byte)Crop(buf[0], nbits % 8);
+* 	Decode(buf, nbytes, UNSIGNED);
+* }
+* void Integer::Randomize(RandomNumberGenerator &rng, const Integer &min, const Integer &max)
+* {
+* 	if (min > max)
+* 		throw InvalidArgument("Integer: Min must be no greater than Max");
+*
+* 	Integer range = max - min;
+* 	const unsigned int nbits = range.BitCount();
+*
+* 	do
+* 	{
+* 		Randomize(rng, nbits);
+* 	}
+* 	while (*this > range);
+*
+* 	*this += min;
+* }
+*
+*/
+
+static int
+SigningKey___init__(PyObject* self, PyObject* args, PyObject* kwdict) {
+    static const char *kwlist[] = { "seed", NULL };
+    const char* seed;
+    int seedlen;
+    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "t#:SigningKey___init__", const_cast<char**>(kwlist), &seed, &seedlen)) {
+        return -1;
+    }
+
+    if (seedlen != 12) {
+        PyErr_Format(ecdsa_error, "Precondition violation: seed is required to be of length 12, but it was %d", seedlen);
+        return -1;
+    }
+
+    OID curve;
+    Integer grouporderm1;
+    byte privexpbytes[24] = {0};
+    Integer privexponentm1;
+    privexponentm1.Decode(privexpbytes, sizeof(privexpbytes)); assert (priveexponentm1 == 0); // just checking..
+
+    curve = ASN1::secp192r1();
+    grouporderm1 = DL_GroupParameters_EC<ECP>(curve).GetGroupOrder() - 1;
+    Tiger t;
+
+    t.Update(reinterpret_cast<const byte*>(TAG_AND_SALT), TAG_AND_SALT_len);
+    t.Update(reinterpret_cast<const byte*>(seed), seedlen);
+    t.TruncatedFinal(privexpbytes, Tiger::DIGESTSIZE);
+    privexponentm1.Decode(privexpbytes, sizeof(privexpbytes));
+
+    while (privexponentm1 >= grouporderm1) {
+        Tiger t2;
+        t2.Update(reinterpret_cast<const byte*>(TAG_AND_SALT), TAG_AND_SALT_len);
+        std::cerr << "WHEE " << sizeof(privexpbytes) << "\n";std::cerr.flush();
+        t2.Update(privexpbytes, sizeof(privexpbytes));
+        t2.TruncatedFinal(privexpbytes, Tiger::DIGESTSIZE);
+        privexponentm1.Decode(privexpbytes, sizeof(privexpbytes));
+    }
+
+    SigningKey* mself = reinterpret_cast<SigningKey*>(self);
+    mself->k = new ECDSA<ECP, Tiger>::Signer(curve, privexponentm1+1);
+    if (!mself->k) {
+        PyErr_NoMemory();
+        return -1;
+    }
+
+    return 0;
+}
+
+PyDoc_STRVAR(SigningKey__init____doc__,
+"Create a signing key (192 bits) deterministically from the given seed.\n\
+\n\
+This implies that if someone can guess the seed then they can learn the signing key.  A good way to get an unguessable seed is os.urandom(12).\n\
+\n\
+@param seed seed\n\
+\n\
+@precondition len(seed) >= ceil(sizeinbits/16.0)");
+
+static PyObject *
+SigningKey__dump(SigningKey *self, PyObject *dummy) {
+    const DL_GroupParameters_EC<ECP>& gp = self->k->GetKey().GetGroupParameters();
+    std::cout << "whee " << gp.GetEncodedElementSize(true) << "\a";
+    std::cout << "booo " << gp.GetEncodedElementSize(false) << "\n";
+
+    ECPPoint p = gp.GetSubgroupGenerator();
+    std::cout << "generator " << p.x << ", " << p.y << "\n";
+
+    std::cout << "GroupOrder: ";
+    std::cout << gp.GetGroupOrder();
+    std::cout << "\n";
+
+    std::string s;
+    StringSink* ss = new StringSink(s);
+    HexEncoder he(ss);
+    std::cout << "AlgorithmID: ";
+    gp.GetAlgorithmID().DEREncode(he);
+    std::cout << s << "\n";
+
+    const ECP& ec = gp.GetCurve();
+    Integer fieldsize = ec.FieldSize();
+    std::cout << "field size " << fieldsize.BitCount() << " " << fieldsize.ByteCount() << " " << ec.FieldSize() << "\n";
+    std::cout << "Curve: ";
+    std::cout << "curve field max element bit length: " << ec.GetField().MaxElementBitLength() << "\n";
+    std::cout << "curve field modulus: " << ec.GetField().GetModulus() << "\n";
+    std::cout << "curve A: " << ec.GetA() << ", curve B: " << ec.GetB();
+
+    const ECP::Field& f = ec.GetField();
+    std::cout << "curve field modulus: " << f.GetModulus() << "\n";
+    std::cout << "curve field identity: " << f.Identity() << "\n";
+
+    std::string cfs;
+    StringSink* cfss = new StringSink(cfs);
+    HexEncoder cfhe(cfss);
+    f.DEREncode(cfhe);
+    std::cout << "curve field derencoding: " << cfs << "\n";
+
+    const CryptoMaterial& cm = self->k->GetMaterial();
+    Integer i;
+    cm.GetValue("SubgroupOrder", i);
+    std::cout << "\n";
+    std::cout << "SubgroupOrder: ";
+    std::cout << i;
+    std::cout << "\n";
+    ECP::Element e;
+    cm.GetValue("SubgroupGenerator", e);
+    std::cout << "SubgroupGenerator: ";
+    std::cout << e.x << ", " << e.y;
+    std::cout << "\n";
+
+    std::cout << "private key: ";
+
+    const PrivateKey& privkey = self->k->GetPrivateKey();
+
+    std::cout << privkey.GetValueNames() << "\n";
+
+    Integer privi;
+    privkey.GetValue("PrivateExponent", privi);
+    std::cout << privi << "\n";
+    std::cout << "numbits: " << privi.BitCount() << "\n";
+    std::cout << "numbytes: " << privi.ByteCount() << "\n";
+
+    Py_RETURN_NONE;
+}
+
+PyDoc_STRVAR(SigningKey__dump__doc__,
+"Print to stdout some descriptions of the math pieces.");
+
 static PyObject *
 SigningKey_sign(SigningKey *self, PyObject *msgobj) {
     const char *msg;
@@ -173,22 +400,32 @@ SigningKey_sign(SigningKey *self, PyObject *msgobj) {
     PyString_AsStringAndSize(msgobj, const_cast<char**>(&msg), reinterpret_cast<Py_ssize_t*>(&msgsize));
     assert (msgsize >= 0);
 
-    Py_ssize_t sigsize = self->k->SignatureLength();
+    Py_ssize_t sigsize;
+    sigsize = self->k->SignatureLength();
+
     PyStringObject* result = reinterpret_cast<PyStringObject*>(PyString_FromStringAndSize(NULL, sigsize));
     if (!result)
         return NULL;
     assert (sigsize >= 0);
 
-    AutoSeededRandomPool randpool(false);
-    Py_ssize_t siglengthwritten = self->k->SignMessage(
-        randpool,
-        reinterpret_cast<const byte*>(msg),
-        msgsize,
-        reinterpret_cast<byte*>(PyString_AS_STRING(result)));
+    AutoSeededRandomPool randpool(false); //XXX
+
+    Py_ssize_t siglengthwritten;
+    try {
+        siglengthwritten = self->k->SignMessage(
+            randpool,
+            reinterpret_cast<const byte*>(msg),
+            msgsize,
+            reinterpret_cast<byte*>(PyString_AS_STRING(result)));
+    } catch (InvalidDataFormat le) {
+        Py_DECREF(result);
+        return PyErr_Format(ecdsa_error, "Signing key was corrupted.  Crypto++ gave this exception: %s", le.what());
+    }
+
     if (siglengthwritten < sigsize)
         fprintf(stderr, "%s: %d: %s: %s", __FILE__, __LINE__, "SigningKey_sign", "INTERNAL ERROR: signature was shorter than expected.");
     else if (siglengthwritten > sigsize) {
-        fprintf(stderr, "%s: %d: %s: %s", __FILE__, __LINE__, "SigningKey_sign", "INTERNAL ERROR: signature was longer than expected, so invalid memory was overwritten.");
+        fprintf(stderr, "%s: %d: %s: %s", __FILE__, __LINE__, "SigningKey_sign", "INTERNAL ERROR: signature was longer than expected, so memory was invalidly overwritten.");
         abort();
     }
     assert (siglengthwritten >= 0);
@@ -197,43 +434,29 @@ SigningKey_sign(SigningKey *self, PyObject *msgobj) {
 }
 
 PyDoc_STRVAR(SigningKey_sign__doc__,
-"Return a signature on the argument.");
+     "Return a signature on the argument."); //XXX  If randseed is not None then it is required to be an  "); // XXX randseed!
 
 static PyObject *
 SigningKey_get_verifying_key(SigningKey *self, PyObject *dummy) {
-    VerifyingKey *verifier = reinterpret_cast<VerifyingKey*>(VerifyingKey_construct());
+    VerifyingKey *verifier = PyObject_New(VerifyingKey, &VerifyingKey_type);
+
     if (!verifier)
         return NULL;
 
-    verifier->k = new ECDSA<ECP, SHA256>::Verifier(*(self->k));
+    verifier->k = new ECDSA<ECP, Tiger>::Verifier(*(self->k));
     if (!verifier->k)
         return PyErr_NoMemory();
+
     return reinterpret_cast<PyObject*>(verifier);
 }
 
 PyDoc_STRVAR(SigningKey_get_verifying_key__doc__,
 "Return the corresponding verifying key.");
 
-static PyObject *
-SigningKey_serialize(SigningKey *self, PyObject *dummy) {
-    Py_ssize_t len = self->k->GetKey().GetGroupParameters().GetSubgroupOrder().ByteCount();
-    PyObject* result = PyString_FromStringAndSize(NULL, len);
-
-    const DL_PrivateKey_EC<ECP>& privkey = dynamic_cast<const DL_PrivateKey_EC<ECP>&>(self->k->GetPrivateKey());
-
-    privkey.GetPrivateExponent().Encode(reinterpret_cast<byte*>(PyString_AS_STRING(result)), len);
-
-    return result;
-}
-
-PyDoc_STRVAR(SigningKey_serialize__doc__,
-"Return a string containing the key material.  The string can be passed to \n\
-create_signing_key_from_string() to instantiate a new copy of this key.");
-
 static PyMethodDef SigningKey_methods[] = {
     {"sign", reinterpret_cast<PyCFunction>(SigningKey_sign), METH_O, SigningKey_sign__doc__},
+    {"_dump", reinterpret_cast<PyCFunction>(SigningKey__dump), METH_NOARGS, SigningKey__dump__doc__},
     {"get_verifying_key", reinterpret_cast<PyCFunction>(SigningKey_get_verifying_key), METH_NOARGS, SigningKey_get_verifying_key__doc__},
-    {"serialize", reinterpret_cast<PyCFunction>(SigningKey_serialize), METH_NOARGS, SigningKey_serialize__doc__},
     {NULL},
 };
 
@@ -243,7 +466,7 @@ static PyTypeObject SigningKey_type = {
     "ecdsa.SigningKey", /*tp_name*/
     sizeof(SigningKey),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
-    (destructor)SigningKey_dealloc, /*tp_dealloc*/
+    (destructor)SigningKey_dealloc,                         /*tp_dealloc*/
     0,                         /*tp_print*/
     0,                         /*tp_getattr*/
     0,                         /*tp_setattr*/
@@ -258,143 +481,31 @@ static PyTypeObject SigningKey_type = {
     0,                         /*tp_getattro*/
     0,                         /*tp_setattro*/
     0,                         /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /*tp_flags*/
-    SigningKey__doc__,           /* tp_doc */
-    0,		               /* tp_traverse */
-    0,		               /* tp_clear */
-    0,		               /* tp_richcompare */
-    0,		               /* tp_weaklistoffset */
-    0,		               /* tp_iter */
-    0,		               /* tp_iternext */
-    SigningKey_methods             /* tp_methods */
+    Py_TPFLAGS_DEFAULT,        /*tp_flags*/
+    SigningKey__doc__,         /* tp_doc */
+    0,                               /* tp_traverse */
+    0,                               /* tp_clear */
+    0,                               /* tp_richcompare */
+    0,                               /* tp_weaklistoffset */
+    0,                               /* tp_iter */
+    0,                               /* tp_iternext */
+    SigningKey_methods,             /* tp_methods */
+    0,                         /* tp_members */
+    0,                         /* tp_getset */
+    0,                         /* tp_base */
+    0,                         /* tp_dict */
+    0,                         /* tp_descr_get */
+    0,                         /* tp_descr_set */
+    0,                         /* tp_dictoffset */
+    SigningKey___init__,       /* tp_init */
 };
 
-/** This function is only for internal use by ecdsamodule.cpp. */
-static SigningKey*
-SigningKey_construct() {
-    SigningKey *self = reinterpret_cast<SigningKey*>(SigningKey_type.tp_alloc(&SigningKey_type, 0));
-    if (!self)
-        return NULL;
-    self->k = NULL;
-    return self;
-}
-
-/* The smaller ECDSA key size that pycryptopp supports -- you should do your 
-   own research, and I recommend http://keylength.com , but basically this is 
-   probably secure for most purposes for at least the next few years, and 
-   possibly for longer. */
-static const int SMALL_KEY_SIZE_BITS=192;
-
-/* The larger ECDSA key size that pycryptopp supports -- you should do your 
-   own research, and I recommend http://keylength.com , but basically this is 
-   probably secure for many years, unless there is a surprising breakthrough in 
-   the theory of elliptic curve cryptography. */
-static const int LARGE_KEY_SIZE_BITS=521;
-
-static PyObject *
-generate(PyObject *dummy, PyObject *args, PyObject *kwdict) {
-    static const char *kwlist[] = {
-        "sizeinbits",
-        NULL
-    };
-    int sizeinbits;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "i:generate", const_cast<char**>(kwlist), &sizeinbits))
-        return NULL;
-
-    if (sizeinbits != SMALL_KEY_SIZE_BITS && sizeinbits != LARGE_KEY_SIZE_BITS)
-        return PyErr_Format(ecdsa_error, "Precondition violation: size in bits is required to be either %d or %d, but it was %d", SMALL_KEY_SIZE_BITS, LARGE_KEY_SIZE_BITS, sizeinbits);
-
-    AutoSeededRandomPool osrng(false);
-    SigningKey *signer = SigningKey_construct();
-    if (!signer)
-        return NULL;
-
-    OID curve;
-    if (sizeinbits == 192)
-        curve = ASN1::secp192r1();
-    else
-        curve = ASN1::secp521r1();
-
-    signer->k = new ECDSA<ECP, SHA256>::Signer(osrng, curve);
-    if (!signer->k)
-        return PyErr_NoMemory();
-    return reinterpret_cast<PyObject*>(signer);
-}
-
-PyDoc_STRVAR(generate__doc__,
-"Create a signing key using the operating system's random number generator.\n\
-\n\
-@param sizeinbits size of the key in bits\n\
-\n\
-@precondition sizeinbits in (192, 521)");
-
-static PyObject *
-create_verifying_key_from_string(PyObject *dummy, PyObject *args, PyObject *kwdict) {
-    static const char *kwlist[] = {
-        "serializedverifyingkey",
-        NULL
-    };
-    const char *serializedverifyingkey;
-    Py_ssize_t serializedverifyingkeysize = 0;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "t#:create_verifying_key_from_string", const_cast<char**>(kwlist), &serializedverifyingkey, &serializedverifyingkeysize))
-        return NULL;
-    assert (serializedverifyingkeysize >= 0);
-
-    VerifyingKey *verifier = reinterpret_cast<VerifyingKey*>(VerifyingKey_construct());
-    if (!verifier)
-        return NULL;
-    StringSource ss(reinterpret_cast<const byte*>(serializedverifyingkey), serializedverifyingkeysize, true);
-
-    verifier->k = new ECDSA<ECP, SHA256>::Verifier(ss);
-    if (!verifier->k)
-        return PyErr_NoMemory();
-    return reinterpret_cast<PyObject*>(verifier);
-}
-
 PyDoc_STRVAR(create_verifying_key_from_string__doc__,
-"Create a verifying key from its serialized state.");
-
-static PyObject *
-create_signing_key_from_string(PyObject *dummy, PyObject *args, PyObject *kwdict) {
-    static const char *kwlist[] = {
-        "serializedsigningkey",
-        NULL
-    };
-    const char *serializedsigningkey;
-    Py_ssize_t serializedsigningkeysize = 0;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwdict, "t#:create_signing_key_from_string", const_cast<char**>(kwlist), &serializedsigningkey, &serializedsigningkeysize))
-        return NULL;
-    if (serializedsigningkeysize != 24 && serializedsigningkeysize != 66)
-        return PyErr_Format(ecdsa_error, "Precondition violation: size in bytes of the serialized signing key is required to be either %d (for %d-bit keys) or %d (for %d-bit keys), but it was %d", 24, SMALL_KEY_SIZE_BITS, 66, LARGE_KEY_SIZE_BITS, serializedsigningkeysize);
-
-
-    SigningKey *verifier = SigningKey_construct();
-    if (!verifier)
-        return NULL;
-
-    OID curve;
-    if (serializedsigningkeysize == 24)
-        curve = ASN1::secp192r1();
-    else
-        curve = ASN1::secp521r1();
-    Integer privexponent(reinterpret_cast<const byte*>(serializedsigningkey), serializedsigningkeysize);
-
-    verifier->k = new ECDSA<ECP, SHA256>::Signer(curve, privexponent);
-    if (!verifier->k)
-        return PyErr_NoMemory();
-    return reinterpret_cast<PyObject*>(verifier);
-}
-
-PyDoc_STRVAR(create_signing_key_from_string__doc__,
-"Create a signing key from its serialized state.");
+"Create a verifying key from its serialized state.\n\
+\n\
+@precondition Length of serialized key is required to be 24 (for 192-bit key)."); //XXX actually 25 length
 
 static PyMethodDef ecdsa_functions[] = {
-    {"generate", reinterpret_cast<PyCFunction>(generate), METH_KEYWORDS, generate__doc__},
-    {"create_verifying_key_from_string", reinterpret_cast<PyCFunction>(create_verifying_key_from_string), METH_KEYWORDS, create_verifying_key_from_string__doc__},
-    {"create_signing_key_from_string", reinterpret_cast<PyCFunction>(create_signing_key_from_string), METH_KEYWORDS, create_signing_key_from_string__doc__},
     {NULL, NULL, 0, NULL}  /* sentinel */
 };
 
@@ -406,8 +517,10 @@ initecdsa(void) {
     PyObject *module;
     PyObject *module_dict;
 
+    VerifyingKey_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(&VerifyingKey_type) < 0)
         return;
+    SigningKey_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(&SigningKey_type) < 0)
         return;
 
