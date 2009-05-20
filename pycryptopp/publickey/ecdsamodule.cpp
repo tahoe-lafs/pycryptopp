@@ -1,6 +1,7 @@
 /**
 * Things to do:
 * Make it work and pass tests.
+* compressed pub keys -- check out Wei Dai's example code on mailinglist as linked to from pycryptopp trac by Brian
 * Make new KDF (standard, Crypto++-compatible).
 *  in C++
 *  in Python
@@ -156,7 +157,6 @@ VerifyingKey_serialize(VerifyingKey *self, PyObject *dummy) {
     const DL_GroupParameters_EC<ECP>& params = pubkey->GetGroupParameters();
 
     Py_ssize_t len = params.GetEncodedElementSize(true);
-//XXX   params.SetPointCompression(true);
     PyObject* result = PyString_FromStringAndSize(NULL, len);
     if (!result)
         return NULL;
@@ -287,8 +287,9 @@ SigningKey___init__(PyObject* self, PyObject* args, PyObject* kwdict) {
     Integer privexponentm1;
     privexponentm1.Decode(privexpbytes, sizeof(privexpbytes)); assert (priveexponentm1 == 0); // just checking..
 
-    curve = ASN1::secp192r1();
-    grouporderm1 = DL_GroupParameters_EC<ECP>(curve).GetGroupOrder() - 1;
+    DL_GroupParameters_EC<ECP> params(ASN1::secp192r1());
+    params.SetPointCompression(true);
+    grouporderm1 = params.GetGroupOrder() - 1;
     Tiger t;
 
     t.Update(reinterpret_cast<const byte*>(TAG_AND_SALT), TAG_AND_SALT_len);
@@ -306,7 +307,9 @@ SigningKey___init__(PyObject* self, PyObject* args, PyObject* kwdict) {
     }
 
     SigningKey* mself = reinterpret_cast<SigningKey*>(self);
-    mself->k = new ECDSA<ECP, Tiger>::Signer(curve, privexponentm1+1);
+
+    mself->k = new ECDSA<ECP, Tiger>::Signer(params, privexponentm1+1);
+
     if (!mself->k) {
         PyErr_NoMemory();
         return -1;
@@ -440,10 +443,20 @@ static PyObject *
 SigningKey_get_verifying_key(SigningKey *self, PyObject *dummy) {
     VerifyingKey *verifier = PyObject_New(VerifyingKey, &VerifyingKey_type);
 
+    const DL_PrivateKey_EC<ECP>* privkey;
+    privkey = dynamic_cast<const DL_PrivateKey_EC<ECP>*>(&(self->k->GetPrivateKey()));
+    const DL_GroupParameters_EC<ECP>& params = privkey->GetGroupParameters();
+
     if (!verifier)
         return NULL;
 
-    verifier->k = new ECDSA<ECP, Tiger>::Verifier(*(self->k));
+    // Ugh..  Making a temp Verifier just to get the public element to construct the real verifier along with params.
+    ECDSA<ECP, Tiger>::Verifier* temp = new ECDSA<ECP, Tiger>::Verifier(*(self->k));
+    const DL_PublicKey_EC<ECP>* temppubkey;
+    temppubkey = dynamic_cast<const DL_PublicKey_EC<ECP>*>(&(temp->GetPublicKey()));
+    ECP::Element pubel = temppubkey->GetPublicElement();
+
+    verifier->k = new ECDSA<ECP, Tiger>::Verifier(params, pubel);
     if (!verifier->k)
         return PyErr_NoMemory();
 
