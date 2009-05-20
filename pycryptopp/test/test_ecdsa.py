@@ -2,9 +2,38 @@
 
 import random
 
+import os
+SEED = os.environ.get('REPEATABLE_RANDOMNESS_SEED', None)
+
+if SEED is None:
+    # Generate a seed which is fairly short (to ease cut-and-paste, writing it
+    # down, etc.).  Note that Python's random module's seed() function is going
+    # to take the hash() of this seed, which is a 32-bit value (currently) so
+    # there is no point in making this seed larger than 32 bits.  Make it 30
+    # bits, which conveniently fits into six base-32 chars.  Include a separator
+    # because chunking facilitates memory (including working and short-term
+    # memory) in humans.
+    chars = "ybndrfg8ejkmcpqxot1uwisza345h769" # Zooko's choice, rationale in "DESIGN" doc in z-base-32 project
+    SEED = ''.join([random.choice(chars) for x in range(3)] + ['-'] + [random.choice(chars) for x in range(3)])
+
+import logging
+logging.info("REPEATABLE_RANDOMNESS_SEED: %s\n" % SEED)
+logging.info("In order to reproduce this run of the code, set the environment variable \"REPEATABLE_RANDOMNESS_SEED\" to %s before executing.\n" % SEED)
+random.seed(SEED)
+
+def seed_which_refuses(a):
+    logging.warn("I refuse to reseed to %s -- I already seeded with %s.\n" % (a, SEED,))
+    return
+random.seed = seed_which_refuses
+
+from random import randrange
+
 import unittest
 
 from pycryptopp.publickey import ecdsa
+
+def randstr(n, rr=randrange):
+    return ''.join([chr(rr(0, 256)) for x in xrange(n)])
 
 from base64 import b32encode
 def ab(x): # debuggery
@@ -17,102 +46,174 @@ def ab(x): # debuggery
     elif len(x) == 0:
         return "%s:%s" % (len(x), "--empty--",)
 
-def randstr(n):
-    return ''.join(map(chr, map(random.randrange, [0]*n, [256]*n)))
+def div_ceil(n, d):
+    """
+    The smallest integer k such that k*d >= n.
+    """
+    return (n/d) + (n%d != 0)
 
-KEYSIZE=192 # The choices are 192 or 521 -- they are both secure, and 192 makes for faster unit tests.
+KEYBITS=192
+
+# The number of bytes required for a seed to have the same security level as a
+# key in this elliptic curve: 2 bits of public key per bit of security.
+SEEDBITS=div_ceil(192, 2)
+SEEDBYTES=div_ceil(SEEDBITS, 8)
+
+# The number of bytes required to encode a public key in this elliptic curve.
+PUBKEYBYTES=div_ceil(KEYBITS, 8)+1 # 1 byte for the sign of the y component
+
+# The number of bytes requires to encode a signature in this elliptic curve.
+SIGBITS=KEYBITS*2
+SIGBYTES=div_ceil(SIGBITS, 8)
+
 class Signer(unittest.TestCase):
-    def test_generate_bad_size(self):
-        try:
-            signer = ecdsa.generate(KEYSIZE-1)
-        except ecdsa.Error, le:
-            self.failUnless("size in bits is required to be " in str(le), le)
-        else:
-            self.fail("Should have raised error from size being too small.")
-        try:
-            signer = ecdsa.generate(sizeinbits=KEYSIZE-1)
-        except ecdsa.Error, le:
-            self.failUnless("size in bits is required to be " in str(le), le)
-        else:
-            self.fail("Should have raised error from size being too small.")
+    def test_construct_from_same_seed_is_reproducible(self):
+        seed = randstr(SEEDBYTES)
+        signer1 = ecdsa.SigningKey(seed)
+        signer2 = ecdsa.SigningKey(seed)
+        self.failUnlessEqual(signer1.get_verifying_key().serialize(), signer2.get_verifying_key().serialize())
 
-    def test_generate(self):
-        signer = ecdsa.generate(KEYSIZE)
-        # Hooray!  It didn't raise an exception!  We win!
-        signer = ecdsa.generate(sizeinbits=KEYSIZE)
-        # Hooray!  It didn't raise an exception!  We win!
+        # ... and using different seeds constructs a different private key.
+        seed3 = randstr(SEEDBYTES)
+        assert seed3 != seed, "Internal error in Python random module's PRNG (or in pycryptopp's hacks to it to facilitate testing) -- got two identical strings from randstr(%s)" % SEEDBYTES
+        signer3 = ecdsa.SigningKey(seed3)
+        self.failIfEqual(signer1.get_verifying_key().serialize(), signer3.get_verifying_key().serialize())
 
-    def test_sign(self):
-        signer = ecdsa.generate(KEYSIZE)
-        result = signer.sign("abc")
-        self.failUnlessEqual(len(result), 2*((KEYSIZE+7)/8))
-        # TODO: test against someone's official test vectors.
+        # Also try the all-zeroes string just because bugs sometimes are
+        # data-dependent on zero or cause bogus zeroes.
+        seed4 = '\x00'*SEEDBYTES
+        assert seed4 != seed, "Internal error in Python random module's PRNG (or in pycryptopp's hacks to it to facilitate testing) -- got the all-zeroes string from randstr(%s)" % SEEDBYTES
+        signer4 = ecdsa.SigningKey(seed4)
+        self.failIfEqual(signer4.get_verifying_key().serialize(), signer1.get_verifying_key().serialize())
+
+        signer5 = ecdsa.SigningKey(seed4)
+        self.failUnlessEqual(signer5.get_verifying_key().serialize(), signer4.get_verifying_key().serialize())
+
+    def test_construct_short_seed(self):
+        try:
+            signer = ecdsa.SigningKey("\x00\x00\x00")
+        except ecdsa.Error, le:
+            self.failUnless("seed is required to be of length >=" in str(le), le)
+        else:
+           self.fail("Should have raised error from seed being too short.")
+
+    def test_construct_bad_arg_type(self):
+        try:
+            signer = ecdsa.SigningKey(1)
+        except TypeError, le:
+            self.failUnless("must be string" in str(le), le)
+        else:
+           self.fail("Should have raised error from seed being of the wrong type.")
+
+class Verifier(unittest.TestCase):
+    def test_from_signer_and_serialize_and_deserialize(self):
+        seed = randstr(SEEDBYTES)
+        signer = ecdsa.SigningKey(seed)
+
+        verifier = signer.get_verifying_key()
+        s1 = verifier.serialize()
+        self.failUnlessEqual(len(s1), PUBKEYBYTES)
+        verifier2 = ecdsa.VerifyingKey(s1)
+        s2 = verifier.serialize()
+        self.failUnlessEqual(s1, s2)
+
+def flip_one_bit(s):
+    i = randrange(0, len(s))
+    result = s[:i] + chr(ord(s[i])^(0x01<<randrange(0, 8))) + s[i+1:]
+    assert result != s, "Internal error -- flip_one_bit() produced the same string as its input: %s == %s" % (result, s)
+    return result
+
+def randmsg():
+    # Choose a random message size from a range probably large enough to
+    # exercise any different code paths which depend on the message length.
+    randmsglen = randrange(0, SIGBYTES*2+2)
+    return randstr(randmsglen)
 
 class SignAndVerify(unittest.TestCase):
-    def _help_test_sign_and_check(self, signer, verifier, msg):
+    def _help_test_sign_and_check_good_keys(self, signer, verifier):
+        msg = randmsg()
+
         sig = signer.sign(msg)
-        self.failUnlessEqual(len(sig), 2*((KEYSIZE+7)/8))
+        self.failUnlessEqual(len(sig), SIGBYTES)
         self.failUnless(verifier.verify(msg, sig))
 
-    def test_sign_and_check_a(self):
-        signer = ecdsa.generate(KEYSIZE)
+        # Now flip one bit of the signature and make sure that the signature doesn't check.
+        badsig = flip_one_bit(sig)
+        self.failIf(verifier.verify(msg, badsig))
+
+        # Now generate a random signature and make sure that the signature doesn't check.
+        badsig = randstr(len(sig))
+        assert badsig != sig, "Internal error -- randstr() produced the same string twice: %s == %s" % (badsig, sig)
+        self.failIf(verifier.verify(msg, badsig))
+
+        # Now flip one bit of the message and make sure that the original signature doesn't check.
+        badmsg = flip_one_bit(msg)
+        self.failIf(verifier.verify(badmsg, sig))
+
+        # Now generate a random message and make sure that the original signature doesn't check.
+        badmsg = randstr(len(msg))
+        assert badmsg != msg, "Internal error -- randstr() produced the same string twice: %s == %s" % (badmsg, msg)
+        self.failIf(verifier.verify(badmsg, sig))
+
+    def _help_test_sign_and_check_bad_keys(self, signer, verifier):
+        """
+        Make sure that this signer/verifier pair cannot produce and verify signatures.
+        """
+        msg = randmsg()
+
+        sig = signer.sign(msg)
+        self.failUnlessEqual(len(sig), SIGBYTES)
+        self.failIf(verifier.verify(msg, sig))
+
+    def test(self):
+        seed = randstr(SEEDBYTES)
+        signer = ecdsa.SigningKey(seed)
         verifier = signer.get_verifying_key()
-        return self._help_test_sign_and_check(signer, verifier, "a")
+        self._help_test_sign_and_check_good_keys(signer, verifier)
 
-    def _help_test_sign_and_check_random(self, signer, verifier):
-        for i in range(3):
-            l = random.randrange(0, 2**10)
-            msg = randstr(l)
-            self._help_test_sign_and_check(signer, verifier, msg)
+        vstr = verifier.serialize()
+        verifier2 = ecdsa.VerifyingKey(vstr)
+        self._help_test_sign_and_check_good_keys(signer, verifier2)
+       
+        signer2 = ecdsa.SigningKey(seed)
+        self._help_test_sign_and_check_good_keys(signer2, verifier2)
+         
+        verifier3 = signer2.get_verifying_key()
+        self._help_test_sign_and_check_good_keys(signer, verifier3)
 
-    def test_sign_and_check_random(self):
-        signer = ecdsa.generate(KEYSIZE)
-        verifier = signer.get_verifying_key()
-        return self._help_test_sign_and_check_random(signer, verifier)
+        # Now test various ways that the keys could be corrupted or ill-matched.
 
-    def _help_test_sign_and_failcheck(self, signer, verifier, msg):
-        sig = signer.sign("a")
-        sig = sig[:-1] + chr(ord(sig[-1])^0x01)
-        self.failUnless(not verifier.verify(msg, sig))
+        # Flip one bit of the public key.
+        badvstr = flip_one_bit(vstr)
+        try:
+            badverifier = ecdsa.VerifyingKey(badvstr)
+        except ecdsa.Error, le:
+            # Ok, fine, the verifying key was corrupted and Crypto++ detected this fact.
+            pass
+        else:
+            self._help_test_sign_and_check_bad_keys(signer, badverifier)
 
-    def test_sign_and_failcheck_a(self):
-        signer = ecdsa.generate(KEYSIZE)
-        verifier = signer.get_verifying_key()
-        return self._help_test_sign_and_failcheck(signer, verifier, "a")
+        # Randomize all bits of the public key.
+        badvstr = randstr(len(vstr))
+        assert badvstr != vstr, "Internal error -- randstr() produced the same string twice: %s == %s" % (badvstr, vstr)
+        try:
+            badverifier = ecdsa.VerifyingKey(badvstr)
+        except ecdsa.Error, le:
+            # Ok, fine, the key was corrupted and Crypto++ detected this fact.
+            pass
+        else:
+            self._help_test_sign_and_check_bad_keys(signer, badverifier)
+        
+        # Flip one bit of the private key.
+        badseed = flip_one_bit(seed)
+        badsigner = ecdsa.SigningKey(badseed)
+        self._help_test_sign_and_check_bad_keys(badsigner, verifier)
 
-    def _help_test_sign_and_failcheck_random(self, signer, verifier):
-        for i in range(3):
-            l = random.randrange(0, 2**10)
-            msg = randstr(l)
-            self._help_test_sign_and_failcheck(signer, verifier, msg)
-
-    def test_sign_and_failcheck_random(self):
-        signer = ecdsa.generate(KEYSIZE)
-        verifier = signer.get_verifying_key()
-        return self._help_test_sign_and_failcheck_random(signer, verifier)
-
-    def test_serialize_and_deserialize_verifying_key_and_test(self):
-        signer = ecdsa.generate(KEYSIZE)
-        verifier = signer.get_verifying_key()
-        serstr = verifier.serialize()
-        verifier = None
-        newverifier = ecdsa.create_verifying_key_from_string(serstr)
-        self._help_test_sign_and_check(signer, newverifier, "a")
-        self._help_test_sign_and_check_random(signer, newverifier)
-        self._help_test_sign_and_failcheck(signer, newverifier, "a")
-        self._help_test_sign_and_failcheck_random(signer, newverifier)
-
-    def test_serialize_and_deserialize_signing_key_and_test(self):
-        signer = ecdsa.generate(KEYSIZE)
-        verifier = signer.get_verifying_key()
-        serstr = signer.serialize()
-        signer = None
-        newsigner = ecdsa.create_signing_key_from_string(serstr)
-        self._help_test_sign_and_check(newsigner, verifier, "a")
-        self._help_test_sign_and_check_random(newsigner, verifier)
-        self._help_test_sign_and_failcheck(newsigner, verifier, "a")
-        self._help_test_sign_and_failcheck_random(newsigner, verifier)
-
+        # Randomize all bits of the private key.
+        badseed = randstr(len(seed))
+        assert badseed != seed, "Internal error -- randstr() produced the same string twice: %s == %s" % (badseed, seed)
+        badsigner = ecdsa.SigningKey(badseed)
+        self._help_test_sign_and_check_bad_keys(badsigner, verifier)
 
 if __name__ == "__main__":
     unittest.main()
