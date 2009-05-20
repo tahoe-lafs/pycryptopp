@@ -93,7 +93,7 @@ class Signer(unittest.TestCase):
         try:
             signer = ecdsa.SigningKey("\x00\x00\x00")
         except ecdsa.Error, le:
-            self.failUnless("seed is required to be of length >=" in str(le), le)
+            self.failUnless("seed is required to be of length " in str(le), le)
         else:
            self.fail("Should have raised error from seed being too short.")
 
@@ -172,6 +172,7 @@ class SignAndVerify(unittest.TestCase):
         self._help_test_sign_and_check_good_keys(signer, verifier)
 
         vstr = verifier.serialize()
+        self.failUnlessEqual(len(vstr), PUBKEYBYTES)
         verifier2 = ecdsa.VerifyingKey(vstr)
         self._help_test_sign_and_check_good_keys(signer, verifier2)
        

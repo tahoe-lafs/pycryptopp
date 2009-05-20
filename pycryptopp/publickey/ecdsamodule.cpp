@@ -66,7 +66,7 @@ USING_NAMESPACE(CryptoPP)
 PyDoc_STRVAR(ecdsa__doc__,
 "ecdsa -- ECDSA(1363)/EMSA1(Tiger) signatures\n\
 \n\
-To create a new ECDSA signing key (deterministically from a 12-byte seed), construct an instance of the class, passing the seed as argument, i.e. SigningKey(seed).  If you call serialize() on that instance, you'll get that seed back.\n\
+To create a new ECDSA signing key (deterministically from a 12-byte seed), construct an instance of the class, passing the seed as argument, i.e. SigningKey(seed).\n\
 \n\
 To get a verifying key from a signing key, call get_verifying_key() on the signing key instance.\n\
 \n\
@@ -503,7 +503,7 @@ static PyTypeObject SigningKey_type = {
 PyDoc_STRVAR(create_verifying_key_from_string__doc__,
 "Create a verifying key from its serialized state.\n\
 \n\
-@precondition Length of serialized key is required to be 24 (for 192-bit key)."); //XXX actually 25 length
+@precondition Length of serialized key is required to be 25 bytes (for 192-bit key).");
 
 static PyMethodDef ecdsa_functions[] = {
     {NULL, NULL, 0, NULL}  /* sentinel */
