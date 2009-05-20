@@ -285,7 +285,7 @@ SigningKey___init__(PyObject* self, PyObject* args, PyObject* kwdict) {
     Integer grouporderm1;
     byte privexpbytes[24] = {0};
     Integer privexponentm1;
-    privexponentm1.Decode(privexpbytes, sizeof(privexpbytes)); assert (priveexponentm1 == 0); // just checking..
+    privexponentm1.Decode(privexpbytes, sizeof(privexpbytes)); assert (privexponentm1 == 0); // just checking..
 
     DL_GroupParameters_EC<ECP> params(ASN1::secp192r1());
     params.SetPointCompression(true);
