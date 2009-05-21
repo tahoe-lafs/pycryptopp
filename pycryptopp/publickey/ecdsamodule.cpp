@@ -96,7 +96,7 @@ VerifyingKey___init__(PyObject* self, PyObject* args, PyObject* kwdict) {
     assert (serializedverifyingkeysize >= 0);
 
     if (serializedverifyingkeysize != 25) {
-        PyErr_Format(ecdsa_error, "Precondition violation: size in bits is required to be %d (for %d-bit key), but it was %d", 25, KEY_SIZE_BITS, serializedverifyingkeysize);
+        PyErr_Format(ecdsa_error, "Precondition violation: size in bits is required to be %d (for %d-bit key), but it was %Zd", 25, KEY_SIZE_BITS, serializedverifyingkeysize);
         return -1;
     }
 
@@ -170,7 +170,7 @@ VerifyingKey_serialize(VerifyingKey *self, PyObject *dummy) {
 
 PyDoc_STRVAR(VerifyingKey_serialize__doc__,
 "Return a string containing the key material.  The string can be passed to \n\
-create_verifying_key_from_string() to instantiate a new copy of this key.");
+the constructor of VerifyingKey to instantiate a new copy of this key.");
 
 static PyMethodDef VerifyingKey_methods[] = {
     {"verify", reinterpret_cast<PyCFunction>(VerifyingKey_verify), METH_KEYWORDS, VerifyingKey_verify__doc__},
@@ -217,9 +217,6 @@ static PyTypeObject VerifyingKey_type = {
     0,                         /* tp_dictoffset */
     VerifyingKey___init__,       /* tp_init */
 };
-
-PyDoc_STRVAR(SigningKey__doc__,
-"an ECDSA signing key");
 
 typedef struct {
     PyObject_HEAD
@@ -502,7 +499,7 @@ static PyTypeObject SigningKey_type = {
     0,                         /*tp_setattro*/
     0,                         /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT,        /*tp_flags*/
-    SigningKey__doc__,         /* tp_doc */
+    SigningKey__init____doc__,         /* tp_doc */
     0,                               /* tp_traverse */
     0,                               /* tp_clear */
     0,                               /* tp_richcompare */
@@ -519,11 +516,6 @@ static PyTypeObject SigningKey_type = {
     0,                         /* tp_dictoffset */
     SigningKey___init__,       /* tp_init */
 };
-
-PyDoc_STRVAR(create_verifying_key_from_string__doc__,
-"Create a verifying key from its serialized state.\n\
-\n\
-@precondition Length of serialized key is required to be 25 bytes (for 192-bit key).");
 
 static PyMethodDef ecdsa_functions[] = {
     {NULL, NULL, 0, NULL}  /* sentinel */
