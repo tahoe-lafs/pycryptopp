@@ -67,6 +67,22 @@ SIGBITS=KEYBITS*2
 SIGBYTES=div_ceil(SIGBITS, 8)
 
 class Signer(unittest.TestCase):
+    def test_construct(self):
+        seed = randstr(SEEDBYTES)
+        signer = ecdsa.SigningKey(seed)
+
+    def test_sign(self):
+        seed = randstr(SEEDBYTES)
+        signer = ecdsa.SigningKey(seed)
+        sig = signer.sign("message")
+
+    def test_sign_and_verify(self):
+        seed = randstr(SEEDBYTES)
+        signer = ecdsa.SigningKey(seed)
+        sig = signer.sign("message")
+        v = signer.get_verifying_key()
+        self.failUnless(v.verify("message", sig))
+
     def test_construct_from_same_seed_is_reproducible(self):
         seed = randstr(SEEDBYTES)
         signer1 = ecdsa.SigningKey(seed)
