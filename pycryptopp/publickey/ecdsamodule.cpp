@@ -154,6 +154,8 @@ static PyObject *
 VerifyingKey_serialize(VerifyingKey *self, PyObject *dummy) {
     const DL_PublicKey_EC<ECP>* pubkey;
     pubkey = dynamic_cast<const DL_PublicKey_EC<ECP>*>(&(self->k->GetPublicKey()));
+    if (!pubkey)
+        return PyErr_Format(ecdsa_error, "dynamic_cast failed for k->GetPublicKey()");
     const DL_GroupParameters_EC<ECP>& params = pubkey->GetGroupParameters();
 
     Py_ssize_t len = params.GetEncodedElementSize(true);
@@ -445,6 +447,9 @@ SigningKey_get_verifying_key(SigningKey *self, PyObject *dummy) {
 
     const DL_PrivateKey_EC<ECP>* privkey;
     privkey = dynamic_cast<const DL_PrivateKey_EC<ECP>*>(&(self->k->GetPrivateKey()));
+    if (!privkey)
+        return PyErr_Format(ecdsa_error, "dynamic_cast failed for k->GetPrivateKey()");
+
     const DL_GroupParameters_EC<ECP>& params = privkey->GetGroupParameters();
 
     if (!verifier)
@@ -454,6 +459,8 @@ SigningKey_get_verifying_key(SigningKey *self, PyObject *dummy) {
     ECDSA<ECP, Tiger>::Verifier* temp = new ECDSA<ECP, Tiger>::Verifier(*(self->k));
     const DL_PublicKey_EC<ECP>* temppubkey;
     temppubkey = dynamic_cast<const DL_PublicKey_EC<ECP>*>(&(temp->GetPublicKey()));
+    if (!temppubkey)
+        return PyErr_Format(ecdsa_error, "dynamic_cast failed for temp->GetPublicKey()");
     ECP::Element pubel = temppubkey->GetPublicElement();
 
     verifier->k = new ECDSA<ECP, Tiger>::Verifier(params, pubel);
