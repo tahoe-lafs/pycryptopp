@@ -444,6 +444,8 @@ PyDoc_STRVAR(SigningKey_sign__doc__,
 static PyObject *
 SigningKey_get_verifying_key(SigningKey *self, PyObject *dummy) {
     VerifyingKey *verifier = PyObject_New(VerifyingKey, &VerifyingKey_type);
+    if (!verifier)
+        return NULL;
 
     const DL_PrivateKey_EC<ECP>* privkey;
     privkey = dynamic_cast<const DL_PrivateKey_EC<ECP>*>(&(self->k->GetPrivateKey()));
@@ -452,8 +454,6 @@ SigningKey_get_verifying_key(SigningKey *self, PyObject *dummy) {
 
     const DL_GroupParameters_EC<ECP>& params = privkey->GetGroupParameters();
 
-    if (!verifier)
-        return NULL;
 
     // Ugh..  Making a temp Verifier just to get the public element to construct the real verifier along with params.
     ECDSA<ECP, Tiger>::Verifier* temp = new ECDSA<ECP, Tiger>::Verifier(*(self->k));
