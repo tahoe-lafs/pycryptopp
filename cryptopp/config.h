@@ -104,34 +104,33 @@ NAMESPACE_BEGIN(CryptoPP)
 typedef unsigned short word16;
 typedef unsigned int word32;
 
-#if defined(__GNUC__) || defined(__MWERKS__) || defined(__SUNPRO_CC)
-	#define WORD64_AVAILABLE
-	typedef unsigned long long word64;
-	#define W64LIT(x) x##LL
-#elif defined(_MSC_VER) || defined(__BORLANDC__)
-	#define WORD64_AVAILABLE
+#if defined(_MSC_VER) || defined(__BORLANDC__)
 	typedef unsigned __int64 word64;
 	#define W64LIT(x) x##ui64
+#else
+	typedef unsigned long long word64;
+	#define W64LIT(x) x##ULL
 #endif
 
 // define large word type, used for file offsets and such
-#ifdef WORD64_AVAILABLE
-	typedef word64 lword;
-	const lword LWORD_MAX = W64LIT(0xffffffffffffffff);
-#else
-	typedef word32 lword;
-	const lword LWORD_MAX = 0xffffffffUL;
+typedef word64 lword;
+const lword LWORD_MAX = W64LIT(0xffffffffffffffff);
+
+#ifdef __GNUC__
+	#define CRYPTOPP_GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
 #endif
 
 // define hword, word, and dword. these are used for multiprecision integer arithmetic
 // Intel compiler won't have _umul128 until version 10.0. See http://softwarecommunity.intel.com/isn/Community/en-US/forums/thread/30231625.aspx
-#if (defined(_MSC_VER) && (!defined(__INTEL_COMPILER) || __INTEL_COMPILER >= 1000) && (defined(_M_X64) || defined(_M_IA64))) || (defined(__DECCXX) && defined(__alpha__)) || (defined(__INTEL_COMPILER) && defined(__x86_64__))
+#if (defined(_MSC_VER) && (!defined(__INTEL_COMPILER) || __INTEL_COMPILER >= 1000) && (defined(_M_X64) || defined(_M_IA64))) || (defined(__DECCXX) && defined(__alpha__)) || (defined(__INTEL_COMPILER) && defined(__x86_64__)) || (defined(__SUNPRO_CC) && defined(__x86_64__))
 	typedef word32 hword;
 	typedef word64 word;
 #else
 	#define CRYPTOPP_NATIVE_DWORD_AVAILABLE
 	#if defined(__alpha__) || defined(__ia64__) || defined(_ARCH_PPC64) || defined(__x86_64__) || defined(__mips64) || defined(__sparc64__)
-		#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+		#if defined(__GNUC__) && !defined(__INTEL_COMPILER) && !(CRYPTOPP_GCC_VERSION == 40001 && defined(__APPLE__)) && CRYPTOPP_GCC_VERSION >= 30400
+			// GCC 4.0.1 on MacOS X is missing __umodti3 and __udivti3
+			// mode(TI) division broken on amd64 with GCC earlier than GCC 3.4
 			typedef word32 hword;
 			typedef word64 word;
 			typedef __uint128_t dword;
@@ -143,16 +142,16 @@ typedef unsigned int word32;
 			typedef word32 word;
 			typedef word64 dword;
 		#endif
-	#elif defined(WORD64_AVAILABLE)
-		#define CRYPTOPP_SLOW_WORD64 // use alternative code that avoids word64
+	#else
+		// being here means the native register size is probably 32 bits or less
+		#define CRYPTOPP_BOOL_SLOW_WORD64 1
 		typedef word16 hword;
 		typedef word32 word;
 		typedef word64 dword;
-	#else
-		typedef byte hword;
-		typedef word16 word;
-		typedef word32 dword;
 	#endif
+#endif
+#ifndef CRYPTOPP_BOOL_SLOW_WORD64
+	#define CRYPTOPP_BOOL_SLOW_WORD64 0
 #endif
 
 const unsigned int WORD_SIZE = sizeof(word);
@@ -181,14 +180,10 @@ NAMESPACE_END
 	#endif
 #endif
 
-#ifdef __GNUC__
-	#define CRYPTOPP_GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
-#endif
-
 #ifndef CRYPTOPP_ALIGN_DATA
 	#if defined(CRYPTOPP_MSVC6PP_OR_LATER)
 		#define CRYPTOPP_ALIGN_DATA(x) __declspec(align(x))
-	#elif defined(__GNUC__) || __SUNPRO_CC > 0x580
+	#elif defined(__GNUC__)
 		#define CRYPTOPP_ALIGN_DATA(x) __attribute__((aligned(x)))
 	#else
 		#define CRYPTOPP_ALIGN_DATA(x)
@@ -293,6 +288,12 @@ NAMESPACE_END
 	#define CRYPTOPP_BOOL_SSE2_INTRINSICS_AVAILABLE 0
 #endif
 
+#if CRYPTOPP_BOOL_SSE2_INTRINSICS_AVAILABLE || CRYPTOPP_BOOL_SSE2_ASM_AVAILABLE || defined(CRYPTOPP_X64_MASM_AVAILABLE)
+	#define CRYPTOPP_BOOL_ALIGN16_ENABLED 1
+#else
+	#define CRYPTOPP_BOOL_ALIGN16_ENABLED 0
+#endif
+
 // how to allocate 16-byte aligned memory (for SSE2)
 #if defined(CRYPTOPP_MSVC6PP_OR_LATER)
 	#define CRYPTOPP_MM_MALLOC_AVAILABLE
@@ -317,7 +318,7 @@ NAMESPACE_END
 #endif
 
 // how to declare class constants
-#if defined(_MSC_VER) && _MSC_VER <= 1300
+#if (defined(_MSC_VER) && _MSC_VER <= 1300) || defined(__INTEL_COMPILER)
 #	define CRYPTOPP_CONSTANT(x) enum {x};
 #else
 #	define CRYPTOPP_CONSTANT(x) static const int x;
@@ -336,11 +337,11 @@ NAMESPACE_END
 	#define CRYPTOPP_BOOL_X86 0
 #endif
 
-#if CRYPTOPP_BOOL_X64 || CRYPTOPP_BOOL_X86
+#if CRYPTOPP_BOOL_X64 || CRYPTOPP_BOOL_X86 || defined(__powerpc__)
 	#define CRYPTOPP_ALLOW_UNALIGNED_DATA_ACCESS
 #endif
 
-#define CRYPTOPP_VERSION 552
+#define CRYPTOPP_VERSION 560
 
 // ***************** determine availability of OS features ********************
 
@@ -354,7 +355,7 @@ NAMESPACE_END
 #define CRYPTOPP_UNIX_AVAILABLE
 #endif
 
-#if defined(WORD64_AVAILABLE) && (defined(CRYPTOPP_WIN32_AVAILABLE) || defined(CRYPTOPP_UNIX_AVAILABLE))
+#if defined(CRYPTOPP_WIN32_AVAILABLE) || defined(CRYPTOPP_UNIX_AVAILABLE)
 #	define HIGHRES_TIMER_AVAILABLE
 #endif
 

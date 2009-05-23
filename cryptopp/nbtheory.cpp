@@ -262,8 +262,7 @@ static inline bool FastProbablePrimeTest(const Integer &n)
 	return IsStrongProbablePrime(n,2);
 }
 
-AlgorithmParameters<AlgorithmParameters<AlgorithmParameters<NullNameValuePairs, Integer::RandomNumberType>, Integer>, Integer>
-	MakeParametersForTwoPrimesOfEqualSize(unsigned int productBitLength)
+AlgorithmParameters MakeParametersForTwoPrimesOfEqualSize(unsigned int productBitLength)
 {
 	if (productBitLength < 16)
 		throw InvalidArgument("invalid bit length");
@@ -568,11 +567,6 @@ Integer CRT(const Integer &xp, const Integer &p, const Integer &xq, const Intege
 	cout << hex << t5 << endl;
 	return t5;
 */
-}
-
-Integer CRT(const Integer &xp, const Integer &p, const Integer &xq, const Integer &q)
-{
-	return CRT(xp, p, xq, q, EuclideanMultiplicativeInverse(p, q));
 }
 
 Integer ModularSquareRoot(const Integer &a, const Integer &p)
@@ -1020,11 +1014,6 @@ Integer InverseLucas(const Integer &e, const Integer &m, const Integer &p, const
 			}
 		}
 	return CRT(p2, p, q2, q, u);
-}
-
-Integer InverseLucas(const Integer &e, const Integer &m, const Integer &p, const Integer &q)
-{
-	return InverseLucas(e, m, p, q, EuclideanMultiplicativeInverse(p, q));
 }
 
 unsigned int FactoringWorkFactor(unsigned int n)

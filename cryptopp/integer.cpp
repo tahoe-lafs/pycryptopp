@@ -101,27 +101,33 @@ static word AtomicInverseModPower2(word A)
 
 // ********************************************************
 
-#if !defined(CRYPTOPP_NATIVE_DWORD_AVAILABLE) || defined(__x86_64__)
+#if !defined(CRYPTOPP_NATIVE_DWORD_AVAILABLE) || (defined(__x86_64__) && defined(CRYPTOPP_WORD128_AVAILABLE))
 	#define Declare2Words(x)			word x##0, x##1;
 	#define AssignWord(a, b)			a##0 = b; a##1 = 0;
 	#define Add2WordsBy1(a, b, c)		a##0 = b##0 + c; a##1 = b##1 + (a##0 < c);
 	#define LowWord(a)					a##0
 	#define HighWord(a)					a##1
 	#ifdef _MSC_VER
-		#define MultiplyWords(p, a, b)	p##0 = _umul128(a, b, &p##1);
+		#define MultiplyWordsLoHi(p0, p1, a, b)		p0 = _umul128(a, b, &p1);
 		#ifndef __INTEL_COMPILER
 			#define Double3Words(c, d)		d##1 = __shiftleft128(d##0, d##1, 1); d##0 = __shiftleft128(c, d##0, 1); c *= 2;
 		#endif
 	#elif defined(__DECCXX)
-		#define MultiplyWords(p, a, b)	p##0 = a*b; p##1 = asm("umulh %a0, %a1, %v0", a, b);
+		#define MultiplyWordsLoHi(p0, p1, a, b)		p0 = a*b; p1 = asm("umulh %a0, %a1, %v0", a, b);
 	#elif defined(__x86_64__)
-		#define MultiplyWords(p, a, b)	asm ("mulq %3" : "=a"(p##0), "=d"(p##1) : "a"(a), "g"(b) : "cc");
-		#define MulAcc(c, d, a, b)		asm ("mulq %6; addq %3, %0; adcq %4, %1; adcq $0, %2;" : "+r"(c), "+r"(d##0), "+r"(d##1), "=a"(p0), "=d"(p1) : "a"(a), "g"(b) : "cc");
-		#define Double3Words(c, d)		asm ("addq %0, %0; adcq %1, %1; adcq %2, %2;" : "+r"(c), "+r"(d##0), "+r"(d##1) : : "cc");
-		#define Acc2WordsBy1(a, b)		asm ("addq %2, %0; adcq $0, %1;" : "+r"(a##0), "+r"(a##1) : "r"(b) : "cc");
-		#define Acc2WordsBy2(a, b)		asm ("addq %2, %0; adcq %3, %1;" : "+r"(a##0), "+r"(a##1) : "r"(b##0), "r"(b##1) : "cc");
-		#define Acc3WordsBy2(c, d, e)	asm ("addq %5, %0; adcq %6, %1; adcq $0, %2;" : "+r"(c), "=r"(e##0), "=r"(e##1) : "1"(d##0), "2"(d##1), "r"(e##0), "r"(e##1) : "cc");
+		#ifdef __SUNPRO_CC
+			// Sun Studio's gcc-style inline assembly is heavily bugged as of version 5.9 Patch 124864-09 2008/12/16, but this one works
+			#define MultiplyWordsLoHi(p0, p1, a, b)		asm ("mulq %3" : "=a"(p0), "=d"(p1) : "a"(a), "r"(b) : "cc");
+		#else
+			#define MultiplyWordsLoHi(p0, p1, a, b)		asm ("mulq %3" : "=a"(p0), "=d"(p1) : "a"(a), "g"(b) : "cc");
+			#define MulAcc(c, d, a, b)		asm ("mulq %6; addq %3, %0; adcq %4, %1; adcq $0, %2;" : "+r"(c), "+r"(d##0), "+r"(d##1), "=a"(p0), "=d"(p1) : "a"(a), "g"(b) : "cc");
+			#define Double3Words(c, d)		asm ("addq %0, %0; adcq %1, %1; adcq %2, %2;" : "+r"(c), "+r"(d##0), "+r"(d##1) : : "cc");
+			#define Acc2WordsBy1(a, b)		asm ("addq %2, %0; adcq $0, %1;" : "+r"(a##0), "+r"(a##1) : "r"(b) : "cc");
+			#define Acc2WordsBy2(a, b)		asm ("addq %2, %0; adcq %3, %1;" : "+r"(a##0), "+r"(a##1) : "r"(b##0), "r"(b##1) : "cc");
+			#define Acc3WordsBy2(c, d, e)	asm ("addq %5, %0; adcq %6, %1; adcq $0, %2;" : "+r"(c), "=r"(e##0), "=r"(e##1) : "1"(d##0), "2"(d##1), "r"(e##0), "r"(e##1) : "cc");
+		#endif
 	#endif
+	#define MultiplyWords(p, a, b)		MultiplyWordsLoHi(p##0, p##1, a, b)
 	#ifndef Double3Words
 		#define Double3Words(c, d)		d##1 = 2*d##1 + (d##0>>(WORD_BITS-1)); d##0 = 2*d##0 + (c>>(WORD_BITS-1)); c *= 2;
 	#endif
@@ -189,10 +195,8 @@ public:
 		DWord r;
 		#ifdef CRYPTOPP_NATIVE_DWORD_AVAILABLE
 			r.m_whole = (dword)a * b;
-		#elif defined(__x86_64__)
-			asm ("mulq %3" : "=a"(r.m_halfs.low), "=d"(r.m_halfs.high) : "a"(a), "g"(b) : "cc");
-		#else
-			r.m_halfs.low = _umul128(a, b, &r.m_halfs.high);
+		#elif defined(MultiplyWordsLoHi)
+			MultiplyWordsLoHi(r.m_halfs.low, r.m_halfs.high, a, b);
 		#endif
 		return r;
 	}
@@ -521,7 +525,7 @@ extern "C" {
 int Baseline_Add(size_t N, word *C, const word *A, const word *B);
 int Baseline_Sub(size_t N, word *C, const word *A, const word *B);
 }
-#elif defined(CRYPTOPP_X64_ASM_AVAILABLE) && defined(__GNUC__)
+#elif defined(CRYPTOPP_X64_ASM_AVAILABLE) && defined(__GNUC__) && defined(CRYPTOPP_WORD128_AVAILABLE)
 int Baseline_Add(size_t N, word *C, const word *A, const word *B)
 {
 	word result;
@@ -547,8 +551,8 @@ int Baseline_Add(size_t N, word *C, const word *A, const word *B)
 	AS2(	mov		%0, 0)
 	AS2(	adc		%0, %0)
 	".att_syntax;"
-	: "=&r" (result)
-	: "c" (N), "r" (C+N), "r" (A+N), "r" (B+N)
+	: "=&r" (result), "+c" (N)
+	: "r" (C+N), "r" (A+N), "r" (B+N)
 	: "memory", "cc"
 	);
 	return (int)result;
@@ -579,8 +583,8 @@ int Baseline_Sub(size_t N, word *C, const word *A, const word *B)
 	AS2(	mov		%0, 0)
 	AS2(	adc		%0, %0)
 	".att_syntax;"
-	: "=&r" (result)
-	: "c" (N), "r" (C+N), "r" (A+N), "r" (B+N)
+	: "=&r" (result), "+c" (N)
+	: "r" (C+N), "r" (A+N), "r" (B+N)
 	: "memory", "cc"
 	);
 	return (int)result;
@@ -3281,7 +3285,7 @@ bool Integer::GenerateRandomNoThrow(RandomNumberGenerator &i_rng, const NameValu
 
 	member_ptr<KDF2_RNG> kdf2Rng;
 	ConstByteArrayParameter seed;
-	if (params.GetValue("Seed", seed))
+	if (params.GetValue(Name::Seed(), seed))
 	{
 		ByteQueue bq;
 		DERSequenceEncoder seq(bq);
@@ -3398,11 +3402,8 @@ std::ostream& operator<<(std::ostream& out, const Integer &a)
 		suffix = '.';
 	}
 
-	SecBlock<char> s(a.BitCount() / (BitPrecision(base)-1) + 1);
 	Integer temp1=a, temp2;
-	unsigned i=0;
-	const char vec[]="0123456789ABCDEF";
-
+    
 	if (a.IsNegative())
 	{
 		out << '-';
@@ -3412,12 +3413,19 @@ std::ostream& operator<<(std::ostream& out, const Integer &a)
 	if (!a)
 		out << '0';
 
+	static const char upper[]="0123456789ABCDEF";
+	static const char lower[]="0123456789abcdef";
+
+	const char* vec = (out.flags() & std::ios::uppercase) ? upper : lower;
+	unsigned i=0;
+	SecBlock<char> s(a.BitCount() / (BitPrecision(base)-1) + 1);
+
 	while (!!temp1)
 	{
 		word digit;
 		Integer::Divide(digit, temp2, temp1, base);
 		s[i++]=vec[digit];
-		temp1=temp2;
+		temp1.swap(temp2);
 	}
 
 	while (i--)
@@ -3713,7 +3721,7 @@ void PositiveDivide(Integer &remainder, Integer &quotient,
 	if (!bSize)
 		throw Integer::DivideByZero();
 
-	if (a.PositiveCompare(b) == -1)
+	if (aSize < bSize)
 	{
 		remainder = a;
 		remainder.sign = Integer::POSITIVE;
@@ -3961,8 +3969,8 @@ Integer Integer::InverseMod(const Integer &m) const
 {
 	assert(m.NotNegative());
 
-	if (IsNegative() || *this>=m)
-		return (*this%m).InverseMod(m);
+	if (IsNegative())
+		return Modulo(m).InverseMod(m);
 
 	if (m.IsEven())
 	{
@@ -3971,7 +3979,7 @@ Integer Integer::InverseMod(const Integer &m) const
 		if (*this == One())
 			return One();
 
-		Integer u = m.InverseMod(*this);
+		Integer u = m.Modulo(*this).InverseMod(*this);
 		return !u ? Zero() : (m*(*this-u)+1)/(*this);
 	}
 

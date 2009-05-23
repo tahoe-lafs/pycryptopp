@@ -76,7 +76,7 @@ protected:
 };
 
 //! _
-template <class T_HashWordType, class T_Endianness, unsigned int T_BlockSize, unsigned int T_StateSize, class T_Transform, unsigned int T_DigestSize = 0>
+template <class T_HashWordType, class T_Endianness, unsigned int T_BlockSize, unsigned int T_StateSize, class T_Transform, unsigned int T_DigestSize = 0, bool T_StateAligned = false>
 class CRYPTOPP_NO_VTABLE IteratedHashWithStaticTransform
 	: public ClonableImpl<T_Transform, AlgorithmImpl<IteratedHash<T_HashWordType, T_Endianness, T_BlockSize>, T_Transform> >
 {
@@ -90,24 +90,16 @@ protected:
 	void Init() {T_Transform::InitState(this->m_state);}
 
 	T_HashWordType* StateBuf() {return this->m_state;}
-	FixedSizeSecBlock<T_HashWordType, T_BlockSize/sizeof(T_HashWordType)> m_state;
+	FixedSizeAlignedSecBlock<T_HashWordType, T_BlockSize/sizeof(T_HashWordType), T_StateAligned> m_state;
 };
 
-NAMESPACE_END
+#ifndef __GNUC__
+	CRYPTOPP_DLL_TEMPLATE_CLASS IteratedHashBase<word64, HashTransformation>;
+	CRYPTOPP_STATIC_TEMPLATE_CLASS IteratedHashBase<word64, MessageAuthenticationCode>;
 
-#ifdef CRYPTOPP_MANUALLY_INSTANTIATE_TEMPLATES
-#include "iterhash.cpp"
+	CRYPTOPP_DLL_TEMPLATE_CLASS IteratedHashBase<word32, HashTransformation>;
+	CRYPTOPP_STATIC_TEMPLATE_CLASS IteratedHashBase<word32, MessageAuthenticationCode>;
 #endif
-
-NAMESPACE_BEGIN(CryptoPP)
-
-#ifdef WORD64_AVAILABLE
-CRYPTOPP_DLL_TEMPLATE_CLASS IteratedHashBase<word64, HashTransformation>;
-CRYPTOPP_STATIC_TEMPLATE_CLASS IteratedHashBase<word64, MessageAuthenticationCode>;
-#endif
-
-CRYPTOPP_DLL_TEMPLATE_CLASS IteratedHashBase<word32, HashTransformation>;
-CRYPTOPP_STATIC_TEMPLATE_CLASS IteratedHashBase<word32, MessageAuthenticationCode>;
 
 NAMESPACE_END
 

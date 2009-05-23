@@ -22,8 +22,8 @@ public:
 	const BufferedTransformation *AttachedTransformation() const;
 	void Detach(BufferedTransformation *newAttachment = NULL);
 
-	size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel=NULL_CHANNEL, bool blocking=true);
-	size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, const std::string &channel=NULL_CHANNEL, bool blocking=true) const;
+	size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true);
+	size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true) const;
 
 	void Initialize(const NameValuePairs &parameters=g_nullNameValuePairs, int propagation=-1);
 	bool Flush(bool hardFlush, int propagation=-1, bool blocking=true);
@@ -38,11 +38,11 @@ protected:
 
 	void PropagateInitialize(const NameValuePairs &parameters, int propagation);
 
-	size_t Output(int outputSite, const byte *inString, size_t length, int messageEnd, bool blocking, const std::string &channel=NULL_CHANNEL);
-	size_t OutputModifiable(int outputSite, byte *inString, size_t length, int messageEnd, bool blocking, const std::string &channel=NULL_CHANNEL);
-	bool OutputMessageEnd(int outputSite, int propagation, bool blocking, const std::string &channel=NULL_CHANNEL);
-	bool OutputFlush(int outputSite, bool hardFlush, int propagation, bool blocking, const std::string &channel=NULL_CHANNEL);
-	bool OutputMessageSeriesEnd(int outputSite, int propagation, bool blocking, const std::string &channel=NULL_CHANNEL);
+	size_t Output(int outputSite, const byte *inString, size_t length, int messageEnd, bool blocking, const std::string &channel=DEFAULT_CHANNEL);
+	size_t OutputModifiable(int outputSite, byte *inString, size_t length, int messageEnd, bool blocking, const std::string &channel=DEFAULT_CHANNEL);
+	bool OutputMessageEnd(int outputSite, int propagation, bool blocking, const std::string &channel=DEFAULT_CHANNEL);
+	bool OutputFlush(int outputSite, bool hardFlush, int propagation, bool blocking, const std::string &channel=DEFAULT_CHANNEL);
+	bool OutputMessageSeriesEnd(int outputSite, int propagation, bool blocking, const std::string &channel=DEFAULT_CHANNEL);
 
 private:
 	member_ptr<BufferedTransformation> m_attachment;
@@ -190,7 +190,7 @@ protected:
 	virtual void LastPut(const byte *inString, size_t length) =0;
 	virtual void FlushDerived() {}
 
-private:
+protected:
 	size_t PutMaybeModifiable(byte *begin, size_t length, int messageEnd, bool blocking, bool modifiable);
 	void NextPutMaybeModifiable(byte *inString, size_t length, bool modifiable)
 	{
@@ -251,23 +251,29 @@ protected:
 	ByteQueue m_inQueue;
 };
 
+struct BlockPaddingSchemeDef
+{
+	enum BlockPaddingScheme {NO_PADDING, ZEROS_PADDING, PKCS_PADDING, ONE_AND_ZEROS_PADDING, DEFAULT_PADDING};
+};
+
 //! Filter Wrapper for StreamTransformation, optionally handling padding/unpadding when needed
-class CRYPTOPP_DLL StreamTransformationFilter : public FilterWithBufferedInput, private FilterPutSpaceHelper
+class CRYPTOPP_DLL StreamTransformationFilter : public FilterWithBufferedInput, public BlockPaddingSchemeDef, private FilterPutSpaceHelper
 {
 public:
-	enum BlockPaddingScheme {NO_PADDING, ZEROS_PADDING, PKCS_PADDING, ONE_AND_ZEROS_PADDING, DEFAULT_PADDING};
 	/*! DEFAULT_PADDING means PKCS_PADDING if c.MandatoryBlockSize() > 1 && c.MinLastBlockSize() == 0 (e.g. ECB or CBC mode),
 		otherwise NO_PADDING (OFB, CFB, CTR, CBC-CTS modes).
 		See http://www.weidai.com/scan-mirror/csp.html for details of the padding schemes. */
-	StreamTransformationFilter(StreamTransformation &c, BufferedTransformation *attachment = NULL, BlockPaddingScheme padding = DEFAULT_PADDING);
+	StreamTransformationFilter(StreamTransformation &c, BufferedTransformation *attachment = NULL, BlockPaddingScheme padding = DEFAULT_PADDING, bool allowAuthenticatedSymmetricCipher = false);
 
+	std::string AlgorithmName() const {return m_cipher.AlgorithmName();}
+
+protected:
+	void InitializeDerivedAndReturnNewSizes(const NameValuePairs &parameters, size_t &firstSize, size_t &blockSize, size_t &lastSize);
 	void FirstPut(const byte *inString);
 	void NextPutMultiple(const byte *inString, size_t length);
 	void NextPutModifiable(byte *inString, size_t length);
 	void LastPut(const byte *inString, size_t length);
-//	byte * CreatePutSpace(size_t &size);
 
-protected:
 	static size_t LastBlockSize(StreamTransformation &c, BlockPaddingScheme padding);
 
 	StreamTransformation &m_cipher;
@@ -283,22 +289,19 @@ typedef StreamTransformationFilter StreamCipherFilter;
 class CRYPTOPP_DLL HashFilter : public Bufferless<Filter>, private FilterPutSpaceHelper
 {
 public:
-	HashFilter(HashTransformation &hm, BufferedTransformation *attachment = NULL, bool putMessage=false, int truncatedDigestSize=-1)
-		: m_hashModule(hm), m_putMessage(putMessage), m_truncatedDigestSize(truncatedDigestSize) {Detach(attachment);}
+	HashFilter(HashTransformation &hm, BufferedTransformation *attachment = NULL, bool putMessage=false, int truncatedDigestSize=-1, const std::string &messagePutChannel=DEFAULT_CHANNEL, const std::string &hashPutChannel=DEFAULT_CHANNEL);
 
 	std::string AlgorithmName() const {return m_hashModule.AlgorithmName();}
-
 	void IsolatedInitialize(const NameValuePairs &parameters);
 	size_t Put2(const byte *begin, size_t length, int messageEnd, bool blocking);
-
 	byte * CreatePutSpace(size_t &size) {return m_hashModule.CreateUpdateSpace(size);}
 
 private:
 	HashTransformation &m_hashModule;
 	bool m_putMessage;
-	int m_truncatedDigestSize;
-	byte *m_space;
 	unsigned int m_digestSize;
+	byte *m_space;
+	std::string m_messagePutChannel, m_hashPutChannel;
 };
 
 //! Filter Wrapper for HashTransformation
@@ -309,14 +312,13 @@ public:
 	{
 	public:
 		HashVerificationFailed()
-			: Exception(DATA_INTEGRITY_CHECK_FAILED, "HashVerifier: message hash not valid") {}
+			: Exception(DATA_INTEGRITY_CHECK_FAILED, "HashVerificationFilter: message hash or MAC not valid") {}
 	};
 
-	enum Flags {HASH_AT_BEGIN=1, PUT_MESSAGE=2, PUT_HASH=4, PUT_RESULT=8, THROW_EXCEPTION=16, DEFAULT_FLAGS = HASH_AT_BEGIN | PUT_RESULT};
-	HashVerificationFilter(HashTransformation &hm, BufferedTransformation *attachment = NULL, word32 flags = DEFAULT_FLAGS);
+	enum Flags {HASH_AT_END=0, HASH_AT_BEGIN=1, PUT_MESSAGE=2, PUT_HASH=4, PUT_RESULT=8, THROW_EXCEPTION=16, DEFAULT_FLAGS = HASH_AT_BEGIN | PUT_RESULT};
+	HashVerificationFilter(HashTransformation &hm, BufferedTransformation *attachment = NULL, word32 flags = DEFAULT_FLAGS, int truncatedDigestSize=-1);
 
 	std::string AlgorithmName() const {return m_hashModule.AlgorithmName();}
-
 	bool GetLastResult() const {return m_verified;}
 
 protected:
@@ -326,16 +328,58 @@ protected:
 	void LastPut(const byte *inString, size_t length);
 
 private:
-	static inline unsigned int FirstSize(word32 flags, HashTransformation &hm) {return flags & HASH_AT_BEGIN ? hm.DigestSize() : 0;}
-	static inline unsigned int LastSize(word32 flags, HashTransformation &hm) {return flags & HASH_AT_BEGIN ? 0 : hm.DigestSize();}
+	friend class AuthenticatedDecryptionFilter;
 
 	HashTransformation &m_hashModule;
 	word32 m_flags;
-	SecByteBlock m_expectedHash;
+	unsigned int m_digestSize;
 	bool m_verified;
+	SecByteBlock m_expectedHash;
 };
 
 typedef HashVerificationFilter HashVerifier;	// for backwards compatibility
+
+//! Filter wrapper for encrypting with AuthenticatedSymmetricCipher, optionally handling padding/unpadding when needed
+/*! Additional authenticated data should be given in channel "AAD". If putAAD is true, AAD will be Put() to the attached BufferedTransformation in channel "AAD". */
+class CRYPTOPP_DLL AuthenticatedEncryptionFilter : public StreamTransformationFilter
+{
+public:
+	/*! See StreamTransformationFilter for documentation on BlockPaddingScheme  */
+	AuthenticatedEncryptionFilter(AuthenticatedSymmetricCipher &c, BufferedTransformation *attachment = NULL, bool putAAD=false, int truncatedDigestSize=-1, const std::string &macChannel=DEFAULT_CHANNEL, BlockPaddingScheme padding = DEFAULT_PADDING);
+
+	void IsolatedInitialize(const NameValuePairs &parameters);
+	byte * ChannelCreatePutSpace(const std::string &channel, size_t &size);
+	size_t ChannelPut2(const std::string &channel, const byte *begin, size_t length, int messageEnd, bool blocking);
+	void LastPut(const byte *inString, size_t length);
+
+protected:
+	HashFilter m_hf;
+};
+
+//! Filter wrapper for decrypting with AuthenticatedSymmetricCipher, optionally handling padding/unpadding when needed
+/*! Additional authenticated data should be given in channel "AAD". */
+class CRYPTOPP_DLL AuthenticatedDecryptionFilter : public FilterWithBufferedInput, public BlockPaddingSchemeDef
+{
+public:
+	enum Flags {MAC_AT_END=0, MAC_AT_BEGIN=1, THROW_EXCEPTION=16, DEFAULT_FLAGS = THROW_EXCEPTION};
+
+	/*! See StreamTransformationFilter for documentation on BlockPaddingScheme  */
+	AuthenticatedDecryptionFilter(AuthenticatedSymmetricCipher &c, BufferedTransformation *attachment = NULL, word32 flags = DEFAULT_FLAGS, int truncatedDigestSize=-1, BlockPaddingScheme padding = DEFAULT_PADDING);
+
+	std::string AlgorithmName() const {return m_hashVerifier.AlgorithmName();}
+	byte * ChannelCreatePutSpace(const std::string &channel, size_t &size);
+	size_t ChannelPut2(const std::string &channel, const byte *begin, size_t length, int messageEnd, bool blocking);
+	bool GetLastResult() const {return m_hashVerifier.GetLastResult();}
+
+protected:
+	void InitializeDerivedAndReturnNewSizes(const NameValuePairs &parameters, size_t &firstSize, size_t &blockSize, size_t &lastSize);
+	void FirstPut(const byte *inString);
+	void NextPutMultiple(const byte *inString, size_t length);
+	void LastPut(const byte *inString, size_t length);
+
+	HashVerificationFilter m_hashVerifier;
+	StreamTransformationFilter m_streamFilter;
+};
 
 //! Filter Wrapper for PK_Signer
 class CRYPTOPP_DLL SignerFilter : public Unflushable<Filter>
@@ -368,7 +412,7 @@ public:
 			: Exception(DATA_INTEGRITY_CHECK_FAILED, "VerifierFilter: digital signature not valid") {}
 	};
 
-	enum Flags {SIGNATURE_AT_BEGIN=1, PUT_MESSAGE=2, PUT_SIGNATURE=4, PUT_RESULT=8, THROW_EXCEPTION=16, DEFAULT_FLAGS = SIGNATURE_AT_BEGIN | PUT_RESULT};
+	enum Flags {SIGNATURE_AT_END=0, SIGNATURE_AT_BEGIN=1, PUT_MESSAGE=2, PUT_SIGNATURE=4, PUT_RESULT=8, THROW_EXCEPTION=16, DEFAULT_FLAGS = SIGNATURE_AT_BEGIN | PUT_RESULT};
 	SignatureVerificationFilter(const PK_Verifier &verifier, BufferedTransformation *attachment = NULL, word32 flags = DEFAULT_FLAGS);
 
 	std::string AlgorithmName() const {return m_verifier.AlgorithmName();}
@@ -473,6 +517,8 @@ public:
 	bool MessageSeriesEnd(int propagation=-1, bool blocking=true)
 		{return m_passSignal ? m_owner.AttachedTransformation()->MessageSeriesEnd(propagation, blocking) : false;}
 
+	byte * ChannelCreatePutSpace(const std::string &channel, size_t &size)
+		{return m_owner.AttachedTransformation()->ChannelCreatePutSpace(channel, size);}
 	size_t ChannelPut2(const std::string &channel, const byte *begin, size_t length, int messageEnd, bool blocking)
 		{return m_owner.AttachedTransformation()->ChannelPut2(channel, begin, length, m_passSignal ? messageEnd : 0, blocking);}
 	size_t ChannelPutModifiable2(const std::string &channel, byte *begin, size_t length, int messageEnd, bool blocking)
@@ -625,8 +671,8 @@ public:
 	template <class T> StringStore(const T &string)
 		{StoreInitialize(MakeParameters("InputBuffer", ConstByteArrayParameter(string)));}
 
-	CRYPTOPP_DLL size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel=NULL_CHANNEL, bool blocking=true);
-	CRYPTOPP_DLL size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, const std::string &channel=NULL_CHANNEL, bool blocking=true) const;
+	CRYPTOPP_DLL size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true);
+	CRYPTOPP_DLL size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true) const;
 
 private:
 	CRYPTOPP_DLL void StoreInitialize(const NameValuePairs &parameters);
@@ -648,8 +694,8 @@ public:
 	bool AnyRetrievable() const {return MaxRetrievable() != 0;}
 	lword MaxRetrievable() const {return m_length-m_count;}
 
-	size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel=NULL_CHANNEL, bool blocking=true);
-	size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, const std::string &channel=NULL_CHANNEL, bool blocking=true) const
+	size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true);
+	size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true) const
 	{
 		throw NotImplemented("RandomNumberStore: CopyRangeTo2() is not supported by this store");
 	}
@@ -668,8 +714,8 @@ public:
 	NullStore(lword size = ULONG_MAX) : m_size(size) {}
 	void StoreInitialize(const NameValuePairs &parameters) {}
 	lword MaxRetrievable() const {return m_size;}
-	size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel=NULL_CHANNEL, bool blocking=true);
-	size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, const std::string &channel=NULL_CHANNEL, bool blocking=true) const;
+	size_t TransferTo2(BufferedTransformation &target, lword &transferBytes, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true);
+	size_t CopyRangeTo2(BufferedTransformation &target, lword &begin, lword end=LWORD_MAX, const std::string &channel=DEFAULT_CHANNEL, bool blocking=true) const;
 
 private:
 	lword m_size;
@@ -712,11 +758,11 @@ public:
 	void IsolatedInitialize(const NameValuePairs &parameters)
 		{m_store.IsolatedInitialize(parameters);}
 	size_t Pump2(lword &byteCount, bool blocking=true)
-		{return m_store.TransferTo2(*AttachedTransformation(), byteCount, NULL_CHANNEL, blocking);}
+		{return m_store.TransferTo2(*AttachedTransformation(), byteCount, DEFAULT_CHANNEL, blocking);}
 	size_t PumpMessages2(unsigned int &messageCount, bool blocking=true)
-		{return m_store.TransferMessagesTo2(*AttachedTransformation(), messageCount, NULL_CHANNEL, blocking);}
+		{return m_store.TransferMessagesTo2(*AttachedTransformation(), messageCount, DEFAULT_CHANNEL, blocking);}
 	size_t PumpAll2(bool blocking=true)
-		{return m_store.TransferAllTo2(*AttachedTransformation(), NULL_CHANNEL, blocking);}
+		{return m_store.TransferAllTo2(*AttachedTransformation(), DEFAULT_CHANNEL, blocking);}
 	bool SourceExhausted() const
 		{return !m_store.AnyRetrievable() && !m_store.AnyMessages();}
 	void SetAutoSignalPropagation(int propagation)

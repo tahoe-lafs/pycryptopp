@@ -19,9 +19,6 @@ NAMESPACE_BEGIN(CryptoPP)
 RandomPool::RandomPool()
 	: m_pCipher(new AES::Encryption), m_keySet(false)
 {
-	memset(m_key, 0, 32);
-	memset(m_seed, 0, 16);
-	SHA256 hash;
 }
 
 void RandomPool::IncorporateEntropy(const byte *input, size_t length)

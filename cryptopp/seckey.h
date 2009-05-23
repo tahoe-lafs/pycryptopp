@@ -206,6 +206,16 @@ struct SymmetricCipherDocumentation
 	typedef SymmetricCipher Decryption;
 };
 
+/*! \brief Each class derived from this one defines two types, Encryption and Decryption, 
+	both of which implement the AuthenticatedSymmetricCipher interface. */
+struct AuthenticatedSymmetricCipherDocumentation
+{
+	//! implements the AuthenticatedSymmetricCipher interface
+	typedef AuthenticatedSymmetricCipher Encryption;
+	//! implements the AuthenticatedSymmetricCipher interface
+	typedef AuthenticatedSymmetricCipher Decryption;
+};
+
 NAMESPACE_END
 
 #endif

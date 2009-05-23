@@ -103,7 +103,7 @@ size_t Filter::OutputModifiable(int outputSite, byte *inString, size_t length, i
 {
 	if (messageEnd)
 		messageEnd--;
-	size_t result = AttachedTransformation()->PutModifiable2(inString, length, messageEnd, blocking);
+	size_t result = AttachedTransformation()->ChannelPutModifiable2(channel, inString, length, messageEnd, blocking);
 	m_continueAt = result ? outputSite : 0;
 	return result;
 }
@@ -112,7 +112,7 @@ size_t Filter::Output(int outputSite, const byte *inString, size_t length, int m
 {
 	if (messageEnd)
 		messageEnd--;
-	size_t result = AttachedTransformation()->Put2(inString, length, messageEnd, blocking);
+	size_t result = AttachedTransformation()->ChannelPut2(channel, inString, length, messageEnd, blocking);
 	m_continueAt = result ? outputSite : 0;
 	return result;
 }
@@ -540,6 +540,18 @@ size_t ArrayXorSink::Put2(const byte *begin, size_t length, int messageEnd, bool
 
 // *************************************************************
 
+StreamTransformationFilter::StreamTransformationFilter(StreamTransformation &c, BufferedTransformation *attachment, BlockPaddingScheme padding, bool allowAuthenticatedSymmetricCipher)
+   : FilterWithBufferedInput(attachment)
+	, m_cipher(c)
+{
+	assert(c.MinLastBlockSize() == 0 || c.MinLastBlockSize() > c.MandatoryBlockSize());
+
+	if (!allowAuthenticatedSymmetricCipher && dynamic_cast<AuthenticatedSymmetricCipher *>(&c) != 0)
+		throw InvalidArgument("StreamTransformationFilter: please use AuthenticatedEncryptionFilter and AuthenticatedDecryptionFilter for AuthenticatedSymmetricCipher");
+
+	IsolatedInitialize(MakeParameters(Name::BlockPaddingScheme(), padding));
+}
+
 size_t StreamTransformationFilter::LastBlockSize(StreamTransformation &c, BlockPaddingScheme padding)
 {
 	if (c.MinLastBlockSize() > 0)
@@ -550,26 +562,22 @@ size_t StreamTransformationFilter::LastBlockSize(StreamTransformation &c, BlockP
 		return 0;
 }
 
-StreamTransformationFilter::StreamTransformationFilter(StreamTransformation &c, BufferedTransformation *attachment, BlockPaddingScheme padding)
-   : FilterWithBufferedInput(0, c.MandatoryBlockSize(), LastBlockSize(c, padding), attachment)
-	, m_cipher(c)
+void StreamTransformationFilter::InitializeDerivedAndReturnNewSizes(const NameValuePairs &parameters, size_t &firstSize, size_t &blockSize, size_t &lastSize)
 {
-	assert(c.MinLastBlockSize() == 0 || c.MinLastBlockSize() > c.MandatoryBlockSize());
-
-	bool isBlockCipher = (c.MandatoryBlockSize() > 1 && c.MinLastBlockSize() == 0);
+	BlockPaddingScheme padding = parameters.GetValueWithDefault(Name::BlockPaddingScheme(), DEFAULT_PADDING);
+	bool isBlockCipher = (m_cipher.MandatoryBlockSize() > 1 && m_cipher.MinLastBlockSize() == 0);
 
 	if (padding == DEFAULT_PADDING)
-	{
-		if (isBlockCipher)
-			m_padding = PKCS_PADDING;
-		else
-			m_padding = NO_PADDING;
-	}
+		m_padding = isBlockCipher ? PKCS_PADDING : NO_PADDING;
 	else
 		m_padding = padding;
 
 	if (!isBlockCipher && (m_padding == PKCS_PADDING || m_padding == ONE_AND_ZEROS_PADDING))
-		throw InvalidArgument("StreamTransformationFilter: PKCS_PADDING and ONE_AND_ZEROS_PADDING cannot be used with " + c.AlgorithmName());
+		throw InvalidArgument("StreamTransformationFilter: PKCS_PADDING and ONE_AND_ZEROS_PADDING cannot be used with " + m_cipher.AlgorithmName());
+
+	firstSize = 0;
+	blockSize = m_cipher.MandatoryBlockSize();
+	lastSize = LastBlockSize(m_cipher, m_padding);
 }
 
 void StreamTransformationFilter::FirstPut(const byte *inString)
@@ -588,7 +596,7 @@ void StreamTransformationFilter::NextPutMultiple(const byte *inString, size_t le
 	do
 	{
 		size_t len = m_optimalBufferSize;
-		byte *space = HelpCreatePutSpace(*AttachedTransformation(), NULL_CHANNEL, s, length, len);
+		byte *space = HelpCreatePutSpace(*AttachedTransformation(), DEFAULT_CHANNEL, s, length, len);
 		if (len < length)
 		{
 			if (len == m_optimalBufferSize)
@@ -628,7 +636,7 @@ void StreamTransformationFilter::LastPut(const byte *inString, size_t length)
 			{
 				// do padding
 				size_t blockSize = STDMAX(minLastBlockSize, (size_t)m_cipher.MandatoryBlockSize());
-				space = HelpCreatePutSpace(*AttachedTransformation(), NULL_CHANNEL, blockSize);
+				space = HelpCreatePutSpace(*AttachedTransformation(), DEFAULT_CHANNEL, blockSize);
 				memcpy(space, inString, length);
 				memset(space + length, 0, blockSize - length);
 				m_cipher.ProcessLastBlock(space, space, blockSize);
@@ -644,7 +652,7 @@ void StreamTransformationFilter::LastPut(const byte *inString, size_t length)
 						throw InvalidCiphertext("StreamTransformationFilter: ciphertext length is not a multiple of block size");
 				}
 
-				space = HelpCreatePutSpace(*AttachedTransformation(), NULL_CHANNEL, length, m_optimalBufferSize);
+				space = HelpCreatePutSpace(*AttachedTransformation(), DEFAULT_CHANNEL, length, m_optimalBufferSize);
 				m_cipher.ProcessLastBlock(space, inString, length);
 				AttachedTransformation()->Put(space, length);
 			}
@@ -656,7 +664,7 @@ void StreamTransformationFilter::LastPut(const byte *inString, size_t length)
 		unsigned int s;
 		s = m_cipher.MandatoryBlockSize();
 		assert(s > 1);
-		space = HelpCreatePutSpace(*AttachedTransformation(), NULL_CHANNEL, s, m_optimalBufferSize);
+		space = HelpCreatePutSpace(*AttachedTransformation(), DEFAULT_CHANNEL, s, m_optimalBufferSize);
 		if (m_cipher.IsForwardTransformation())
 		{
 			assert(length < s);
@@ -705,59 +713,63 @@ void StreamTransformationFilter::LastPut(const byte *inString, size_t length)
 
 // *************************************************************
 
+HashFilter::HashFilter(HashTransformation &hm, BufferedTransformation *attachment, bool putMessage, int truncatedDigestSize, const std::string &messagePutChannel, const std::string &hashPutChannel)
+	: m_hashModule(hm), m_putMessage(putMessage), m_messagePutChannel(messagePutChannel), m_hashPutChannel(hashPutChannel)
+{
+	m_digestSize = truncatedDigestSize < 0 ? m_hashModule.DigestSize() : truncatedDigestSize;
+	Detach(attachment);
+}
+
 void HashFilter::IsolatedInitialize(const NameValuePairs &parameters)
 {
 	m_putMessage = parameters.GetValueWithDefault(Name::PutMessage(), false);
-	m_truncatedDigestSize = parameters.GetIntValueWithDefault(Name::TruncatedDigestSize(), -1);
-	m_hashModule.Restart();
+	int s = parameters.GetIntValueWithDefault(Name::TruncatedDigestSize(), -1);
+	m_digestSize = s < 0 ? m_hashModule.DigestSize() : s;
 }
 
 size_t HashFilter::Put2(const byte *inString, size_t length, int messageEnd, bool blocking)
 {
 	FILTER_BEGIN;
-	m_hashModule.Update(inString, length);
 	if (m_putMessage)
-		FILTER_OUTPUT(1, inString, length, 0);
+		FILTER_OUTPUT3(1, 0, inString, length, 0, m_messagePutChannel);
+	m_hashModule.Update(inString, length);
 	if (messageEnd)
 	{
 		{
 			size_t size;
-			m_digestSize = m_hashModule.DigestSize();
-			if (m_truncatedDigestSize >= 0 && (unsigned int)m_truncatedDigestSize < m_digestSize)
-				m_digestSize = m_truncatedDigestSize;
-			m_space = HelpCreatePutSpace(*AttachedTransformation(), NULL_CHANNEL, m_digestSize, m_digestSize, size = m_digestSize);
+			m_space = HelpCreatePutSpace(*AttachedTransformation(), m_hashPutChannel, m_digestSize, m_digestSize, size = m_digestSize);
 			m_hashModule.TruncatedFinal(m_space, m_digestSize);
 		}
-		FILTER_OUTPUT(2, m_space, m_digestSize, messageEnd);
+		FILTER_OUTPUT3(2, 0, m_space, m_digestSize, messageEnd, m_hashPutChannel);
 	}
 	FILTER_END_NO_MESSAGE_END;
 }
 
 // *************************************************************
 
-HashVerificationFilter::HashVerificationFilter(HashTransformation &hm, BufferedTransformation *attachment, word32 flags)
+HashVerificationFilter::HashVerificationFilter(HashTransformation &hm, BufferedTransformation *attachment, word32 flags, int truncatedDigestSize)
 	: FilterWithBufferedInput(attachment)
 	, m_hashModule(hm)
 {
-	IsolatedInitialize(MakeParameters(Name::HashVerificationFilterFlags(), flags));
+	IsolatedInitialize(MakeParameters(Name::HashVerificationFilterFlags(), flags)(Name::TruncatedDigestSize(), truncatedDigestSize));
 }
 
 void HashVerificationFilter::InitializeDerivedAndReturnNewSizes(const NameValuePairs &parameters, size_t &firstSize, size_t &blockSize, size_t &lastSize)
 {
 	m_flags = parameters.GetValueWithDefault(Name::HashVerificationFilterFlags(), (word32)DEFAULT_FLAGS);
-	m_hashModule.Restart();
-	size_t size = m_hashModule.DigestSize();
+	int s = parameters.GetIntValueWithDefault(Name::TruncatedDigestSize(), -1);
+	m_digestSize = s < 0 ? m_hashModule.DigestSize() : s;
 	m_verified = false;
-	firstSize = m_flags & HASH_AT_BEGIN ? size : 0;
+	firstSize = m_flags & HASH_AT_BEGIN ? m_digestSize : 0;
 	blockSize = 1;
-	lastSize = m_flags & HASH_AT_BEGIN ? 0 : size;
+	lastSize = m_flags & HASH_AT_BEGIN ? 0 : m_digestSize;
 }
 
 void HashVerificationFilter::FirstPut(const byte *inString)
 {
 	if (m_flags & HASH_AT_BEGIN)
 	{
-		m_expectedHash.New(m_hashModule.DigestSize());
+		m_expectedHash.New(m_digestSize);
 		memcpy(m_expectedHash, inString, m_expectedHash.size());
 		if (m_flags & PUT_HASH)
 			AttachedTransformation()->Put(inString, m_expectedHash.size());
@@ -776,11 +788,11 @@ void HashVerificationFilter::LastPut(const byte *inString, size_t length)
 	if (m_flags & HASH_AT_BEGIN)
 	{
 		assert(length == 0);
-		m_verified = m_hashModule.Verify(m_expectedHash);
+		m_verified = m_hashModule.TruncatedVerify(m_expectedHash, m_digestSize);
 	}
 	else
 	{
-		m_verified = (length==m_hashModule.DigestSize() && m_hashModule.Verify(inString));
+		m_verified = (length==m_digestSize && m_hashModule.TruncatedVerify(inString, length));
 		if (m_flags & PUT_HASH)
 			AttachedTransformation()->Put(inString, length);
 	}
@@ -790,6 +802,115 @@ void HashVerificationFilter::LastPut(const byte *inString, size_t length)
 
 	if ((m_flags & THROW_EXCEPTION) && !m_verified)
 		throw HashVerificationFailed();
+}
+
+// *************************************************************
+
+AuthenticatedEncryptionFilter::AuthenticatedEncryptionFilter(AuthenticatedSymmetricCipher &c, BufferedTransformation *attachment, 
+								bool putAAD, int truncatedDigestSize, const std::string &macChannel, BlockPaddingScheme padding)
+	: StreamTransformationFilter(c, attachment, padding, true)
+	, m_hf(c, new OutputProxy(*this, false), putAAD, truncatedDigestSize, AAD_CHANNEL, macChannel)
+{
+	assert(c.IsForwardTransformation());
+}
+
+void AuthenticatedEncryptionFilter::IsolatedInitialize(const NameValuePairs &parameters)
+{
+	m_hf.IsolatedInitialize(parameters);
+	StreamTransformationFilter::IsolatedInitialize(parameters);
+}
+
+byte * AuthenticatedEncryptionFilter::ChannelCreatePutSpace(const std::string &channel, size_t &size)
+{
+	if (channel.empty())
+		return StreamTransformationFilter::CreatePutSpace(size);
+
+	if (channel == AAD_CHANNEL)
+		return m_hf.CreatePutSpace(size);
+
+	throw InvalidChannelName("AuthenticatedEncryptionFilter", channel);
+}
+
+size_t AuthenticatedEncryptionFilter::ChannelPut2(const std::string &channel, const byte *begin, size_t length, int messageEnd, bool blocking)
+{
+	if (channel.empty())
+		return StreamTransformationFilter::Put2(begin, length, messageEnd, blocking);
+
+	if (channel == AAD_CHANNEL)
+		return m_hf.Put2(begin, length, 0, blocking);
+
+	throw InvalidChannelName("AuthenticatedEncryptionFilter", channel);
+}
+
+void AuthenticatedEncryptionFilter::LastPut(const byte *inString, size_t length)
+{
+	StreamTransformationFilter::LastPut(inString, length);
+	m_hf.MessageEnd();
+}
+
+// *************************************************************
+
+AuthenticatedDecryptionFilter::AuthenticatedDecryptionFilter(AuthenticatedSymmetricCipher &c, BufferedTransformation *attachment, word32 flags, int truncatedDigestSize, BlockPaddingScheme padding)
+	: FilterWithBufferedInput(attachment)
+	, m_hashVerifier(c, new OutputProxy(*this, false))
+	, m_streamFilter(c, new OutputProxy(*this, false), padding, true)
+{
+	assert(!c.IsForwardTransformation() || c.IsSelfInverting());
+	IsolatedInitialize(MakeParameters(Name::BlockPaddingScheme(), padding)(Name::AuthenticatedDecryptionFilterFlags(), flags)(Name::TruncatedDigestSize(), truncatedDigestSize));
+}
+
+void AuthenticatedDecryptionFilter::InitializeDerivedAndReturnNewSizes(const NameValuePairs &parameters, size_t &firstSize, size_t &blockSize, size_t &lastSize)
+{
+	word32 flags = parameters.GetValueWithDefault(Name::AuthenticatedDecryptionFilterFlags(), (word32)DEFAULT_FLAGS);
+
+	m_hashVerifier.Initialize(CombinedNameValuePairs(parameters, MakeParameters(Name::HashVerificationFilterFlags(), flags)));
+	m_streamFilter.Initialize(parameters);
+
+	firstSize = m_hashVerifier.m_firstSize;
+	blockSize = 1;
+	lastSize = m_hashVerifier.m_lastSize;
+}
+
+byte * AuthenticatedDecryptionFilter::ChannelCreatePutSpace(const std::string &channel, size_t &size)
+{
+	if (channel.empty())
+		return m_streamFilter.CreatePutSpace(size);
+
+	if (channel == AAD_CHANNEL)
+		return m_hashVerifier.CreatePutSpace(size);
+
+	throw InvalidChannelName("AuthenticatedDecryptionFilter", channel);
+}
+
+size_t AuthenticatedDecryptionFilter::ChannelPut2(const std::string &channel, const byte *begin, size_t length, int messageEnd, bool blocking)
+{
+	if (channel.empty())
+	{
+		if (m_lastSize > 0)
+			m_hashVerifier.ForceNextPut();
+		return FilterWithBufferedInput::Put2(begin, length, messageEnd, blocking);
+	}
+
+	if (channel == AAD_CHANNEL)
+		return m_hashVerifier.Put2(begin, length, 0, blocking);
+
+	throw InvalidChannelName("AuthenticatedDecryptionFilter", channel);
+}
+
+void AuthenticatedDecryptionFilter::FirstPut(const byte *inString)
+{
+	m_hashVerifier.Put(inString, m_firstSize);
+}
+
+void AuthenticatedDecryptionFilter::NextPutMultiple(const byte *inString, size_t length)
+{
+	m_streamFilter.Put(inString, length);
+}
+
+void AuthenticatedDecryptionFilter::LastPut(const byte *inString, size_t length)
+{
+	m_streamFilter.MessageEnd();
+	m_hashVerifier.PutMessageEnd(inString, length);
 }
 
 // *************************************************************

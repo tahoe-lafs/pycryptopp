@@ -1,9 +1,8 @@
 // iterhash.cpp - written and placed in the public domain by Wei Dai
 
-#include "pch.h"
-
-// prevent Sun's CC compiler from including this file automatically
-#if !defined(__SUNPRO_CC) || defined(CRYPTOPP_MANUALLY_INSTANTIATE_TEMPLATES)
+#ifndef __GNUC__
+#define CRYPTOPP_MANUALLY_INSTANTIATE_TEMPLATES
+#endif
 
 #include "iterhash.h"
 #include "misc.h"
@@ -26,13 +25,13 @@ template <class T, class BASE> void IteratedHashBase<T, BASE>::Update(const byte
 
 	if (num != 0)	// process left over data
 	{
-		if ((num+len) >= blockSize)
+		if (num+len >= blockSize)
 		{
 			memcpy(data+num, input, blockSize-num);
 			HashBlock(dataBuf);
 			input += (blockSize-num);
-			len-=(blockSize - num);
-			num=0;
+			len -= (blockSize-num);
+			num = 0;
 			// drop through and do the rest
 		}
 		else
@@ -133,18 +132,28 @@ template <class T, class BASE> void IteratedHashBase<T, BASE>::TruncatedFinal(by
 	ByteOrder order = this->GetByteOrder();
 
 	PadLastBlock(blockSize - 2*sizeof(HashWordType));
-	ConditionalByteReverse<HashWordType>(order, dataBuf, dataBuf, blockSize - 2*sizeof(HashWordType));
+	dataBuf[blockSize/sizeof(T)-2+order] = ConditionalByteReverse(order, this->GetBitCountLo());
+	dataBuf[blockSize/sizeof(T)-1-order] = ConditionalByteReverse(order, this->GetBitCountHi());
 
-	dataBuf[blockSize/sizeof(T)-2] = order ? this->GetBitCountHi() : this->GetBitCountLo();
-	dataBuf[blockSize/sizeof(T)-1] = order ? this->GetBitCountLo() : this->GetBitCountHi();
+	HashBlock(dataBuf);
 
-	HashEndianCorrectedBlock(dataBuf);
-	ConditionalByteReverse<HashWordType>(order, stateBuf, stateBuf, this->DigestSize());
-	memcpy(digest, stateBuf, size);
+	if (IsAligned<HashWordType>(digest) && size%sizeof(HashWordType)==0)
+		ConditionalByteReverse<HashWordType>(order, (HashWordType *)digest, stateBuf, size);
+	else
+	{
+		ConditionalByteReverse<HashWordType>(order, stateBuf, stateBuf, this->DigestSize());
+		memcpy(digest, stateBuf, size);
+	}
 
 	this->Restart();		// reinit for next use
 }
 
-NAMESPACE_END
+#ifdef __GNUC__
+	template class IteratedHashBase<word64, HashTransformation>;
+	template class IteratedHashBase<word64, MessageAuthenticationCode>;
 
+	template class IteratedHashBase<word32, HashTransformation>;
+	template class IteratedHashBase<word32, MessageAuthenticationCode>;
 #endif
+
+NAMESPACE_END

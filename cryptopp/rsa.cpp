@@ -115,12 +115,12 @@ void InvertibleRSAFunction::GenerateRandom(RandomNumberGenerator &rng, const Nam
 		throw InvalidArgument("InvertibleRSAFunction: invalid public exponent");
 
 	RSAPrimeSelector selector(m_e);
-	const NameValuePairs &primeParam = MakeParametersForTwoPrimesOfEqualSize(modulusSize)
+	AlgorithmParameters primeParam = MakeParametersForTwoPrimesOfEqualSize(modulusSize)
 		(Name::PointerToPrimeSelector(), selector.GetSelectorPointer());
 	m_p.GenerateRandom(rng, primeParam);
 	m_q.GenerateRandom(rng, primeParam);
 
-	m_d = EuclideanMultiplicativeInverse(m_e, LCM(m_p-1, m_q-1));
+	m_d = m_e.InverseMod(LCM(m_p-1, m_q-1));
 	assert(m_d.IsPositive());
 
 	m_dp = m_d % (m_p-1);

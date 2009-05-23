@@ -245,7 +245,7 @@ CRYPTOPP_DLL extern PAssignIntToInteger g_pAssignIntToInteger;
 
 CRYPTOPP_DLL const std::type_info & CRYPTOPP_API IntegerTypeId();
 
-class CRYPTOPP_DLL AlgorithmParametersBase : public NameValuePairs
+class CRYPTOPP_DLL AlgorithmParametersBase
 {
 public:
 	class ParameterNotUsed : public Exception
@@ -254,10 +254,18 @@ public:
 		ParameterNotUsed(const char *name) : Exception(OTHER_ERROR, std::string("AlgorithmParametersBase: parameter \"") + name + "\" not used") {}
 	};
 
+	// this is actually a move, not a copy
+	AlgorithmParametersBase(const AlgorithmParametersBase &x)
+		: m_name(x.m_name), m_throwIfNotUsed(x.m_throwIfNotUsed), m_used(x.m_used)
+	{
+		m_next.reset(const_cast<AlgorithmParametersBase &>(x).m_next.release());
+		x.m_used = true;
+	}
+
 	AlgorithmParametersBase(const char *name, bool throwIfNotUsed)
 		: m_name(name), m_throwIfNotUsed(throwIfNotUsed), m_used(false) {}
 
-	~AlgorithmParametersBase()
+	virtual ~AlgorithmParametersBase()
 	{
 #ifdef CRYPTOPP_UNCAUGHT_EXCEPTION_AVAILABLE
 		if (!std::uncaught_exception())
@@ -276,65 +284,91 @@ public:
 	}
 
 	bool GetVoidValue(const char *name, const std::type_info &valueType, void *pValue) const;
-
+	
 protected:
+	friend class AlgorithmParameters;
+	void operator=(const AlgorithmParametersBase& rhs);	// assignment not allowed, declare this for VC60
+
 	virtual void AssignValue(const char *name, const std::type_info &valueType, void *pValue) const =0;
-	virtual const NameValuePairs & GetParent() const =0;
+	virtual void MoveInto(void *p) const =0;	// not really const
 
 	const char *m_name;
 	bool m_throwIfNotUsed;
 	mutable bool m_used;
+	member_ptr<AlgorithmParametersBase> m_next;
 };
 
 template <class T>
-class AlgorithmParametersBase2 : public AlgorithmParametersBase
+class AlgorithmParametersTemplate : public AlgorithmParametersBase
 {
 public:
-	AlgorithmParametersBase2(const char *name, const T &value, bool throwIfNotUsed) : AlgorithmParametersBase(name, throwIfNotUsed), m_value(value) {}
+	AlgorithmParametersTemplate(const char *name, const T &value, bool throwIfNotUsed)
+		: AlgorithmParametersBase(name, throwIfNotUsed), m_value(value)
+	{
+	}
 
 	void AssignValue(const char *name, const std::type_info &valueType, void *pValue) const
 	{
 		// special case for retrieving an Integer parameter when an int was passed in
 		if (!(g_pAssignIntToInteger != NULL && typeid(T) == typeid(int) && g_pAssignIntToInteger(valueType, pValue, &m_value)))
 		{
-			ThrowIfTypeMismatch(name, typeid(T), valueType);
+			NameValuePairs::ThrowIfTypeMismatch(name, typeid(T), valueType);
 			*reinterpret_cast<T *>(pValue) = m_value;
 		}
+	}
+
+	void MoveInto(void *buffer) const
+	{
+		AlgorithmParametersTemplate<T>* p = new(buffer) AlgorithmParametersTemplate<T>(*this);
 	}
 
 protected:
 	T m_value;
 };
 
-template <class PARENT, class T>
-class AlgorithmParameters : public AlgorithmParametersBase2<T>
+CRYPTOPP_DLL_TEMPLATE_CLASS AlgorithmParametersTemplate<bool>;
+CRYPTOPP_DLL_TEMPLATE_CLASS AlgorithmParametersTemplate<int>;
+CRYPTOPP_DLL_TEMPLATE_CLASS AlgorithmParametersTemplate<ConstByteArrayParameter>;
+
+class CRYPTOPP_DLL AlgorithmParameters : public NameValuePairs
 {
 public:
-	AlgorithmParameters(const PARENT &parent, const char *name, const T &value, bool throwIfNotUsed)
-		: AlgorithmParametersBase2<T>(name, value, throwIfNotUsed), m_parent(parent)
-	{}
+	AlgorithmParameters();
 
-	AlgorithmParameters(const AlgorithmParameters &copy)
-		: AlgorithmParametersBase2<T>(copy), m_parent(copy.m_parent)
+#ifdef __BORLANDC__
+	template <class T>
+	AlgorithmParameters(const char *name, const T &value, bool throwIfNotUsed=true)
+		: m_next(new AlgorithmParametersTemplate<T>(name, value, throwIfNotUsed))
+		, m_defaultThrowIfNotUsed(throwIfNotUsed)
 	{
-		copy.m_used = true;
+	}
+#endif
+
+	AlgorithmParameters(const AlgorithmParameters &x);
+
+	AlgorithmParameters & operator=(const AlgorithmParameters &x);
+
+	template <class T>
+	AlgorithmParameters & operator()(const char *name, const T &value, bool throwIfNotUsed)
+	{
+		member_ptr<AlgorithmParametersBase> p(new AlgorithmParametersTemplate<T>(name, value, throwIfNotUsed));
+		p->m_next.reset(m_next.release());
+		m_next.reset(p.release());
+		m_defaultThrowIfNotUsed = throwIfNotUsed;
+		return *this;
 	}
 
-	template <class R>
-	AlgorithmParameters<AlgorithmParameters<PARENT,T>, R> operator()(const char *name, const R &value) const
+	template <class T>
+	AlgorithmParameters & operator()(const char *name, const T &value)
 	{
-		return AlgorithmParameters<AlgorithmParameters<PARENT,T>, R>(*this, name, value, this->m_throwIfNotUsed);
+		return operator()(name, value, m_defaultThrowIfNotUsed);
 	}
 
-	template <class R>
-	AlgorithmParameters<AlgorithmParameters<PARENT,T>, R> operator()(const char *name, const R &value, bool throwIfNotUsed) const
-	{
-		return AlgorithmParameters<AlgorithmParameters<PARENT,T>, R>(*this, name, value, throwIfNotUsed);
-	}
+	bool GetVoidValue(const char *name, const std::type_info &valueType, void *pValue) const;
 
-private:
-	const NameValuePairs & GetParent() const {return m_parent;}
-	PARENT m_parent;
+protected:
+	member_ptr<AlgorithmParametersBase> m_next;
+	bool m_defaultThrowIfNotUsed;
 };
 
 //! Create an object that implements NameValuePairs for passing parameters
@@ -343,13 +377,17 @@ private:
 	such as MSVC 7.0 and earlier.
 	\note A NameValuePairs object containing an arbitrary number of name value pairs may be constructed by
 	repeatedly using operator() on the object returned by MakeParameters, for example:
-	const NameValuePairs &parameters = MakeParameters(name1, value1)(name2, value2)(name3, value3);
+	AlgorithmParameters parameters = MakeParameters(name1, value1)(name2, value2)(name3, value3);
 */
+#ifdef __BORLANDC__
+typedef AlgorithmParameters MakeParameters;
+#else
 template <class T>
-AlgorithmParameters<NullNameValuePairs,T> MakeParameters(const char *name, const T &value, bool throwIfNotUsed = true)
+AlgorithmParameters MakeParameters(const char *name, const T &value, bool throwIfNotUsed = true)
 {
-	return AlgorithmParameters<NullNameValuePairs,T>(g_nullNameValuePairs, name, value, throwIfNotUsed);
+	return AlgorithmParameters()(name, value, throwIfNotUsed);
 }
+#endif
 
 #define CRYPTOPP_GET_FUNCTION_ENTRY(name)		(Name::name(), &ThisClass::Get##name)
 #define CRYPTOPP_SET_FUNCTION_ENTRY(name)		(Name::name(), &ThisClass::Set##name)
