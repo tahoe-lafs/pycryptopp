@@ -22,3 +22,12 @@ try:
     print full.rstrip()
 except OSError:
     pass
+
+try:
+    out = subprocess.Popen(["python", "-c", "import platform;print platform.platform()"],
+                           stdout=subprocess.PIPE).communicate()[0]
+    print
+    print "platform:", out.replace("\n", " ")
+    print full.rstrip()
+except OSError:
+    pass
