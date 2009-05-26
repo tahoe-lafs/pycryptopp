@@ -83,6 +83,13 @@ class Signer(unittest.TestCase):
         v = signer.get_verifying_key()
         self.failUnless(v.verify("message", sig))
 
+    def test_sign_and_verify_emptymsg(self):
+        seed = randstr(SEEDBYTES)
+        signer = ecdsa.SigningKey(seed)
+        sig = signer.sign("")
+        v = signer.get_verifying_key()
+        self.failUnless(v.verify("", sig))
+
     def test_construct_from_same_seed_is_reproducible(self):
         seed = randstr(SEEDBYTES)
         signer1 = ecdsa.SigningKey(seed)
@@ -134,6 +141,7 @@ class Verifier(unittest.TestCase):
         self.failUnlessEqual(s1, s2)
 
 def flip_one_bit(s):
+    assert s
     i = randrange(0, len(s))
     result = s[:i] + chr(ord(s[i])^(0x01<<randrange(0, 8))) + s[i+1:]
     assert result != s, "Internal error -- flip_one_bit() produced the same string as its input: %s == %s" % (result, s)
@@ -142,7 +150,7 @@ def flip_one_bit(s):
 def randmsg():
     # Choose a random message size from a range probably large enough to
     # exercise any different code paths which depend on the message length.
-    randmsglen = randrange(0, SIGBYTES*2+2)
+    randmsglen = randrange(1, SIGBYTES*2+2)
     return randstr(randmsglen)
 
 class SignAndVerify(unittest.TestCase):
