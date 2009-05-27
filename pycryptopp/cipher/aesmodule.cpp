@@ -4,6 +4,8 @@
 
 #include <Python.h>
 
+#include "aesmodule.hpp"
+
 #if (PY_VERSION_HEX < 0x02050000)
 typedef int Py_ssize_t;
 #endif
@@ -17,9 +19,7 @@ typedef int Py_ssize_t;
 #include <cryptopp/aes.h>
 #endif
 
-static char aes__doc__[] = "\
-aes counter mode cipher\
-";
+static const char*const aes___doc__ = "_aes counter mode cipher";
 
 static PyObject *aes_error;
 
@@ -132,7 +132,7 @@ AES_init(PyObject* self, PyObject *args, PyObject *kwdict) {
 static PyTypeObject AES_type = {
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
-    "aes.AES", /*tp_name*/
+    "_aes.AES", /*tp_name*/
     sizeof(AES),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
     AES_dealloc, /*tp_dealloc*/
@@ -171,30 +171,15 @@ static PyTypeObject AES_type = {
     AES_new,                /* tp_new */
 };
 
-static struct PyMethodDef aes_functions[] = {
-    {NULL,     NULL}            /* Sentinel */
-};
-
-#ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
-#define PyMODINIT_FUNC void
-#endif
-PyMODINIT_FUNC
-initaes(void) {
-    PyObject *module;
-    PyObject *module_dict;
-
+void
+init_aes(PyObject*const module) {
     if (PyType_Ready(&AES_type) < 0)
         return;
-
-    module = Py_InitModule3("aes", aes_functions, aes__doc__);
-    if (!module)
-      return;
-
     Py_INCREF(&AES_type);
+    PyModule_AddObject(module, "aes_AES", (PyObject *)&AES_type);
 
-    PyModule_AddObject(module, "AES", (PyObject *)&AES_type);
+    aes_error = PyErr_NewException(const_cast<char*>("_aes.Error"), NULL, NULL);
+    PyModule_AddObject(module, "aes_Error", aes_error);
 
-    module_dict = PyModule_GetDict(module);
-    aes_error = PyErr_NewException(const_cast<char*>("aes.Error"), NULL, NULL);
-    PyDict_SetItemString(module_dict, "Error", aes_error);
+    PyModule_AddStringConstant(module, "aes___doc__", aes___doc__);
 }

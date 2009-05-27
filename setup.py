@@ -159,19 +159,7 @@ else:
         raise RuntimeError("if %s.py exists, it is required to be well-formed" % (VERSIONFILE,))
 
 ext_modules.append(
-    Extension('pycryptopp.publickey.rsa', extra_srcs + ['pycryptopp/publickey/rsamodule.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
-    )
-
-ext_modules.append(
-    Extension('pycryptopp.publickey.ecdsa', extra_srcs + ['pycryptopp/publickey/ecdsamodule.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
-    )
-
-ext_modules.append(
-    Extension('pycryptopp.hash.sha256', extra_srcs + ['pycryptopp/hash/sha256module.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
-    )
-
-ext_modules.append(
-    Extension('pycryptopp.cipher.aes', extra_srcs + ['pycryptopp/cipher/aesmodule.cpp',], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
+    Extension('pycryptopp._pycryptopp', extra_srcs + ['pycryptopp/_pycryptoppmodule.cpp', 'pycryptopp/publickey/ecdsamodule.cpp', 'pycryptopp/publickey/rsamodule.cpp', 'pycryptopp/hash/sha256module.cpp', 'pycryptopp/cipher/aesmodule.cpp'], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
     )
 
 miscdeps=os.path.join(os.getcwd(), 'misc', 'dependencies')

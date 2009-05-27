@@ -29,6 +29,8 @@
 
 #include <math.h>
 
+#include "ecdsamodule.hpp"
+
 #if (PY_VERSION_HEX < 0x02050000)
 typedef int Py_ssize_t;
 #endif
@@ -64,14 +66,13 @@ static const int KEY_SIZE_BITS=192;
 
 USING_NAMESPACE(CryptoPP)
 
-PyDoc_STRVAR(ecdsa__doc__,
-"ecdsa -- ECDSA(1363)/EMSA1(Tiger) signatures\n\
+static const char*const ecdsa___doc__ = "ecdsa -- ECDSA(1363)/EMSA1(Tiger) signatures\n\
 \n\
 To create a new ECDSA signing key (deterministically from a 12-byte seed), construct an instance of the class, passing the seed as argument, i.e. SigningKey(seed).\n\
 \n\
 To get a verifying key from a signing key, call get_verifying_key() on the signing key instance.\n\
 \n\
-To deserialize an ECDSA verifying key from a string, call VerifyingKey(serialized_verifying_key).");
+To deserialize an ECDSA verifying key from a string, call VerifyingKey(serialized_verifying_key).";
 
 static PyObject *ecdsa_error;
 
@@ -501,36 +502,22 @@ static PyTypeObject SigningKey_type = {
     SigningKey___init__,       /* tp_init */
 };
 
-static PyMethodDef ecdsa_functions[] = {
-    {NULL, NULL, 0, NULL}  /* sentinel */
-};
-
-#ifndef PyMODINIT_FUNC /* declarations for DLL import/export */
-#define PyMODINIT_FUNC void
-#endif
-PyMODINIT_FUNC
-initecdsa(void) {
-    PyObject *module;
-    PyObject *module_dict;
-
+void
+init_ecdsa(PyObject*const module) {
     VerifyingKey_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(&VerifyingKey_type) < 0)
         return;
+    Py_INCREF(&VerifyingKey_type);
+    PyModule_AddObject(module, "ecdsa_VerifyingKey", (PyObject *)&VerifyingKey_type);
+
     SigningKey_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(&SigningKey_type) < 0)
         return;
-
-    module = Py_InitModule3("ecdsa", ecdsa_functions, ecdsa__doc__);
-    if (!module)
-      return;
-
     Py_INCREF(&SigningKey_type);
-    Py_INCREF(&VerifyingKey_type);
+    PyModule_AddObject(module, "ecdsa_SigningKey", (PyObject *)&SigningKey_type);
 
-    PyModule_AddObject(module, "SigningKey", (PyObject *)&SigningKey_type);
-    PyModule_AddObject(module, "VerifyingKey", (PyObject *)&VerifyingKey_type);
+    ecdsa_error = PyErr_NewException(const_cast<char*>("_ecdsa.Error"), NULL, NULL);
+    PyModule_AddObject(module, "ecdsa_Error", ecdsa_error);
 
-    module_dict = PyModule_GetDict(module);
-    ecdsa_error = PyErr_NewException(const_cast<char*>("ecdsa.Error"), NULL, NULL);
-    PyDict_SetItemString(module_dict, "Error", ecdsa_error);
+    PyModule_AddStringConstant(module, "ecdsa___doc__", ecdsa___doc__);
 }

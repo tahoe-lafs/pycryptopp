@@ -7,6 +7,8 @@
 
 #include <Python.h>
 
+#include "rsamodule.hpp"
+
 #if (PY_VERSION_HEX < 0x02050000)
 typedef int Py_ssize_t;
 #endif
@@ -26,14 +28,13 @@ typedef int Py_ssize_t;
 
 USING_NAMESPACE(CryptoPP)
 
-PyDoc_STRVAR(rsa__doc__,
-"rsa -- RSA-PSS-SHA256 signatures\n\
+static const char*const rsa___doc__ = "_rsa -- RSA-PSS-SHA256 signatures\n\
 \n\
 To create a new RSA signing key from the operating system's random number generator, call generate().\n\
 To deserialize an RSA signing key from a string, call create_signing_key_from_string().\n\
 \n\
 To get an RSA verifying key from an RSA signing key, call get_verifying_key() on the signing key.\n\
-To deserialize an RSA verifying key from a string, call create_verifying_key_from_string().");
+To deserialize an RSA verifying key from a string, call create_verifying_key_from_string().";
 
 static PyObject *rsa_error;
 
@@ -107,7 +108,7 @@ static PyMethodDef VerifyingKey_methods[] = {
 static PyTypeObject VerifyingKey_type = {
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
-    "rsa.VerifyingKey", /*tp_name*/
+    "_rsa.VerifyingKey", /*tp_name*/
     sizeof(VerifyingKey),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
     reinterpret_cast<destructor>(VerifyingKey_dealloc), /*tp_dealloc*/
@@ -237,7 +238,7 @@ static PyMethodDef SigningKey_methods[] = {
 static PyTypeObject SigningKey_type = {
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
-    "rsa.SigningKey", /*tp_name*/
+    "_rsa.SigningKey", /*tp_name*/
     sizeof(SigningKey),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
     (destructor)SigningKey_dealloc, /*tp_dealloc*/
@@ -279,8 +280,8 @@ SigningKey_construct() {
 // static const int MIN_KEY_SIZE_BITS=3675; /* according to Lenstra 2001 "Unbelievable security: Matching AES security using public key systems", you should use RSA keys of length 3675 bits if you want it to be as hard to factor your RSA key as to brute-force your AES-128 key in the year 2030. */
 static const int MIN_KEY_SIZE_BITS=522; /* minimum that can do PSS-SHA256 -- totally insecure and allowed only for faster unit tests */
 
-static PyObject *
-generate(PyObject *dummy, PyObject *args, PyObject *kwdict) {
+PyObject *
+rsa_generate(PyObject *dummy, PyObject *args, PyObject *kwdict) {
     static const char *kwlist[] = {
         "sizeinbits",
         NULL
@@ -303,15 +304,14 @@ generate(PyObject *dummy, PyObject *args, PyObject *kwdict) {
     return reinterpret_cast<PyObject*>(signer);
 }
 
-PyDoc_STRVAR(generate__doc__,
-"Create a signing key using the operating system's random number generator.\n\
+const char*const rsa_generate__doc__ = "Create a signing key using the operating system's random number generator.\n\
 \n\
 @param sizeinbits size of the key in bits\n\
 \n\
-@precondition sizeinbits >= 522");
+@precondition sizeinbits >= 522";
 
-static PyObject *
-create_verifying_key_from_string(PyObject *dummy, PyObject *args, PyObject *kwdict) {
+PyObject *
+rsa_create_verifying_key_from_string(PyObject *dummy, PyObject *args, PyObject *kwdict) {
     static const char *kwlist[] = {
         "serializedverifyingkey",
         NULL
@@ -334,11 +334,10 @@ create_verifying_key_from_string(PyObject *dummy, PyObject *args, PyObject *kwdi
     return reinterpret_cast<PyObject*>(verifier);
 }
 
-PyDoc_STRVAR(create_verifying_key_from_string__doc__,
-"Create a verifying key from its serialized state.");
+const char*const rsa_create_verifying_key_from_string__doc__ = "Create a verifying key from its serialized state.";
 
-static PyObject *
-create_signing_key_from_string(PyObject *dummy, PyObject *args, PyObject *kwdict) {
+PyObject *
+rsa_create_signing_key_from_string(PyObject *dummy, PyObject *args, PyObject *kwdict) {
     static const char *kwlist[] = {
         "serializedsigningkey",
         NULL
@@ -361,40 +360,24 @@ create_signing_key_from_string(PyObject *dummy, PyObject *args, PyObject *kwdict
     return reinterpret_cast<PyObject*>(verifier);
 }
 
-PyDoc_STRVAR(create_signing_key_from_string__doc__,
-"Create a signing key from its serialized state.");
+const char*const rsa_create_signing_key_from_string__doc__ = "Create a signing key from its serialized state.";
 
-static PyMethodDef rsa_functions[] = {
-    {"generate", reinterpret_cast<PyCFunction>(generate), METH_KEYWORDS, generate__doc__},
-    {"create_verifying_key_from_string", reinterpret_cast<PyCFunction>(create_verifying_key_from_string), METH_KEYWORDS, create_verifying_key_from_string__doc__},
-    {"create_signing_key_from_string", reinterpret_cast<PyCFunction>(create_signing_key_from_string), METH_KEYWORDS, create_signing_key_from_string__doc__},
-    {NULL, NULL, 0, NULL}  /* sentinel */
-};
-
-#ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
-#define PyMODINIT_FUNC void
-#endif
-PyMODINIT_FUNC
-initrsa(void) {
-    PyObject *module;
-    PyObject *module_dict;
-
+void
+init_rsa(PyObject*const module) {
+    VerifyingKey_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(&VerifyingKey_type) < 0)
         return;
+    Py_INCREF(&VerifyingKey_type);
+    PyModule_AddObject(module, "rsa_VerifyingKey", (PyObject *)&VerifyingKey_type);
+
+    SigningKey_type.tp_new = PyType_GenericNew;
     if (PyType_Ready(&SigningKey_type) < 0)
         return;
-
-    module = Py_InitModule3("rsa", rsa_functions, rsa__doc__);
-    if (!module)
-      return;
-
     Py_INCREF(&SigningKey_type);
-    Py_INCREF(&VerifyingKey_type);
+    PyModule_AddObject(module, "rsa_SigningKey", (PyObject *)&SigningKey_type);
 
-    PyModule_AddObject(module, "SigningKey", (PyObject *)&SigningKey_type);
-    PyModule_AddObject(module, "VerifyingKey", (PyObject *)&VerifyingKey_type);
+    rsa_error = PyErr_NewException(const_cast<char*>("_rsa.Error"), NULL, NULL);
+    PyModule_AddObject(module, "rsa_Error", rsa_error);
 
-    module_dict = PyModule_GetDict(module);
-    rsa_error = PyErr_NewException(const_cast<char*>("rsa.Error"), NULL, NULL);
-    PyDict_SetItemString(module_dict, "Error", rsa_error);
+    PyModule_AddStringConstant(module, "rsa___doc__", rsa___doc__);
 }

@@ -3,6 +3,7 @@
  */
 
 #include <Python.h>
+#include <assert.h>
 
 #if (PY_VERSION_HEX < 0x02050000)
 typedef int Py_ssize_t;
@@ -19,9 +20,7 @@ typedef int Py_ssize_t;
 #include <cryptopp/filters.h>
 #endif
 
-static char sha256__doc__[] = "\
-sha256 hash function\
-";
+static const char*const sha256___doc__ = "_sha256 hash function";
 
 static PyObject *sha256_error;
 
@@ -58,6 +57,7 @@ a single call with the concatenation of all the messages.");
 static PyObject *
 SHA256_digest(SHA256* self, PyObject* dummy) {
     if (!self->digest) {
+        assert (self->h);
         self->digest = reinterpret_cast<PyStringObject*>(PyString_FromStringAndSize(NULL, self->h->DigestSize()));
         if (!self->digest)
             return NULL;
@@ -134,7 +134,7 @@ SHA256_init(PyObject* self, PyObject *args, PyObject *kwdict) {
 static PyTypeObject SHA256_type = {
     PyObject_HEAD_INIT(NULL)
     0,                         /*ob_size*/
-    "sha256.SHA256", /*tp_name*/
+    "_sha256.SHA256", /*tp_name*/
     sizeof(SHA256),             /*tp_basicsize*/
     0,                         /*tp_itemsize*/
     reinterpret_cast<destructor>(SHA256_dealloc), /*tp_dealloc*/
@@ -174,30 +174,15 @@ static PyTypeObject SHA256_type = {
     SHA256_new,                /* tp_new */
 };
 
-static struct PyMethodDef sha256_functions[] = {
-    {NULL,     NULL}            /* Sentinel */
-};
-
-#ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
-#define PyMODINIT_FUNC void
-#endif
-PyMODINIT_FUNC
-initsha256(void) {
-    PyObject *module;
-    PyObject *module_dict;
-
+void
+init_sha256(PyObject*const module) {
     if (PyType_Ready(&SHA256_type) < 0)
         return;
-
-    module = Py_InitModule3("sha256", sha256_functions, sha256__doc__);
-    if (!module)
-      return;
-
     Py_INCREF(&SHA256_type);
+    PyModule_AddObject(module, "sha256_SHA256", (PyObject *)&SHA256_type);
 
-    PyModule_AddObject(module, "SHA256", (PyObject *)&SHA256_type);
+    sha256_error = PyErr_NewException(const_cast<char*>("_sha256.Error"), NULL, NULL);
+    PyModule_AddObject(module, "sha256_Error", sha256_error);
 
-    module_dict = PyModule_GetDict(module);
-    sha256_error = PyErr_NewException(const_cast<char*>("sha256.Error"), NULL, NULL);
-    PyDict_SetItemString(module_dict, "Error", sha256_error);
+    PyModule_AddStringConstant(module, "sha256___doc__", sha256___doc__);
 }
