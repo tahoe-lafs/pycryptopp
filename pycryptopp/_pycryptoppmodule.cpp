@@ -17,9 +17,9 @@ from pycryptopp import hash\n\
 from pycryptopp.hash import sha256");
 
 static PyMethodDef _pycryptopp_functions[] = {
-    {"rsa_generate", reinterpret_cast<PyCFunction>(rsa_generate), METH_KEYWORDS, rsa_generate__doc__},
-    {"rsa_create_verifying_key_from_string", reinterpret_cast<PyCFunction>(rsa_create_verifying_key_from_string), METH_KEYWORDS, rsa_create_verifying_key_from_string__doc__},
-    {"rsa_create_signing_key_from_string", reinterpret_cast<PyCFunction>(rsa_create_signing_key_from_string), METH_KEYWORDS, rsa_create_signing_key_from_string__doc__},
+    {"rsa_generate", reinterpret_cast<PyCFunction>(rsa_generate), METH_KEYWORDS, const_cast<char*>(rsa_generate__doc__)},
+    {"rsa_create_verifying_key_from_string", reinterpret_cast<PyCFunction>(rsa_create_verifying_key_from_string), METH_KEYWORDS, const_cast<char*>(rsa_create_verifying_key_from_string__doc__)},
+    {"rsa_create_signing_key_from_string", reinterpret_cast<PyCFunction>(rsa_create_signing_key_from_string), METH_KEYWORDS, const_cast<char*>(rsa_create_signing_key_from_string__doc__)},
     {NULL, NULL, 0, NULL}  /* sentinel */
 };
 

@@ -379,5 +379,5 @@ init_rsa(PyObject*const module) {
     rsa_error = PyErr_NewException(const_cast<char*>("_rsa.Error"), NULL, NULL);
     PyModule_AddObject(module, "rsa_Error", rsa_error);
 
-    PyModule_AddStringConstant(module, "rsa___doc__", rsa___doc__);
+    PyModule_AddStringConstant(module, "rsa___doc__", const_cast<char*>(rsa___doc__));
 }

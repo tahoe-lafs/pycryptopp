@@ -184,5 +184,5 @@ init_sha256(PyObject*const module) {
     sha256_error = PyErr_NewException(const_cast<char*>("_sha256.Error"), NULL, NULL);
     PyModule_AddObject(module, "sha256_Error", sha256_error);
 
-    PyModule_AddStringConstant(module, "sha256___doc__", sha256___doc__);
+    PyModule_AddStringConstant(module, "sha256___doc__", const_cast<char*>(sha256___doc__));
 }

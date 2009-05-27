@@ -181,5 +181,5 @@ init_aes(PyObject*const module) {
     aes_error = PyErr_NewException(const_cast<char*>("_aes.Error"), NULL, NULL);
     PyModule_AddObject(module, "aes_Error", aes_error);
 
-    PyModule_AddStringConstant(module, "aes___doc__", aes___doc__);
+    PyModule_AddStringConstant(module, "aes___doc__", const_cast<char*>(aes___doc__));
 }

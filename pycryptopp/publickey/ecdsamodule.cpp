@@ -519,5 +519,5 @@ init_ecdsa(PyObject*const module) {
     ecdsa_error = PyErr_NewException(const_cast<char*>("_ecdsa.Error"), NULL, NULL);
     PyModule_AddObject(module, "ecdsa_Error", ecdsa_error);
 
-    PyModule_AddStringConstant(module, "ecdsa___doc__", ecdsa___doc__);
+    PyModule_AddStringConstant(module, "ecdsa___doc__", const_cast<char*>(ecdsa___doc__));
 }
