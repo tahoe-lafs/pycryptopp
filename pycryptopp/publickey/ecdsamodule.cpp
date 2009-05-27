@@ -444,25 +444,10 @@ SigningKey_get_verifying_key(SigningKey *self, PyObject *dummy) {
     if (!verifier)
         return NULL;
 
-    const DL_PrivateKey_EC<ECP>* privkey;
-    privkey = dynamic_cast<const DL_PrivateKey_EC<ECP>*>(&(self->k->GetPrivateKey()));
-    if (!privkey)
-        return PyErr_Format(ecdsa_error, "dynamic_cast failed for k->GetPrivateKey()");
-
-    const DL_GroupParameters_EC<ECP>& params = privkey->GetGroupParameters();
-
-
-    // Ugh..  Making a temp Verifier just to get the public element to construct the real verifier along with params.
-    ECDSA<ECP, Tiger>::Verifier* temp = new ECDSA<ECP, Tiger>::Verifier(*(self->k));
-    const DL_PublicKey_EC<ECP>* temppubkey;
-    temppubkey = dynamic_cast<const DL_PublicKey_EC<ECP>*>(&(temp->GetPublicKey()));
-    if (!temppubkey)
-        return PyErr_Format(ecdsa_error, "dynamic_cast failed for temp->GetPublicKey()");
-    ECP::Element pubel = temppubkey->GetPublicElement();
-
-    verifier->k = new ECDSA<ECP, Tiger>::Verifier(params, pubel);
+    verifier->k = new ECDSA<ECP, Tiger>::Verifier(*(self->k));
     if (!verifier->k)
         return PyErr_NoMemory();
+    verifier->k->AccessKey().AccessGroupParameters().SetPointCompression(true);
 
     return reinterpret_cast<PyObject*>(verifier);
 }
