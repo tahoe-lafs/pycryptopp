@@ -152,18 +152,17 @@ PyDoc_STRVAR(VerifyingKey_verify__doc__,
 
 static PyObject *
 VerifyingKey_serialize(VerifyingKey *self, PyObject *dummy) {
-    const DL_PublicKey_EC<ECP>* pubkey;
-    pubkey = dynamic_cast<const DL_PublicKey_EC<ECP>*>(&(self->k->GetPublicKey()));
-    if (!pubkey)
-        return PyErr_Format(ecdsa_error, "dynamic_cast failed for k->GetPublicKey()");
-    const DL_GroupParameters_EC<ECP>& params = pubkey->GetGroupParameters();
+    ECDSA<ECP, Tiger>::Verifier *pubkey;
+    pubkey = new ECDSA<ECP, Tiger>::Verifier(*(self->k));
+    const DL_GroupParameters_EC<ECP>& params = pubkey->GetKey().GetGroupParameters();
 
     Py_ssize_t len = params.GetEncodedElementSize(true);
     PyObject* result = PyString_FromStringAndSize(NULL, len);
     if (!result)
         return NULL;
 
-    params.EncodeElement(true, pubkey->GetPublicElement(), reinterpret_cast<byte*>(PyString_AS_STRING(result)));
+    params.EncodeElement(true, pubkey->GetKey().GetPublicElement(),
+                         reinterpret_cast<byte*>(PyString_AS_STRING(result)));
 
     return result;
 }
