@@ -33,8 +33,8 @@ if "--disable-embedded-cryptopp" in sys.argv:
 # Crypto++ source code bundled in the pycryptopp source tree, or by linking to a copy of the
 # Crypto++ library that is already installed on the system.
 
-extra_compile_args=["-w", "-Os"]
-extra_link_args=["-Wl,-x"]
+extra_compile_args=[]
+extra_link_args=[]
 define_macros=[]
 undef_macros=[]
 libraries=[]
@@ -49,6 +49,8 @@ if DEBUG:
     extra_compile_args.append("-Wall")
     extra_link_args.append("-g")
     undef_macros.append('NDEBUG')
+else:
+    extra_compile_args.append("-w")
 
 if DISABLE_EMBEDDED_CRYPTOPP:
     # Link with a Crypto++ library that is already installed on the system.
