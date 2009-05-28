@@ -1,7 +1,13 @@
-import sys, ctypes
+try:
+    from ctypes import RTLD_GLOBAL
+except ImportError:
+    # ctypes was added in Python 2.5 -- we still support Python 2.4, which had dl instead
+    from dl import RTLD_GLOBAL
+
+import sys
 flags = sys.getdlopenflags()
 try:
-    sys.setdlopenflags(flags|ctypes.RTLD_GLOBAL)
+    sys.setdlopenflags(flags|RTLD_GLOBAL)
     from pycryptopp import _pycryptopp
 finally:
     sys.setdlopenflags(flags)
@@ -14,7 +20,7 @@ for name in dir(_pycryptopp):
         myname = name[len(MYNAMEPATTERN):]
         thismodule[myname] = getattr(_pycryptopp, name)
 
-for name in ['sys', 'ctypes', 'flags', '_pycryptopp', 'MYNAMEPATTERN', 'myname']:
+for name in ['sys', 'RTLD_GLOBAL', 'flags', '_pycryptopp', 'MYNAMEPATTERN', 'myname']:
     if thismodule.has_key(name):
         del thismodule[name]
 
