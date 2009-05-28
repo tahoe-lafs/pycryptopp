@@ -1,4 +1,3 @@
-import rsa
+import ecdsa, rsa
 
-quiet_pyflakes=[rsa]
-# quiet_pyflakes=[rsa, ecdsa]
+quiet_pyflakes=[ecdsa, rsa]
