@@ -106,7 +106,23 @@ else:
     if 'sunos' in platform.system().lower():
         extra_compile_args.append('-Wa,--divide') # allow use of "/" operator
 
-    cryptopp_src = [ os.path.join(CRYPTOPPDIR, x) for x in os.listdir(CRYPTOPPDIR) if x.endswith('.cpp') ]
+    # pycryptopp provides access to a very limited subset of libcrypto++.
+    # These are the source files that we actually need to compile.
+    used_cpp_files = ["sha.cpp", "rsa.cpp", "rijndael.cpp",
+                      "pubkey.cpp", "eccrypto.cpp", "dsa.cpp", "cryptlib.cpp",
+                      "iterhash.cpp", "asn.cpp", "queue.cpp", "filters.cpp",
+                      "ecp.cpp", "algebra.cpp",
+                      "dll.cpp", "oaep.cpp", "gfpcrypt.cpp",
+                      "modes.cpp", "hmac.cpp", "randpool.cpp", "pssr.cpp",
+                      "hrtimer.cpp", "hex.cpp", "basecode.cpp", "cpu.cpp",
+                      "integer.cpp", "pkcspad.cpp", "gf2n.cpp", "algparam.cpp",
+                      "rdtables.cpp", "ec2n.cpp",
+                      "tiger.cpp", "tigertab.cpp", "fips140.cpp", "misc.cpp",
+                      "nbtheory.cpp", "osrng.cpp", "rng.cpp", "mqueue.cpp",
+                      ]
+    used_cpp_files.sort()
+
+    cryptopp_src = [ os.path.join(CRYPTOPPDIR, x) for x in used_cpp_files ]
     extra_srcs.extend(cryptopp_src)
 
 # In either case, we must provide a value for CRYPTOPP_DISABLE_ASM that
