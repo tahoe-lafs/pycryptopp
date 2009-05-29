@@ -42,7 +42,7 @@ try:
 finally:
     if use_RTLD_GLOBAL:
         sys.setdlopenflags(flags)
-        del flags
+        del flags, RTLD_GLOBAL
 
 
 def _import_my_names(thismodule, prefix):
@@ -54,4 +54,4 @@ def _import_my_names(thismodule, prefix):
 import publickey, hash, cipher
 
 quiet_pyflakes=[__version__, publickey, hash, cipher, _pycryptopp]
-del sys, RTLD_GLOBAL, quiet_pyflakes
+del sys, quiet_pyflakes
