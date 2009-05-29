@@ -103,22 +103,30 @@ else:
     CRYPTOPPDIR=os.path.join('cryptopp')
     include_dirs.append(".")
 
-    # Versions of GNU assembler older than 2.10 do not understand the kind of ASM that Crypto++ uses.
-    try:
-        sp = subprocess.Popen(['as', '-v'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-        sp.stdin.close()
-        sp.wait()
-        if re.search("GNU assembler version (0|1|2.0)", sp.stderr.read()):
-            define_macros.append(('CRYPTOPP_DISABLE_ASM', 1))
-    except EnvironmentError:
-        # Okay, nevermind.  Maybe there isn't even an 'as' executable on this platform.
-        pass
-
     if 'sunos' in platform.system().lower():
         extra_compile_args.append('-Wa,--divide') # allow use of "/" operator
 
     cryptopp_src = [ os.path.join(CRYPTOPPDIR, x) for x in os.listdir(CRYPTOPPDIR) if x.endswith('.cpp') ]
     extra_srcs.extend(cryptopp_src)
+
+# In either case, we must provide a value for CRYPTOPP_DISABLE_ASM that
+# matches the one used when Crypto++ was originally compiled. The Crypto++
+# GNUMakefile tests the assembler version and only enables assembly for
+# recent versions of the GNU assembler (2.10 or later). The /usr/bin/as on
+# Mac OS-X 10.5 is too old (
+
+try:
+    sp = subprocess.Popen(['as', '-v'], stdin=subprocess.PIPE,
+                          stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                          universal_newlines=True)
+    sp.stdin.close()
+    sp.wait()
+    if re.search("GNU assembler version (0|1|2.0)", sp.stderr.read()):
+        define_macros.append(('CRYPTOPP_DISABLE_ASM', 1))
+except EnvironmentError:
+    # Okay, nevermind. Maybe there isn't even an 'as' executable on this
+    # platform.
+    pass
 
 trove_classifiers=[
     "Environment :: Console",
