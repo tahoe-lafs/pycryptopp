@@ -139,7 +139,7 @@ except EnvironmentError:
 
 trove_classifiers=[
     "Environment :: Console",
-    "License :: OSI Approved :: GNU General Public License (GPL)", 
+    "License :: OSI Approved :: GNU General Public License (GPL)",
     "License :: DFSG approved",
     "License :: Other/Proprietary License",
     "Intended Audience :: Developers",
@@ -206,8 +206,8 @@ if 'flakes' in sys.argv[1:]:
     setup_requires.append('setuptools_pyflakes >= 1.0.0')
 
 # setuptools_darcs is required to produce complete distributions (such as
-# with "sdist" or "bdist_egg"), unless there is a 
-# pycryptopp.egg-info/SOURCES.txt file present which contains a complete list 
+# with "sdist" or "bdist_egg"), unless there is a
+# pycryptopp.egg-info/SOURCES.txt file present which contains a complete list
 # of needed files.
 # http://pypi.python.org/pypi/setuptools_darcs
 setup_requires.append('setuptools_darcs >= 1.0.5')
