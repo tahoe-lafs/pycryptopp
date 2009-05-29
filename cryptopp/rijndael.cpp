@@ -71,6 +71,8 @@ being unloaded from L1 cache, until that round is finished.
 
 #ifdef __sun
 #include <alloca.h>
+#else
+#include <malloc.h>
 #endif
 
 NAMESPACE_BEGIN(CryptoPP)
