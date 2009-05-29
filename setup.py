@@ -128,6 +128,15 @@ except EnvironmentError:
     # platform.
     pass
 
+try:
+    # that "as -v" step creates an empty a.out, so clean it up. Modern GNU
+    # "as" has --version, which emits the version number without actually
+    # assembling anything, but older versions only have -v, which emits a
+    # version number and *then* assembles from stdin.
+    os.unlink("a.out")
+except EnvironmentError:
+    pass
+
 trove_classifiers=[
     "Environment :: Console",
     "License :: OSI Approved :: GNU General Public License (GPL)", 
