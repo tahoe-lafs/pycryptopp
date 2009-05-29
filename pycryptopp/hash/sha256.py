@@ -1,16 +1,4 @@
-try:
-    from ctypes import RTLD_GLOBAL
-except ImportError:
-    # ctypes was added in Python 2.5 -- we still support Python 2.4, which had dl instead
-    from dl import RTLD_GLOBAL
-
-import sys
-flags = sys.getdlopenflags()
-try:
-    sys.setdlopenflags(flags|RTLD_GLOBAL)
-    from pycryptopp import _pycryptopp
-finally:
-    sys.setdlopenflags(flags)
+from pycryptopp import _pycryptopp
 
 MYNAMEPATTERN="sha256_"
 
