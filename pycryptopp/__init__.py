@@ -28,6 +28,12 @@ try:
 finally:
     sys.setdlopenflags(flags)
 
+def _import_my_names(thismodule, prefix):
+    for name in dir(_pycryptopp):
+        if name.startswith(prefix):
+            myname = name[len(prefix):]
+            thismodule[myname] = getattr(_pycryptopp, name)
+
 import publickey, hash, cipher
 
 quiet_pyflakes=[__version__, publickey, hash, cipher, _pycryptopp]
