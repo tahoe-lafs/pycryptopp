@@ -119,6 +119,8 @@ else:
                       "rdtables.cpp", "ec2n.cpp",
                       "tiger.cpp", "tigertab.cpp", "fips140.cpp", "misc.cpp",
                       "nbtheory.cpp", "osrng.cpp", "rng.cpp", "mqueue.cpp",
+                      # on windows, when NDEBUG is off, modes.cpp requires DES
+                      "des.cpp", "dessp.cpp",
                       ]
     used_cpp_files.sort()
 
