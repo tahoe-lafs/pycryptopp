@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import random
+import base64
 
 import os
 SEED = os.environ.get('REPEATABLE_RANDOMNESS_SEED', None)
@@ -75,6 +76,7 @@ class Signer(unittest.TestCase):
         seed = randstr(SEEDBYTES)
         signer = ecdsa.SigningKey(seed)
         sig = signer.sign("message")
+        self.failUnlessEqual(len(sig), SIGBYTES)
 
     def test_sign_and_verify(self):
         seed = randstr(SEEDBYTES)
@@ -239,6 +241,23 @@ class SignAndVerify(unittest.TestCase):
         assert badseed != seed, "Internal error -- randstr() produced the same string twice: %s == %s" % (badseed, seed)
         badsigner = ecdsa.SigningKey(badseed)
         self._help_test_sign_and_check_bad_keys(badsigner, verifier)
+
+class Compatibility(unittest.TestCase):
+    def test_compatibility(self):
+        # Confirm that the KDF used by the SigningKey constructor doesn't
+        # change without suitable backwards-compability
+        seed = base64.b32decode('XS27TJRP3JBZKDEFBDKQ====')
+        signer = ecdsa.SigningKey(seed)
+        v1 = signer.get_verifying_key()
+        vs = v1.serialize()
+        vs32 = base64.b32encode(vs)
+        self.failUnlessEqual(vs32, "ANPNDWJWHQXYSQMD4L36D7WQEGXA42MS5JRUFIWA")
+        v2 = ecdsa.VerifyingKey(vs)
+        #print base64.b32encode(signer.sign("message"))
+        sig32 = "EA3Y7A4T62J3K6MUPJQN3WJ5S4SS53EGZXOSTQW7EQ7OXEMS6QJLYL63BLHMHZD7KFT37KEPJBAKI==="
+        sig = base64.b32decode(sig32)
+        self.failUnless(v1.verify("message", sig))
+        self.failUnless(v2.verify("message", sig))
 
 if __name__ == "__main__":
     unittest.main()
