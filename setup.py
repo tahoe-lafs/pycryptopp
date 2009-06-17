@@ -19,6 +19,12 @@ else:
 
 from setuptools import Extension, find_packages, setup
 
+# ECDSA isn't yet supported, but it can be turned on by testing purposes.  But
+# you'll have to comment-in some lines in the C++ code to make it work.  Also
+# comment-in the unit tests.
+ECDSA=False
+# ECDSA=True
+
 DEBUG=False
 if "--debug" in sys.argv:
     DEBUG=True
@@ -180,8 +186,12 @@ else:
         print "unable to find version in %s" % (VERSIONFILE,)
         raise RuntimeError("if %s.py exists, it is required to be well-formed" % (VERSIONFILE,))
 
+srcs = ['pycryptopp/_pycryptoppmodule.cpp', 'pycryptopp/publickey/rsamodule.cpp', 'pycryptopp/hash/sha256module.cpp', 'pycryptopp/cipher/aesmodule.cpp']
+if ECDSA:
+    srcs.append('pycryptopp/publickey/ecdsamodule.cpp')
+
 ext_modules.append(
-    Extension('pycryptopp._pycryptopp', extra_srcs + ['pycryptopp/_pycryptoppmodule.cpp', 'pycryptopp/publickey/ecdsamodule.cpp', 'pycryptopp/publickey/rsamodule.cpp', 'pycryptopp/hash/sha256module.cpp', 'pycryptopp/cipher/aesmodule.cpp'], include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
+    Extension('pycryptopp._pycryptopp', extra_srcs + srcs, include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
     )
 
 miscdeps=os.path.join(os.getcwd(), 'misc', 'dependencies')
@@ -222,11 +232,16 @@ data_fnames=['COPYING.GPL', 'COPYING.TGPPL.html', 'README.txt']
 doc_loc = "share/doc/python-" + PKG
 data_files = [(doc_loc, data_fnames)]
 
+if ECDSA:
+    long_description='RSA-PSS-SHA256 signatures, ECDSA(1363)/EMSA1(SHA-256) signatures, SHA-256 hashes, and AES-CTR encryption'
+else:
+    long_description='RSA-PSS-SHA256 signatures, SHA-256 hashes, and AES-CTR encryption'
+
 def _setup(test_suite):
     setup(name=PKG,
           version=verstr,
           description='Python wrappers for the Crypto++ library',
-          long_description='RSA-PSS-SHA256 signatures, ECDSA(1363)/EMSA1(SHA-256) signatures, SHA-256 hashes, and AES-CTR encryption',
+          long_description=long_description,
           author='Zooko O\'Whielacronx',
           author_email='zooko@zooko.com',
           url='http://allmydata.org/trac/' + PKG,
