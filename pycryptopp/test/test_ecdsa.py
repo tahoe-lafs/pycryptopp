@@ -32,6 +32,7 @@ from random import randrange
 import unittest
 
 #from pycryptopp.publickey import ecdsa
+ecdsa = None # silence pyflakes
 
 def randstr(n, rr=randrange):
     return ''.join([chr(rr(0, 256)) for x in xrange(n)])
