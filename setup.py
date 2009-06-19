@@ -106,7 +106,6 @@ if DISABLE_EMBEDDED_CRYPTOPP:
 else:
     # Build the Crypto++ library which is included by source code in the pycryptopp tree and
     # link against it.
-    CRYPTOPPDIR=os.path.join('cryptopp')
     include_dirs.append(".")
 
     if 'sunos' in platform.system().lower():
@@ -115,7 +114,7 @@ else:
     # pycryptopp provides access to a very limited subset of libcrypto++.
     # Only those source files from Crypto++ that we need to compile are
     # included in the cryptopp/ subdirectory.
-    cryptopp_src = [ os.path.join(CRYPTOPPDIR, x) for x in os.listdir(CRYPTOPPDIR) if x.endswith('.cpp') ] 
+    cryptopp_src = [ os.path.join('cryptopp', x) for x in os.listdir('cryptopp') if x.endswith('.cpp') ]
     extra_srcs.extend(cryptopp_src)
 
 # In either case, we must provide a value for CRYPTOPP_DISABLE_ASM that
@@ -136,15 +135,15 @@ except EnvironmentError:
     # Okay, nevermind. Maybe there isn't even an 'as' executable on this
     # platform.
     pass
-
-try:
-    # that "as -v" step creates an empty a.out, so clean it up. Modern GNU
-    # "as" has --version, which emits the version number without actually
-    # assembling anything, but older versions only have -v, which emits a
-    # version number and *then* assembles from stdin.
-    os.unlink("a.out")
-except EnvironmentError:
-    pass
+else:
+    try:
+        # that "as -v" step creates an empty a.out, so clean it up. Modern GNU
+        # "as" has --version, which emits the version number without actually
+        # assembling anything, but older versions only have -v, which emits a
+        # version number and *then* assembles from stdin.
+        os.unlink("a.out")
+    except EnvironmentError:
+        pass
 
 trove_classifiers=[
     "Environment :: Console",
