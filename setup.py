@@ -35,6 +35,13 @@ if "--disable-embedded-cryptopp" in sys.argv:
     DISABLE_EMBEDDED_CRYPTOPP=True
     sys.argv.remove("--disable-embedded-cryptopp")
 
+# Unfortunately stdeb v0.3 doesn't seem to offer a way to pass command-line
+# arguments to setup.py when building for Debian, but it does offer a way to
+# pass environment variables, so we here check for that in addition to the
+# command-line argument check above.
+if os.environ.get('PYCRYPTOPP_DISABLE_EMBEDDED_CRYPTOPP') == "1":
+    DISABLE_EMBEDDED_CRYPTOPP=True
+
 # There are two ways that this setup.py script can build pycryptopp, either by using the
 # Crypto++ source code bundled in the pycryptopp source tree, or by linking to a copy of the
 # Crypto++ library that is already installed on the system.
