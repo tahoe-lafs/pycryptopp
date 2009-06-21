@@ -101,13 +101,13 @@ class SHSVectors(unittest.TestCase):
     """
     All of the SHA-256 test vectors from the NIST SHS, in the files distributed
     by NIST.  (NIST distributes them in a .zip, but we expect them to be
-    unpacked and in a subdirectory named 'vectors').
+    unpacked and in a subdirectory named 'testvectors').
     """
     def test_short(self):
-        return self._test_vect(resource_string(__name__, 'vectors/SHA256ShortMsg.txt'))
+        return self._test_vect(resource_string('pycryptopp', 'testvectors/SHA256ShortMsg.txt'))
 
     def test_long(self):
-        return self._test_vect(resource_string(__name__, 'vectors/SHA256LongMsg.txt'))
+        return self._test_vect(resource_string('pycryptopp', 'testvectors/SHA256LongMsg.txt'))
 
     def _test_vect(self, vects_str):
         for mo in VECTS_RE.finditer(vects_str):
@@ -122,7 +122,7 @@ class SHSVectors(unittest.TestCase):
             self.failUnlessEqual(computed_md, md)
 
     def test_monte(self):
-        inlines = resource_string_lines(__name__, 'vectors/SHA256Monte.txt')
+        inlines = resource_string_lines('pycryptopp', 'testvectors/SHA256Monte.txt')
         for line in inlines:
             line = line.strip()
             if line[:7] == 'Seed = ':

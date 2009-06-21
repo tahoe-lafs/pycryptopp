@@ -71,8 +71,8 @@ NIST_KAT_VECTS_RE=re.compile("\nCOUNT = ([0-9]+)\nKEY = ([0-9a-f]+)\nPLAINTEXT =
 
 class AES_from_NIST_KAT(unittest.TestCase):
     def test_NIST_KAT(self):
-        for vectname in resource_listdir(__name__, 'vectors/KAT_AES'):
-            self._test_KAT_file(resource_string(__name__, '/'.join(['vectors/KAT_AES', vectname])))
+        for vectname in resource_listdir('pycryptopp', 'testvectors/KAT_AES'):
+            self._test_KAT_file(resource_string('pycryptopp', '/'.join(['testvectors/KAT_AES', vectname])))
 
     def _test_KAT_file(self, vects_str):
         for mo in NIST_KAT_VECTS_RE.finditer(vects_str):
