@@ -14,7 +14,9 @@ try:
 except ImportError:
     pass
 else:
-    # On cygwin there was a permissions error that was fixed in 0.6c6.
+    # On cygwin there was a conflict with swig with setuptools 0.6c7:
+    #   File "/home/Buildslave/windows-cygwin-pycryptopp/windows-cygwin/build/misc/dependencies/setuptools-0.6c7.egg/setuptools/command/build_ext.py", line 77, in swig_sources
+    # TypeError: swig_sources() takes exactly 3 arguments (2 given)
     use_setuptools(min_version='0.6c6')
 
 from setuptools import Extension, find_packages, setup
