@@ -233,8 +233,8 @@ setup_requires.append('setuptools_darcs >= 1.0.5')
 data_fnames=['COPYING.GPL', 'COPYING.TGPPL.html', 'README.txt']
 
 # In case we are building for a .deb with stdeb's sdist_dsc command, we put the
-# docs in "share/doc/python-pycryptopp".
-doc_loc = "share/doc/python-" + PKG
+# docs in "share/doc/pycryptopp".
+doc_loc = "share/doc/" + PKG
 data_files = [(doc_loc, data_fnames)]
 
 if ECDSA:
