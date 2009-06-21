@@ -25,13 +25,12 @@ DOCUMENTATION
 The documentation is in the docstrings.  From a command-line, use
 "pydoc pycryptopp", "pydoc pycryptopp.cipher", and so on.  From within
 a Python interpreter use "help(pycryptopp)",
-"help(pycryptopp.cipher)", and "help(pycryptopp.cipher.aes)" and so
-on.
+"help(pycryptopp.cipher)", "help(pycryptopp.cipher.aes)" and so on.
 
 CONTACT
 
-I intend to set up a mailing list, but until I do please post to the
-cryptopp-users mailing list [4] with comments about this package.
+Please post to the cryptopp-users mailing list [4] with comments about
+this package.
 
 BOOK REVIEW
 
@@ -50,7 +49,7 @@ critical bug.
 
 Zooko O'Whielacronx
 Boulder, Colorado
-April 24, 2008
+June 21, 2009
 
 [1] http://pypi.python.org/pypi/pycryptopp
 [2] http://cryptopp.com
