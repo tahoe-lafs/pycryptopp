@@ -11,8 +11,6 @@
 #include "randpool.h"
 #include "aes.h"
 #include "sha.h"
-#include "hrtimer.h"
-#include <time.h>
 
 NAMESPACE_BEGIN(CryptoPP)
 
@@ -36,15 +34,6 @@ void RandomPool::GenerateIntoBufferedTransformation(BufferedTransformation &targ
 	{
 		if (!m_keySet)
 			m_pCipher->SetKey(m_key, 32);
-
-		Timer timer;
-		TimerWord tw = timer.GetCurrentTimerValue();
-		CRYPTOPP_COMPILE_ASSERT(sizeof(tw) <= 16);
-		*(TimerWord *)m_seed.data() += tw;
-
-		time_t t = time(NULL);
-		CRYPTOPP_COMPILE_ASSERT(sizeof(t) <= 8);
-		*(time_t *)(m_seed.data()+8) += t;
 
 		do
 		{

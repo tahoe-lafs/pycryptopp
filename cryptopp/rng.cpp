@@ -5,7 +5,6 @@
 #include "rng.h"
 #include "fips140.h"
 
-#include <time.h>
 #include <math.h>
 
 NAMESPACE_BEGIN(CryptoPP)
@@ -66,15 +65,7 @@ X917RNG::X917RNG(BlockTransformation *c, const byte *seed, const byte *determini
 	  m_lastBlock(S),
 	  m_deterministicTimeVector(deterministicTimeVector, deterministicTimeVector ? S : 0)
 {
-	if (!deterministicTimeVector)
-	{
-		time_t tstamp1 = time(0);
-		xorbuf(dtbuf, (byte *)&tstamp1, UnsignedMin(sizeof(tstamp1), S));
-		cipher->ProcessBlock(dtbuf);
-		clock_t tstamp2 = clock();
-		xorbuf(dtbuf, (byte *)&tstamp2, UnsignedMin(sizeof(tstamp2), S));
-		cipher->ProcessBlock(dtbuf);
-	}
+  assert (deterministicTimeVector);
 
 	// for FIPS 140-2
 	GenerateBlock(m_lastBlock, S);
@@ -92,11 +83,7 @@ void X917RNG::GenerateIntoBufferedTransformation(BufferedTransformation &target,
 		}
 		else
 		{
-			clock_t c = clock();
-			xorbuf(dtbuf, (byte *)&c, UnsignedMin(sizeof(c), S));
-			time_t t = time(NULL);
-			xorbuf(dtbuf+S-UnsignedMin(sizeof(t), S), (byte *)&t, UnsignedMin(sizeof(t), S));
-			cipher->ProcessBlock(dtbuf);
+		  assert(false);
 		}
 
 		// combine enciphered timestamp with seed
