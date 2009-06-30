@@ -84,6 +84,22 @@ class SHA256(unittest.TestCase):
         except sha256.Error, le:
             self.failUnless("digest() has been called" in str(le), le)
 
+    def test_chunksize(self):
+        # hashes can be computed on arbitrarily-sized chunks
+        problems = False
+        for length in range(2, 140):
+            s = "a"*length
+            expected = sha256.SHA256(s).hexdigest()
+            for a in range(0, length):
+                h = sha256.SHA256()
+                h.update(s[:a])
+                h.update(s[a:])
+                got = h.hexdigest()
+                if got != expected:
+                    problems = True
+                    print len(s[:a]), len(s[a:]), len(s), got, expected
+        self.failIf(problems)
+
 VECTS_RE=re.compile("\nLen = ([0-9]+)\nMsg = ([0-9a-f]+)\nMD = ([0-9a-f]+)")
 
 # split_on_newlines() copied from pyutil.strutil
