@@ -232,6 +232,11 @@ if 'flakes' in sys.argv[1:]:
 # http://pypi.python.org/pypi/setuptools_darcs
 setup_requires.append('setuptools_darcs >= 1.0.5')
 
+# stdeb is required to produce Debian files with "sdist_dsc".
+# http://github.com/astraw/stdeb/tree/master
+if "sdist_dsc" in sys.argv:
+    setup_requires.append('stdeb >= 0.3')
+
 data_fnames=['COPYING.GPL', 'COPYING.TGPPL.html', 'README.txt']
 
 # In case we are building for a .deb with stdeb's sdist_dsc command, we put the
