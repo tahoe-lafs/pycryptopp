@@ -14,12 +14,12 @@ the appropriate options to ``use_setuptools()``.
 This file can also be run as a script to install or upgrade setuptools.
 """
 import os, sys
-DEFAULT_VERSION = "0.6c12dev"
+DEFAULT_VERSION = "0.6c14dev"
 DEFAULT_DIR     = "misc/dependencies/"
 DEFAULT_URL     = "file:"+DEFAULT_DIR
 
 md5_data = {
-    'setuptools-0.6c12dev.egg': '770da1c9e5446cf04273f0f1cdb8c09a',
+    'setuptools-0.6c14dev.egg': '1f75977fc4bd7727eb55a71b812a7c37',
 }
 
 import sys, os
