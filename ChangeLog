@@ -1,0 +1,5 @@
+2009-07-27  Zooko Wilcox-O'Hearn  <zooko@zooko.com>
+
+	* release pycryptopp-0.5.16
+
+	* setup.py, misc/: a few improvements to the build/packaging
