@@ -1,6 +1,7 @@
 ABOUT THIS PACKAGE
 
-pycryptopp [1] is a python wrapper around the Crypto++ library [2].
+pycryptopp [1] is a python wrapper around a few algorithms from the
+Crypto++ library [2].
 
 LICENCE
 
