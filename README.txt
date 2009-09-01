@@ -21,6 +21,15 @@ To install it into your system run "./setup.py install".  To create a
 binary package run "./setup.py bdist_egg".  There are more features of
 setup.py -- see the documentation of setuptools [3] for details.
 
+If "./setup.py test" doesn't print out "PASSED" and exit with exit
+code 0 then there is something seriously wrong.  Do not use this build
+of pycryptopp.  Please report the error to the cryptopp-users mailing
+list [4].  The next step in debugging if the pycryptopp tests fail is
+to find out if the underlying Crypto++ tests fail on the same system.
+To do that, you have to acquire the Crypto++ source code from
+http://cryptopp.com , build it, and run the self-test, by executing
+"cryptest.exe v", as described in Crypto++'s Readme.txt file.
+
 DOCUMENTATION
 
 The documentation is in the docstrings.  From a command-line, use
@@ -50,7 +59,7 @@ critical bug.
 
 Zooko O'Whielacronx
 Boulder, Colorado
-July 27, 2009
+August 31, 2009
 
 [1] http://pypi.python.org/pypi/pycryptopp
 [2] http://cryptopp.com
