@@ -2,6 +2,7 @@
  * aesmodule.cpp -- Python wrappers around Crypto++'s AES-CTR
  */
 
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
 #include "aesmodule.hpp"

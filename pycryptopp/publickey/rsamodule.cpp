@@ -5,6 +5,7 @@
  * with RSA as the public key algorithm and SHA-256 as the hash function
  */
 
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
 #include "rsamodule.hpp"

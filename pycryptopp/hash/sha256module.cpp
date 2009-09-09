@@ -2,6 +2,7 @@
  * sha256module.cpp -- Python wrappers around Crypto++'s SHA-256
  */
 
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <assert.h>
 
@@ -122,7 +123,7 @@ static int
 SHA256_init(PyObject* self, PyObject *args, PyObject *kwdict) {
     static const char *kwlist[] = { "msg", NULL };
     const char *msg = NULL;
-    size_t msgsize = 0;
+    Py_ssize_t msgsize = 0;
     if (!PyArg_ParseTupleAndKeywords(args, kwdict, "|t#", const_cast<char**>(kwlist), &msg, &msgsize))
         return -1;
 

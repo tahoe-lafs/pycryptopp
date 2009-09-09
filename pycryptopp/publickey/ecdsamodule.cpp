@@ -25,6 +25,7 @@
  * source code for details and doc string for usage.
  */
 
+#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
 #include <math.h>
@@ -270,13 +271,13 @@ static int
 SigningKey___init__(PyObject* self, PyObject* args, PyObject* kwdict) {
     static const char *kwlist[] = { "seed", NULL };
     const char* seed;
-    int seedlen;
+    Py_ssize_t seedlen;
     if (!PyArg_ParseTupleAndKeywords(args, kwdict, "t#:SigningKey___init__", const_cast<char**>(kwlist), &seed, &seedlen)) {
         return -1;
     }
 
     if (seedlen != 12) {
-        PyErr_Format(ecdsa_error, "Precondition violation: seed is required to be of length 12, but it was %d", seedlen);
+        PyErr_Format(ecdsa_error, "Precondition violation: seed is required to be of length 12, but it was %zd", seedlen);
         return -1;
     }
 
