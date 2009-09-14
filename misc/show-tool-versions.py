@@ -9,7 +9,8 @@ try:
     out = subprocess.Popen(["buildbot", "--version"],
                            stdout=subprocess.PIPE).communicate()[0]
     print "buildbot:", out.replace("\n", " ")
-except EnvironmentError:
+except EnvironmentError, le:
+    sys.stderr.write("Got exception invoking 'buildbot': %s" % (le,))
     pass
 
 try:
@@ -20,7 +21,8 @@ try:
     print
     print "darcs:", out.replace("\n", " ")
     print full.rstrip()
-except EnvironmentError:
+except EnvironmentError, le:
+    sys.stderr.write("Got exception invoking 'darcs': %s" % (le,))
     pass
 
 try:
