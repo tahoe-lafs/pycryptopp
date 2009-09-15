@@ -6,13 +6,12 @@
  */
 
 #define PY_SSIZE_T_CLEAN
-#include <Python.h>
-
-#include "rsamodule.hpp"
-
 #if (PY_VERSION_HEX < 0x02050000)
 typedef int Py_ssize_t;
 #endif
+#include <Python.h>
+
+#include "rsamodule.hpp"
 
 /* from Crypto++ */
 #ifdef USE_NAME_CRYPTO_PLUS_PLUS

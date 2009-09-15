@@ -26,15 +26,14 @@
  */
 
 #define PY_SSIZE_T_CLEAN
+#if (PY_VERSION_HEX < 0x02050000)
+typedef int Py_ssize_t;
+#endif
 #include <Python.h>
 
 #include <math.h>
 
 #include "ecdsamodule.hpp"
-
-#if (PY_VERSION_HEX < 0x02050000)
-typedef int Py_ssize_t;
-#endif
 
 /* from Crypto++ */
 #ifdef USE_NAME_CRYPTO_PLUS_PLUS
