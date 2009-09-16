@@ -59,7 +59,7 @@ critical bug.
 
 Zooko O'Whielacronx
 Boulder, Colorado
-August 31, 2009
+September 15, 2009
 
 [1] http://pypi.python.org/pypi/pycryptopp
 [2] http://cryptopp.com
