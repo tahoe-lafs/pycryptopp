@@ -40,3 +40,12 @@ try:
     print "setuptools:", out.replace("\n", " ")
 except (ImportError, EnvironmentError):
     pass
+
+try:
+    out = subprocess.Popen(["g++", "--version"],
+                           stdout=subprocess.PIPE).communicate()[0]
+    print "g++:", out.replace("\n", " ")
+except EnvironmentError, le:
+    sys.stderr.write("Got exception invoking 'g++': %s" % (le,))
+    pass
+
