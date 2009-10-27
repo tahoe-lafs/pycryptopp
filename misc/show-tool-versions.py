@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 
-import sys
-import subprocess
+import os, subprocess, sys
 
 print "python:", sys.version.replace("\n", " ") + ', maxunicode: ' + str(sys.maxunicode)
 
