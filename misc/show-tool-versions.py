@@ -50,10 +50,9 @@ except EnvironmentError, le:
     pass
 
 try:
-    out = subprocess.Popen(["as", "--version"],
+    out = subprocess.Popen(["as", "-version"], stdin=open(os.devnull),
                            stdout=subprocess.PIPE).communicate()[0]
     print "as:", out.replace("\n", " ")
 except EnvironmentError, le:
     sys.stderr.write("Got exception invoking 'as': %s" % (le,))
     pass
-
