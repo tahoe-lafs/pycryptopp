@@ -49,3 +49,11 @@ except EnvironmentError, le:
     sys.stderr.write("Got exception invoking 'g++': %s" % (le,))
     pass
 
+try:
+    out = subprocess.Popen(["as", "--version"],
+                           stdout=subprocess.PIPE).communicate()[0]
+    print "as:", out.replace("\n", " ")
+except EnvironmentError, le:
+    sys.stderr.write("Got exception invoking 'as': %s" % (le,))
+    pass
+
