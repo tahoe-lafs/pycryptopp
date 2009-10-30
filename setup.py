@@ -137,7 +137,7 @@ else:
 # matches the one used when Crypto++ was originally compiled. The Crypto++
 # GNUMakefile tests the assembler version and only enables assembly for
 # recent versions of the GNU assembler (2.10 or later). The /usr/bin/as on
-# Mac OS-X 10.5 is too old (
+# Mac OS-X 10.5 is too old.
 
 try:
     sp = subprocess.Popen(['as', '-v'], stdin=subprocess.PIPE,

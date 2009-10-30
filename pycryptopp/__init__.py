@@ -44,7 +44,6 @@ finally:
         sys.setdlopenflags(flags)
         del flags, RTLD_GLOBAL
 
-
 def _import_my_names(thismodule, prefix):
     for name in dir(_pycryptopp):
         if name.startswith(prefix):
