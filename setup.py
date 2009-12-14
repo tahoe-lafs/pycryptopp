@@ -58,6 +58,13 @@ include_dirs=[]
 library_dirs=[]
 extra_srcs=[] # This is for Crypto++ .cpp files if they are needed.
 
+#
+# Fix the build on OpenBSD
+# http://allmydata.org/trac/pycryptopp/ticket/32
+#
+if 'openbsd' in platform.system().lower():
+    extra_link_args.append("-fpic")
+
 if DEBUG:
     extra_compile_args.append("-O0")
     extra_compile_args.append("-g")
