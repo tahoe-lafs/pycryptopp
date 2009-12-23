@@ -55,3 +55,11 @@ try:
 except EnvironmentError, le:
     sys.stderr.write("Got exception invoking 'as': %s" % (le,))
     pass
+
+try:
+    out = subprocess.Popen(["cryptest.exe", "V"], stdin=open(os.devnull),
+                           stdout=subprocess.PIPE).communicate()[0]
+    print "cryptopp:", out.replace("\n", " ")
+except EnvironmentError, le:
+    sys.stderr.write("Got exception invoking 'cryptest': %s" % (le,))
+    pass
