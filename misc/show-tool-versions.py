@@ -7,7 +7,7 @@ try:
     out = platform.platform()
     print
     print "platform:", out.replace("\n", " ")
- except EnvironmentError, le:
+except EnvironmentError, le:
      sys.stderr.write("Got exception using 'platform': %s" % (le,))
      pass
 
