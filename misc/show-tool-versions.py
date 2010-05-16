@@ -31,7 +31,7 @@ def print_as_ver():
         print "WARNING: a file named a.out exists, and getting the version of the 'as' assembler writes to that filename, so I'm not attempting to get the version of 'as'."
         return
     try:
-        res = subprocess.Popen(cmdlist, stdin=open(os.devnull),
+        res = subprocess.Popen(['as', '-version'], stdin=open(os.devnull),
                                stderr=subprocess.PIPE).communicate()[1]
         print
         print cmdlist[0] + ': ' + res.replace("\n", " ")
