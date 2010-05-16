@@ -15,12 +15,14 @@ def print_platform():
 def print_python_ver():
     print "python:", sys.version.replace("\n", " ") + ', maxunicode: ' + str(sys.maxunicode)
 
-def print_cmd_ver(cmdlist):
+def print_cmd_ver(cmdlist, label=None):
     try:
         res = subprocess.Popen(cmdlist, stdin=open(os.devnull),
                                stdout=subprocess.PIPE).communicate()[0]
+        if label is None:
+            label = cmdlist[0]
         print
-        print cmdlist[0] + ': ' + res.replace("\n", " ")
+        print label + ': ' + res.replace("\n", " ")
     except EnvironmentError, le:
         sys.stderr.write("Got exception invoking '%s': %s\n" % (cmdlist[0], le,))
         pass
@@ -34,10 +36,10 @@ def print_as_ver():
         res = subprocess.Popen(['as', '-version'], stdin=open(os.devnull),
                                stderr=subprocess.PIPE).communicate()[1]
         print
-        print cmdlist[0] + ': ' + res.replace("\n", " ")
+        print 'as: ' + res.replace("\n", " ")
         os.path.remove('a.out')
     except EnvironmentError, le:
-        sys.stderr.write("Got exception invoking '%s': %s\n" % (cmdlist[0], le,))
+        sys.stderr.write("Got exception invoking '%s': %s\n" % ('as', le,))
         pass
 
 def print_setuptools_ver():
@@ -72,7 +74,7 @@ print_cmd_ver(['cl'])
 print_cmd_ver(['g++', '--version'])
 print_cmd_ver(['cryptest', 'V'])
 print_cmd_ver(['darcs', '--version'])
-print_cmd_ver(['darcs', '--exact-version'])
+print_cmd_ver(['darcs', '--exact-version'], label='darcs-exact-version')
 print_cmd_ver(['7za'])
 
 print_as_ver()
