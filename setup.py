@@ -2,8 +2,7 @@
 
 # pycryptopp -- Python wrappers for Crypto++
 #
-# Copyright (C) 2008 Allmydata, Inc.
-# Copyright (C) 2009 Zooko Wilcox-O'Hearn
+# Copyright (C) 2009-2010 Zooko Wilcox-O'Hearn
 # Author: Zooko Wilcox-O'Hearn
 # See README.txt for licensing information.
 

@@ -1,4 +1,11 @@
+
 from pycryptopp import _import_my_names
+
+# These initializations to None are just to pacify pyflakes, which
+# doesn't understand that we have to do some funky import trickery
+# below in _import_my_names() in order to get sensible namespaces.
+AES=None
+Error=None
 
 _import_my_names(globals(), "aes_")
 
@@ -48,7 +55,6 @@ def start_up_self_test():
         k = keysize
         S = '\x00' * (k+b)
         for i in range(1000):
-            n = len(S)
             K = S[-k:]
             P = S[-k-b:-k]
             S += E(K, E(K, P))

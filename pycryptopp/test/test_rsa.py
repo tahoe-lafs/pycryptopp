@@ -28,22 +28,22 @@ KEYSIZE=522 # 522 bits is far too few for actual security -- it is used only for
 class Signer(unittest.TestCase):
     def test_generate_bad_size(self):
         try:
-            signer = rsa.generate(KEYSIZE-1)
+            rsa.generate(KEYSIZE-1)
         except rsa.Error, le:
             self.failUnless("size in bits is required to be >=" in str(le), le)
         else:
             self.fail("Should have raised error from size being too small.")
         try:
-            signer = rsa.generate(sizeinbits=KEYSIZE-1)
+            rsa.generate(sizeinbits=KEYSIZE-1)
         except rsa.Error, le:
             self.failUnless("size in bits is required to be >=" in str(le), le)
         else:
             self.fail("Should have raised error from size being too small.")
 
     def test_generate(self):
-        signer = rsa.generate(KEYSIZE)
+        rsa.generate(KEYSIZE)
         # Hooray!  It didn't raise an exception!  We win!
-        signer = rsa.generate(sizeinbits=KEYSIZE)
+        rsa.generate(sizeinbits=KEYSIZE)
         # Hooray!  It didn't raise an exception!  We win!
 
     def test_sign(self):

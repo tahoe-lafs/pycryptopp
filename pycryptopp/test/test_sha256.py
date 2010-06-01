@@ -78,7 +78,7 @@ class SHA256(unittest.TestCase):
 
     def test_digest_then_update_fail(self):
         h = sha256.SHA256()
-        d1 = h.digest()
+        h.digest()
         try:
             h.update("oops")
         except sha256.Error, le:

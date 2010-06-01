@@ -91,7 +91,6 @@ class AES_from_Niels_Ferguson(unittest.TestCase):
         k = keysize
         S = '\x00' * (k+b)
         for i in range(1000):
-            n = len(S)
             K = S[-k:]
             P = S[-k-b:-k]
             S += E(K, E(K, P))

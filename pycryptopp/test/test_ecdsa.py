@@ -71,7 +71,7 @@ SIGBYTES=div_ceil(SIGBITS, 8)
 class Signer(unittest.TestCase):
     def disabletest_construct(self):
         seed = randstr(SEEDBYTES)
-        signer = ecdsa.SigningKey(seed)
+        ecdsa.SigningKey(seed)
 
     def disabletest_sign(self):
         seed = randstr(SEEDBYTES)
@@ -117,7 +117,7 @@ class Signer(unittest.TestCase):
 
     def disabletest_construct_short_seed(self):
         try:
-            signer = ecdsa.SigningKey("\x00\x00\x00")
+            ecdsa.SigningKey("\x00\x00\x00")
         except ecdsa.Error, le:
             self.failUnless("seed is required to be of length " in str(le), le)
         else:
@@ -125,7 +125,7 @@ class Signer(unittest.TestCase):
 
     def disabletest_construct_bad_arg_type(self):
         try:
-            signer = ecdsa.SigningKey(1)
+            ecdsa.SigningKey(1)
         except TypeError, le:
             self.failUnless("must be string" in str(le), le)
         else:
@@ -139,7 +139,7 @@ class Verifier(unittest.TestCase):
         verifier = signer.get_verifying_key()
         s1 = verifier.serialize()
         self.failUnlessEqual(len(s1), PUBKEYBYTES)
-        verifier2 = ecdsa.VerifyingKey(s1)
+        ecdsa.VerifyingKey(s1)
         s2 = verifier.serialize()
         self.failUnlessEqual(s1, s2)
 
@@ -215,7 +215,7 @@ class SignAndVerify(unittest.TestCase):
         badvstr = flip_one_bit(vstr)
         try:
             badverifier = ecdsa.VerifyingKey(badvstr)
-        except ecdsa.Error, le:
+        except ecdsa.Error:
             # Ok, fine, the verifying key was corrupted and Crypto++ detected this fact.
             pass
         else:
@@ -226,7 +226,7 @@ class SignAndVerify(unittest.TestCase):
         assert badvstr != vstr, "Internal error -- randstr() produced the same string twice: %s == %s" % (badvstr, vstr)
         try:
             badverifier = ecdsa.VerifyingKey(badvstr)
-        except ecdsa.Error, le:
+        except ecdsa.Error:
             # Ok, fine, the key was corrupted and Crypto++ detected this fact.
             pass
         else:
