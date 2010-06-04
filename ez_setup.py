@@ -18,24 +18,7 @@ DEFAULT_VERSION = "0.6c14dev"
 DEFAULT_DIR     = "misc/dependencies/"
 DEFAULT_URL     = "file:"+DEFAULT_DIR
 
-md5_data = {
-    'setuptools-0.6c14dev.egg': '1f75977fc4bd7727eb55a71b812a7c37',
-}
-
 import sys, os
-
-def _validate_md5(egg_name, data):
-    if egg_name in md5_data:
-        from md5 import md5
-        digest = md5(data).hexdigest()
-        if digest != md5_data[egg_name]:
-            print >>sys.stderr, (
-                "md5 validation of %s failed!  (Possible download problem?)"
-                % egg_name
-            )
-            sys.exit(2)
-    return data
-
 
 def use_setuptools(
     version=DEFAULT_VERSION, download_base=DEFAULT_URL, to_dir=os.curdir,
@@ -124,7 +107,7 @@ and place it in this directory before rerunning this script.)
             src = urllib2.urlopen(url)
             # Read/write all in one block, so we don't create a corrupt file
             # if the download is interrupted.
-            data = _validate_md5(egg_name, src.read())
+            data = src.read()
             dst = open(saveto,"wb"); dst.write(data)
         finally:
             if src: src.close()
@@ -207,42 +190,8 @@ def main(argv, version=DEFAULT_VERSION):
             print "Setuptools version",version,"or greater has been installed."
             print '(Run "ez_setup.py -U setuptools" to reinstall or upgrade.)'
 
-def update_md5(filenames):
-    """Update our built-in md5 registry"""
-
-    import re
-    from md5 import md5
-
-    for name in filenames:
-        base = os.path.basename(name)
-        f = open(name,'rb')
-        md5_data[base] = md5(f.read()).hexdigest()
-        f.close()
-
-    data = ["    %r: %r,\n" % it for it in md5_data.items()]
-    data.sort()
-    repl = "".join(data)
-
-    import inspect
-    srcfile = inspect.getsourcefile(sys.modules[__name__])
-    f = open(srcfile, 'rb'); src = f.read(); f.close()
-
-    match = re.search("\nmd5_data = {\n([^}]+)}", src)
-    if not match:
-        print >>sys.stderr, "Internal error!"
-        sys.exit(2)
-
-    src = src[:match.start(1)] + repl + src[match.end(1):]
-    f = open(srcfile,'w')
-    f.write(src)
-    f.close()
-
-
 if __name__=='__main__':
-    if len(sys.argv)>2 and sys.argv[1]=='--md5update':
-        update_md5(sys.argv[2:])
-    else:
-        main(sys.argv[1:])
+    main(sys.argv[1:])
 
 
 
