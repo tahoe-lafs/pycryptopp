@@ -45,7 +45,7 @@ this package.
 BOOK REVIEW
 
 If you are not already acquainted with modern cryptography, buy a copy
-of Ferguson and Schneier's book "Practical Cryptography" and read it.
+of Ferguson, Schneier, and Kohno "Cryptography Engineering" and read it.
 It is easy going and will increase your understanding greatly.
 
 ACKNOWLEDGEMENTS
@@ -53,13 +53,13 @@ ACKNOWLEDGEMENTS
 Thanks to Wei Dai and the contributors to Crypto++, Andrew M. Kuchling
 for his "pycrypto" library which inspired this one, Brian Warner for
 help on Python packaging questions, inspiration, and a million other
-things besides, and Greg Hazel for Windows porting and fixing a
-critical bug.
+things besides, and Greg Hazel and Samuel Neves for Windows porting
+and fixing bugs.
 
 
 Zooko O'Whielacronx
 Boulder, Colorado
-September 15, 2009
+June 4, 2010
 
 [1] http://pypi.python.org/pypi/pycryptopp
 [2] http://cryptopp.com
