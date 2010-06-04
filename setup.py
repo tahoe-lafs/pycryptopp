@@ -8,13 +8,6 @@
 
 import os, platform, re, subprocess, sys
 
-try:
-    from ez_setup import use_setuptools
-except ImportError:
-    pass
-else:
-    use_setuptools()
-
 from setuptools import Extension, find_packages, setup
 
 # ECDSA isn't yet supported, but it can be turned on by testing purposes.  But
