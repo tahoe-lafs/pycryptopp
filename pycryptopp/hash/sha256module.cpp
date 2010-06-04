@@ -176,7 +176,7 @@ static PyTypeObject SHA256_type = {
 };
 
 void
-init_sha256(PyObject*const module) {
+init_sha256(PyObject* module) {
     if (PyType_Ready(&SHA256_type) < 0)
         return;
     Py_INCREF(&SHA256_type);
