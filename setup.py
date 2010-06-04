@@ -119,12 +119,23 @@ else:
     # pycryptopp provides access to a very limited subset of libcrypto++.
     # Only those source files from Crypto++ that we need to compile are
     # included in the cryptopp/ subdirectory.
+
     if 'win32' in sys.platform.lower():
-        # We can handle out-of-line assembly on Windows.
-        # FIXME: this is probably only true if the compiler is MSVC, and probably only certain versions of MSVC.
+        try:
+            res = subprocess.Popen(['cl'], stdin=open(os.devnull), stdout=subprocess.PIPE).communicate()
+        except EnvironmentError, le:
+            # Okay I guess we're not using the "cl.exe" compiler.
+            using_msvc = False
+        else:
+            using_msvc = True
+    else:
+        using_msvc = False
+
+    if using_msvc:
+        # We can handle out-of-line assembly.
         cryptopp_src = [ os.path.join('cryptopp', x) for x in os.listdir('cryptopp') if x.endswith(('.cpp', '.asm')) ]
     else:
-        # We can't handle out-of-line assembly on other platforms.
+        # We can't handle out-of-line assembly.
         cryptopp_src = [ os.path.join('cryptopp', x) for x in os.listdir('cryptopp') if x.endswith('.cpp') ]
     extra_srcs.extend(cryptopp_src)
 
