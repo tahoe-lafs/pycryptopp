@@ -12,13 +12,8 @@ typedef int Py_ssize_t;
 
 
 /* from Crypto++ */
-#ifdef USE_NAME_CRYPTO_PLUS_PLUS
-#include <crypto++/modes.h>
-#include <crypto++/aes.h>
-#else
 #include <cryptopp/modes.h>
 #include <cryptopp/aes.h>
-#endif
 
 static const char*const aes___doc__ = "_aes counter mode cipher\n\
 You are advised to run aes.start_up_self_test() after importing this module.";

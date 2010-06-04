@@ -67,28 +67,11 @@ if DISABLE_EMBEDDED_CRYPTOPP:
     # Link with a Crypto++ library that is already installed on the system.
 
     # Check for a directory starting with "/usr/include" or "/usr/local/include" and
-    # ending with "cryptopp" or "crypto++".
+    # ending with "cryptopp".
 
-    # This is because the upstream Crypto++ GNUmakefile and the Microsoft Visual
-    # Studio projects produce include directory and library named "cryptopp", but
-    # Debian (and hence Ubuntu, and a lot of other derivative distributions) changed
-    # that name to "crypto++".  In Debian package libcrypto++ version 5.5.2-1,
-    # 2007-12-11, they added symlinks from "cryptopp", so once everyone has upgraded
-    # past that version then we can eliminate this detection code.
-
-    # So this will very likely do what you want, but if it doesn't (perhaps because
-    # you have more than one version of Crypto++ installed and it guessed wrong
-    # about which one you wanted to build against) and then you have to read this
-    # code and understand what it is doing.
-
-    for inclpath in ["/usr/local/include/cryptopp", "/usr/include/cryptopp", "/usr/include/crypto++", "/usr/local/include/crypto++"]:
+    for inclpath in ["/usr/local/include/cryptopp", "/usr/include/cryptopp"]:
         if os.path.exists(inclpath):
-            if inclpath.endswith("crypto++"):
-                print "\"%s\" detected, so we will use the Debian name \"crypto++\" to identify the library instead of the upstream name \"cryptopp\"." % (inclpath,)
-                define_macros.append(("USE_NAME_CRYPTO_PLUS_PLUS", True,))
-                libraries.append("crypto++")
-            else:
-                libraries.append("cryptopp")
+            libraries.append("cryptopp")
             incldir = os.path.dirname(inclpath)
             include_dirs.append(incldir)
             libdir = os.path.join(os.path.dirname(incldir), "lib")
@@ -96,7 +79,7 @@ if DISABLE_EMBEDDED_CRYPTOPP:
             break
 
     if not libraries:
-        print "Did not locate libcrypto++ or libcryptopp in the usual places."
+        print "Did not locate libcryptopp in the usual places."
         print "Adding /usr/local/{include,lib} and -lcryptopp in the hopes"
         print "that they will work."
 
@@ -116,7 +99,7 @@ else:
     if 'sunos' in platform.system().lower():
         extra_compile_args.append('-Wa,--divide') # allow use of "/" operator
 
-    # pycryptopp provides access to a very limited subset of libcrypto++.
+    # pycryptopp provides access to a very limited subset of libcryptopp.
     # Only those source files from Crypto++ that we need to compile are
     # included in the cryptopp/ subdirectory.
 
