@@ -119,12 +119,13 @@ else:
     # pycryptopp provides access to a very limited subset of libcrypto++.
     # Only those source files from Crypto++ that we need to compile are
     # included in the cryptopp/ subdirectory.
-    if 'darwin' in sys.platform.lower():
-        # We can't handle out-of-line assembly on Mac OS X.
-        cryptopp_src = [ os.path.join('cryptopp', x) for x in os.listdir('cryptopp') if x.endswith('.cpp') ]
-    else:
-        # We can (??) handle out-of-line assembly on all other platforms.
+    if 'win32' in sys.platform.lower():
+        # We can handle out-of-line assembly on Windows.
+        # FIXME: this is probably only true if the compiler is MSVC, and probably only certain versions of MSVC.
         cryptopp_src = [ os.path.join('cryptopp', x) for x in os.listdir('cryptopp') if x.endswith(('.cpp', '.asm')) ]
+    else:
+        # We can't handle out-of-line assembly on other platforms.
+        cryptopp_src = [ os.path.join('cryptopp', x) for x in os.listdir('cryptopp') if x.endswith('.cpp') ]
     extra_srcs.extend(cryptopp_src)
 
 # In either case, we must provide a value for CRYPTOPP_DISABLE_ASM that
