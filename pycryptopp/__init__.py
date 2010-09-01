@@ -38,6 +38,7 @@ try:
         sys.setdlopenflags(flags|RTLD_GLOBAL)
 
     import _pycryptopp # all that work for one little import
+    __doc__ = _pycryptopp.__doc__
 
 finally:
     if use_RTLD_GLOBAL:
@@ -53,4 +54,4 @@ def _import_my_names(thismodule, prefix):
 import publickey, hash, cipher
 
 quiet_pyflakes=[__version__, publickey, hash, cipher, _pycryptopp]
-del sys, quiet_pyflakes
+del sys, quiet_pyflakes, _import_my_names, use_RTLD_GLOBAL
