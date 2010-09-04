@@ -64,3 +64,5 @@ def start_up_self_test():
 
     _test_from_Niels_AES(16, 'bd883f01035e58f42f9d812f2dacbcd8')
     _test_from_Niels_AES(32, 'c84b0f3a2c76dd9871900b07f09bdd3e')
+
+start_up_self_test()
