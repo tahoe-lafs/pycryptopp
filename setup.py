@@ -33,6 +33,11 @@ if "--disable-embedded-cryptopp" in sys.argv:
 if os.environ.get('PYCRYPTOPP_DISABLE_EMBEDDED_CRYPTOPP') == "1":
     DISABLE_EMBEDDED_CRYPTOPP=True
 
+TEST_DOUBLE_LOAD=False
+if "--test-double-load" in sys.argv:
+    TEST_DOUBLE_LOAD=True
+    sys.argv.remove("--test-double-load")
+
 # There are two ways that this setup.py script can build pycryptopp, either by using the
 # Crypto++ source code bundled in the pycryptopp source tree, or by linking to a copy of the
 # Crypto++ library that is already installed on the system.
@@ -193,10 +198,17 @@ else:
 srcs = ['pycryptopp/_pycryptoppmodule.cpp', 'pycryptopp/publickey/rsamodule.cpp', 'pycryptopp/hash/sha256module.cpp', 'pycryptopp/cipher/aesmodule.cpp']
 if ECDSA:
     srcs.append('pycryptopp/publickey/ecdsamodule.cpp')
+if TEST_DOUBLE_LOAD:
+    srcs.append('pycryptopp/_testdoubleloadmodule.cpp', )
 
 ext_modules.append(
     Extension('pycryptopp._pycryptopp', extra_srcs + srcs, include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
     )
+
+if TEST_DOUBLE_LOAD:
+    ext_modules.append(
+        Extension('_testdoubleload', extra_srcs + srcs, include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
+        )
 
 miscdeps=os.path.join(os.getcwd(), 'misc', 'dependencies')
 dependency_links=[os.path.join(miscdeps, t) for t in os.listdir(miscdeps) if t.endswith(".tar")]
