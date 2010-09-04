@@ -199,7 +199,7 @@ srcs = ['pycryptopp/_pycryptoppmodule.cpp', 'pycryptopp/publickey/rsamodule.cpp'
 if ECDSA:
     srcs.append('pycryptopp/publickey/ecdsamodule.cpp')
 if TEST_DOUBLE_LOAD:
-    srcs.append('pycryptopp/_testdoubleloadmodule.cpp', )
+    srcs.append('_testdoubleloadmodule.cpp', )
 
 ext_modules.append(
     Extension('pycryptopp._pycryptopp', extra_srcs + srcs, include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
