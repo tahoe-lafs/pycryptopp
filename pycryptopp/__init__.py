@@ -20,6 +20,9 @@ except ImportError:
 import sys
 
 use_RTLD_GLOBAL = hasattr(sys, "getdlopenflags")
+
+use_RTLD_GLOBAL = False # testing whether this fixes crashes on Ubuntu 10.04/amd64 without causing other problems on any platform.
+
 if use_RTLD_GLOBAL:
     try:
         from ctypes import RTLD_GLOBAL as RTLD_GLOBAL_FROM_CTYPES
