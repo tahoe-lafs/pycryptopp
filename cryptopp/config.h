@@ -343,6 +343,8 @@ NAMESPACE_END
 
 #define CRYPTOPP_VERSION 560
 
+#include "extraversion.h"
+
 // ***************** determine availability of OS features ********************
 
 #ifndef NO_OS_DEPENDENCE

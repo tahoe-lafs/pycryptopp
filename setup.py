@@ -129,7 +129,7 @@ else:
 
 # In either case, we must provide a value for CRYPTOPP_DISABLE_ASM that
 # matches the one used when Crypto++ was originally compiled. The Crypto++
-# GNUMakefile tests the assembler version and only enables assembly for
+# GNUmakefile tests the assembler version and only enables assembly for
 # recent versions of the GNU assembler (2.10 or later). The /usr/bin/as on
 # Mac OS-X 10.5 is too old.
 
@@ -161,14 +161,9 @@ trove_classifiers=[
     "License :: DFSG approved",
     "License :: Other/Proprietary License",
     "Intended Audience :: Developers",
-    "Operating System :: Microsoft",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: Unix",
-    "Operating System :: POSIX :: Linux",
-    "Operating System :: POSIX",
     "Operating System :: MacOS :: MacOS X",
-    "Operating System :: Microsoft :: Windows :: Windows NT/2000",
-    "Operating System :: OS Independent",
     "Natural Language :: English",
     "Programming Language :: C",
     "Programming Language :: C++",
@@ -176,6 +171,7 @@ trove_classifiers=[
     "Programming Language :: Python :: 2",
     "Programming Language :: Python :: 2.4",
     "Programming Language :: Python :: 2.5",
+    "Programming Language :: Python :: 2.6",
     "Topic :: Software Development :: Libraries",
     ]
 

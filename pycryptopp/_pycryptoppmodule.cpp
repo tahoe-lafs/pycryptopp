@@ -6,6 +6,9 @@
 #include "hash/sha256module.hpp"
 #include "cipher/aesmodule.hpp"
 
+/* from Crypto++ */
+#include <cryptopp/config.h>
+
 PyDoc_STRVAR(_pycryptopp__doc__,
 "_pycryptopp -- Python wrappers for a few algorithms from Crypto++\n\
 \n\
@@ -34,6 +37,20 @@ init_pycryptopp(void) {
     module = Py_InitModule3("_pycryptopp", _pycryptopp_functions, _pycryptopp__doc__);
     if (!module)
       return;
+
+    PyObject* version;
+
+    /* a tuple of (Crypto++ version, extra-version) */
+    #ifdef CRYPTOPP_EXTRA_VERSION
+    version = Py_BuildValue("is", CRYPTOPP_VERSION, CRYPTOPP_EXTRA_VERSION);
+    #else
+    version = Py_BuildValue("iO", CRYPTOPP_VERSION, Py_None);
+    #endif
+
+    int succ = PyModule_AddObject(module, "cryptopp_version", version);
+    if (succ != 0)
+        return;
+
 
     //init_ecdsa(module);
     init_rsa(module);
