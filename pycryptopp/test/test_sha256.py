@@ -64,7 +64,7 @@ class SHA256(unittest.TestCase):
 
     def test_constructor_type_check(self):
         self.failUnlessRaises(TypeError, sha256.SHA256, None)
-                              
+
     def test_update_type_check(self):
         h = sha256.SHA256()
         self.failUnlessRaises(TypeError, h.update, None)
@@ -99,6 +99,26 @@ class SHA256(unittest.TestCase):
                     problems = True
                     print len(s[:a]), len(s[a:]), len(s), got, expected
         self.failIf(problems)
+
+    def test_recursive_different_chunksizes(self):
+        """
+        Test that updating a hasher with various sized inputs yields
+        the expected answer. This is somewhat redundant with
+        test_chunksize(), but that's okay. This one exercises some
+        slightly different situations (such as finalizing a hash after
+        different length inputs.) This one is recursive so that there
+        is a single fixed result that we expect.
+        """
+        hx = sha256.SHA256()
+        for i in range(0, 65):
+            s = "a" * i
+            hy = sha256.SHA256(s).digest()
+            hx.update(hy)
+        for i in range(0, 65):
+            hx.update('b')
+            hx.update('c'*64)
+        self.failUnlessEqual(hx.hexdigest().lower(), '79cbfab60b81f06937f376d4ad9560a60e70cb11a9b658a93e53010d1da77090')
+
 
 VECTS_RE=re.compile("\nLen = ([0-9]+)\nMsg = ([0-9a-f]+)\nMD = ([0-9a-f]+)")
 
@@ -159,6 +179,3 @@ class SHSVectors(unittest.TestCase):
                 seed = mds[-1]
                 self.failUnlessEqual(line[5:], b2a_hex(seed))
                 j += 1
-
-if __name__ == "__main__":
-    unittest.main()
