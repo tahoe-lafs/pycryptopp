@@ -110,14 +110,14 @@ class SHA256(unittest.TestCase):
         is a single fixed result that we expect.
         """
         hx = sha256.SHA256()
+        s = ''.join([ chr(c) for c in range(65) ])
         for i in range(0, 65):
-            s = "a" * i
-            hy = sha256.SHA256(s).digest()
+            hy = sha256.SHA256(s[:i]).digest()
             hx.update(hy)
         for i in range(0, 65):
-            hx.update('b')
-            hx.update('c'*64)
-        self.failUnlessEqual(hx.hexdigest().lower(), '79cbfab60b81f06937f376d4ad9560a60e70cb11a9b658a93e53010d1da77090')
+            hx.update(chr(0xFE))
+            hx.update(s[:64])
+        self.failUnlessEqual(hx.hexdigest().lower(), '5191c7841dd4e16aa454d40af924585dffc67157ffdbfd0236acddd07901629d')
 
 
 VECTS_RE=re.compile("\nLen = ([0-9]+)\nMsg = ([0-9a-f]+)\nMD = ([0-9a-f]+)")

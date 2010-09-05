@@ -24,14 +24,14 @@ def start_up_self_test():
     is a single fixed result that we expect.
     """
     hx = SHA256()
+    s = ''.join([ chr(c) for c in range(65) ])
     for i in range(0, 65):
-        s = "a" * i
-        hy = SHA256(s).digest()
+        hy = SHA256(s[:i]).digest()
         hx.update(hy)
     for i in range(0, 65):
-        hx.update('b')
-        hx.update('c'*64)
-    if hx.hexdigest().lower() != '79cbfab60b81f06937f376d4ad9560a60e70cb11a9b658a93e53010d1da77090':
+        hx.update(chr(0xFE))
+        hx.update(s[:64])
+    if hx.hexdigest().lower() != '5191c7841dd4e16aa454d40af924585dffc67157ffdbfd0236acddd07901629d':
         raise Error("pycryptopp failed startup self-test. Please run pycryptopp unit tests.")
 
 start_up_self_test()
