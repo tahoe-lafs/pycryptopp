@@ -71,9 +71,6 @@ else:
 if DISABLE_EMBEDDED_CRYPTOPP:
     # Link with a Crypto++ library that is already installed on the system.
 
-    # Check for a directory starting with "/usr/include" or "/usr/local/include" and
-    # ending with "cryptopp".
-
     for inclpath in ["/usr/local/include/cryptopp", "/usr/include/cryptopp"]:
         if os.path.exists(inclpath):
             libraries.append("cryptopp")
@@ -104,10 +101,6 @@ else:
     if 'sunos' in platform.system().lower():
         extra_compile_args.append('-Wa,--divide') # allow use of "/" operator
 
-    # pycryptopp provides access to a very limited subset of libcryptopp.
-    # Only those source files from Crypto++ that we need to compile are
-    # included in the cryptopp/ subdirectory.
-
     if 'win32' in sys.platform.lower():
         try:
             res = subprocess.Popen(['cl'], stdin=open(os.devnull), stdout=subprocess.PIPE).communicate()
@@ -131,7 +124,7 @@ else:
 # matches the one used when Crypto++ was originally compiled. The Crypto++
 # GNUmakefile tests the assembler version and only enables assembly for
 # recent versions of the GNU assembler (2.10 or later). The /usr/bin/as on
-# Mac OS-X 10.5 is too old.
+# Mac OS-X 10.6 is too old.
 
 try:
     sp = subprocess.Popen(['as', '-v'], stdin=subprocess.PIPE,
