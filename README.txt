@@ -59,7 +59,7 @@ and fixing bugs.
 
 Zooko O'Whielacronx
 Boulder, Colorado
-June 4, 2010
+September 18, 2010
 
 [1] http://pypi.python.org/pypi/pycryptopp
 [2] http://cryptopp.com
