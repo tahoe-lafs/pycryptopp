@@ -118,6 +118,13 @@ else:
     else:
         # We can't handle out-of-line assembly.
         cryptopp_src = [ os.path.join('cryptopp', x) for x in os.listdir('cryptopp') if x.endswith('.cpp') ]
+
+    # Something -- I know now what -- is creating files named
+    # "._$FNAME", for example "._rdtables.cpp", and those files
+    # contain uncompilable data that is not C++, thus on occasion
+    # causing the build to fail. This works-around that:
+    cryptopp_src = [ c for c in cryptopp_src if not c.startswith('._') ]
+
     extra_srcs.extend(cryptopp_src)
 
 # In either case, we must provide a value for CRYPTOPP_DISABLE_ASM that
