@@ -2,6 +2,9 @@
 
 import os, subprocess, sys, traceback
 
+def foldlines(s):
+    return s.replace("\n", " ").replace("\r", "")
+
 def print_platform():
     print
     try:
