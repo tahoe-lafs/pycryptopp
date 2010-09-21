@@ -222,7 +222,7 @@ install_requires = ['setuptools >= 0.6a9'] # for pkg_resources for loading test 
 # that are already in use), you may need to add it to setup.cfg and configure
 # it to run darcsver before your command, if you want the version number to be
 # correct when that command runs.  http://pypi.python.org/pypi/darcsver
-setup_requires.append('darcsver >= 1.2.0')
+setup_requires.append('darcsver >= 1.6.2')
 
 # setuptools_pyflakes is needed only if you want "./setup.py flakes" to run
 # pyflakes on all the pycryptopp modules.
