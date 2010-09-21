@@ -4,6 +4,12 @@ import subprocess
 PIPE=subprocess.PIPE
 from distutils import log
 
+def all(iterable):
+    for thing in iterable:
+        if not thing:
+            return False
+    return True
+
 OUR_VERSION_BASE_RE_STR="(\d+)(\.(\d+)(\.(\d+))?)?((a|b|c)(\d+))?(\.dev(\d+))?"
 try:
     # If we can import pyutil.version_class then use its regex.
