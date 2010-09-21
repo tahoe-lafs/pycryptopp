@@ -85,5 +85,18 @@ except (ImportError, ValueError):
     __version__ = distutils_Version(verstr)
 '''
 
-        (rc, verstr) = darcsvermodule.update(self.project_name, [self.version_file], self.count_all_patches, abort_if_snapshot=self.abort_if_snapshot, EXE_NAME="setup.py darcsver", version_body=[PYTHON_VERSION_BODY])
+        CPP_VERSION_BODY='''
+/* This is the version of this tree, as created by %(versiontool)s from the darcs patch
+ * information: the main version number is taken from the most recent release
+ * tag. If some patches have been added since the last release, this will have a
+ * -NN "build number" suffix, or else a -rNN "revision number" suffix. Please see
+ * pyutil.version_class for a description of what the different fields mean.
+ */
+
+#define CRYPTOPP_EXTRA_VERSION "%(pkgname)s-%(appversion)s"
+'''
+
+        versionfiles = [self.version_file, 'cryptopp/extraversion.h']
+        versionbodies = [PYTHON_VERSION_BODY, CPP_VERSION_BODY]
+        (rc, verstr) = darcsvermodule.update(self.project_name, versionfiles, self.count_all_patches, abort_if_snapshot=self.abort_if_snapshot, EXE_NAME="setup.py darcsver", version_body=versionbodies)
         self.distribution.metadata.version = verstr
