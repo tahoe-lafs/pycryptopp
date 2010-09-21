@@ -6,7 +6,10 @@
 # Author: Zooko Wilcox-O'Hearn
 # See README.txt for licensing information.
 
-import os, platform, re, subprocess, sys
+import glob, os, platform, re, subprocess, sys
+
+egg = os.path.realpath(glob.glob('darcsver-*.egg')[0])
+sys.path.insert(0, egg)
 
 from setuptools import Extension, find_packages, setup
 
