@@ -253,37 +253,25 @@ if ECDSA:
 else:
     long_description='RSA-PSS-SHA256 signatures, SHA-256 hashes, and AES-CTR encryption'
 
-def _setup(test_suite):
-    setup(name=PKG,
-          version=verstr,
-          description='Python wrappers for the Crypto++ library',
-          long_description=long_description,
-          author='Zooko O\'Whielacronx',
-          author_email='zooko@zooko.com',
-          url='http://allmydata.org/trac/' + PKG,
-          license='GNU GPL',
-          packages=find_packages(),
-          include_package_data=True,
-          exclude_package_data={
-              '': [ '*.cpp', '*.hpp', ]
-              },
-          data_files=data_files,
-          setup_requires=setup_requires,
-          install_requires=install_requires,
-          dependency_links=dependency_links,
-          classifiers=trove_classifiers,
-          ext_modules=ext_modules,
-          test_suite=test_suite,
-          zip_safe=False, # I prefer unzipped for easier access.
-          )
-
-test_suite_name=PKG+".test"
-try:
-    _setup(test_suite=test_suite_name)
-except Exception, le:
-    # to work around a bug in Elisa v0.3.5
-    # https://bugs.launchpad.net/elisa/+bug/263697
-    if "test_suite must be a list" in str(le):
-        _setup(test_suite=[test_suite_name])
-    else:
-        raise
+setup(name=PKG,
+      version=verstr,
+      description='Python wrappers for a few algorithms from the Crypto++ library',
+      long_description=long_description,
+      author='Zooko O\'Whielacronx',
+      author_email='zooko@zooko.com',
+      url='http://tahoe-lafs.org/trac/' + PKG,
+      license='GNU GPL', # see README.txt for details -- there is also an alternative licence
+      packages=find_packages(),
+      include_package_data=True,
+      exclude_package_data={
+          '': [ '*.cpp', '*.hpp', ]
+          },
+      data_files=data_files,
+      setup_requires=setup_requires,
+      install_requires=install_requires,
+      dependency_links=dependency_links,
+      classifiers=trove_classifiers,
+      ext_modules=ext_modules,
+      test_suite=PKG+".test",
+      zip_safe=False, # I prefer unzipped for easier access.
+      )
