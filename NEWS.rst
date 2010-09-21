@@ -1,3 +1,7 @@
+2010-09-20 -- pycryptopp v0.5.24
+
+    * make setup backwards-compatible to Python 2.4
+
 2010-09-20 -- pycryptopp v0.5.23
 
     * don't attempt to compile Mac OS X extended attribute files (this fixes the build breaking)
