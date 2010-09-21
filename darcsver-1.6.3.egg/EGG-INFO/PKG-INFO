@@ -1,6 +1,6 @@
 Metadata-Version: 1.0
 Name: darcsver
-Version: 1.6.2
+Version: 1.6.3
 Summary: generate a version number from darcs history
 Home-page: http://tahoe-lafs.org/trac/darcsver
 Author: Zooko O'Whielacronx
@@ -12,12 +12,14 @@ Description: darcsver - generate version numbers from darcs revision control his
         What Does It Do
         ---------------
         
-        Create _version.py, based upon the latest darcs release tag.
+        Create files containing version numbers, based upon the latest darcs
+        release tag.
         
-        If your source tree is coming from darcs (i.e. it is in a darcs repository),
-        this tool will determine the most recent release tag, count the patches that
-        have been applied since then, and compute a version number to be written into
-        _version.py . This version number will be available by doing:
+        If your source tree is coming from darcs (i.e. it is in a darcs
+        repository), this tool will determine the most recent release tag,
+        count the patches that have been applied since then, and compute a
+        version number to be written into _version.py (and optionally other
+        version files). This version number will be available by doing:
         
         from your_package_name import __version__
         
@@ -107,13 +109,6 @@ Classifier: Development Status :: 5 - Production/Stable
 Classifier: License :: OSI Approved :: BSD License
 Classifier: License :: DFSG approved
 Classifier: Intended Audience :: Developers
-Classifier: Operating System :: Microsoft
-Classifier: Operating System :: Microsoft :: Windows
-Classifier: Operating System :: Unix
-Classifier: Operating System :: POSIX :: Linux
-Classifier: Operating System :: POSIX
-Classifier: Operating System :: MacOS :: MacOS X
-Classifier: Operating System :: Microsoft :: Windows :: Windows NT/2000
 Classifier: Operating System :: OS Independent
 Classifier: Natural Language :: English
 Classifier: Programming Language :: Python
@@ -121,5 +116,6 @@ Classifier: Programming Language :: Python :: 2
 Classifier: Programming Language :: Python :: 2.4
 Classifier: Programming Language :: Python :: 2.5
 Classifier: Programming Language :: Python :: 2.6
+Classifier: Programming Language :: Python :: 2.7
 Classifier: Topic :: Utilities
 Classifier: Topic :: Software Development :: Libraries

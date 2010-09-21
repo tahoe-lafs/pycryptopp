@@ -36,7 +36,7 @@ VERSION_BODY = '''
 # pyutil.version_class for a description of what the different fields mean.
 
 __pkgname__ = "%(pkgname)s"
-verstr = "%(appversion)s"
+verstr = "%(pkgversion)s"
 try:
     from pyutil.version_class import Version as pyutil_Version
     __version__ = pyutil_Version(verstr)
@@ -50,7 +50,7 @@ def write_version_py(verstr, outfname, EXE_NAME, version_body, pkgname):
     f = open(outfname, "wt+")
     f.write(version_body % {
             'versiontool': EXE_NAME,
-            'appversion': verstr,
+            'pkgversion': verstr,
             'pkgname': pkgname,
             })
     f.close()

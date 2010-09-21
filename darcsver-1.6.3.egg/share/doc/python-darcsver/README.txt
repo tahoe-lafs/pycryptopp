@@ -4,12 +4,14 @@ darcsver - generate version numbers from darcs revision control history
 What Does It Do
 ---------------
 
-Create _version.py, based upon the latest darcs release tag.
+Create files containing version numbers, based upon the latest darcs
+release tag.
 
-If your source tree is coming from darcs (i.e. it is in a darcs repository),
-this tool will determine the most recent release tag, count the patches that
-have been applied since then, and compute a version number to be written into
-_version.py . This version number will be available by doing:
+If your source tree is coming from darcs (i.e. it is in a darcs
+repository), this tool will determine the most recent release tag,
+count the patches that have been applied since then, and compute a
+version number to be written into _version.py (and optionally other
+version files). This version number will be available by doing:
 
  from your_package_name import __version__
 
