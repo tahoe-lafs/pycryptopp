@@ -1,3 +1,5 @@
+darcsver - generate version numbers from darcs revision control history
+=======================================================================
 
 What Does It Do
 ---------------
@@ -19,7 +21,7 @@ this tool will quietly exit without modifying the existing _version.py .
 'release tags' are tags in the source repository that match the following
 regexp:
 
- ^your_package_name-\d+\.\d+(\.\d+)?((a|b|c)(\d+)?)?\w*$
+ ^your_package_name-(\d+)(\.(\d+)(\.(\d+))?)?((a|b|c|rc)(\d+))?
 
 
 Installation
