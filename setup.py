@@ -248,6 +248,11 @@ data_fnames=['COPYING.GPL', 'COPYING.TGPPL.html', 'README.txt']
 doc_loc = "share/doc/" + PKG
 data_files = [(doc_loc, data_fnames)]
 
+# Note that due to a bug in distutils we also have to maintain a
+# MANIFEST.in file specifying cryptopp/extraversion.h. This bug was
+# fixed in Python 2.7
+data_files.append(('cryptopp', ['cryptopp/extraversion.h']))
+
 if ECDSA:
     long_description='RSA-PSS-SHA256 signatures, ECDSA(1363)/EMSA1(SHA-256) signatures, SHA-256 hashes, and AES-CTR encryption'
 else:
