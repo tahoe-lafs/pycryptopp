@@ -54,7 +54,7 @@ extra_srcs=[] # This is for Crypto++ .cpp files if they are needed.
 
 #
 # Fix the build on OpenBSD
-# http://allmydata.org/trac/pycryptopp/ticket/32
+# http://tahoe-lafs/trac/pycryptopp/ticket/32
 #
 if 'openbsd' in platform.system().lower():
     extra_link_args.append("-fpic")
