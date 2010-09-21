@@ -258,6 +258,36 @@ if ECDSA:
 else:
     long_description='RSA-PSS-SHA256 signatures, SHA-256 hashes, and AES-CTR encryption'
 
+PY_VERSION_BODY='''
+# This is the version of this tree, as created by %(versiontool)s from the darcs patch
+# information: the main version number is taken from the most recent release
+# tag. If some patches have been added since the last release, this will have a
+# -NN "build number" suffix, or else a -rNN "revision number" suffix. Please see
+# pyutil.version_class for a description of what the different fields mean.
+
+__pkgname__ = "%(pkgname)s"
+verstr = "%(pkgversion)s"
+try:
+    from pyutil.version_class import Version as pyutil_Version
+    __version__ = pyutil_Version(verstr)
+except (ImportError, ValueError):
+    # Maybe there is no pyutil installed, or this may be an older version of
+    # pyutil.version_class which does not support SVN-alike revision numbers.
+    from distutils.version import LooseVersion as distutils_Version
+    __version__ = distutils_Version(verstr)
+'''
+
+CPP_VERSION_BODY='''
+/* This is the version of this tree, as created by %(versiontool)s from the darcs patch
+ * information: the main version number is taken from the most recent release
+ * tag. If some patches have been added since the last release, this will have a
+ * -NN "build number" suffix, or else a -rNN "revision number" suffix. Please see
+ * pyutil.version_class for a description of what the different fields mean.
+ */
+
+#define CRYPTOPP_EXTRA_VERSION "%(pkgname)s-%(pkgversion)s"
+'''
+
 setup(name=PKG,
       version=verstr,
       description='Python wrappers for a few algorithms from the Crypto++ library',
@@ -279,4 +309,6 @@ setup(name=PKG,
       ext_modules=ext_modules,
       test_suite=PKG+".test",
       zip_safe=False, # I prefer unzipped for easier access.
+      versionfiles=[os.path.join('pycryptopp', '_version.py'), os.path.join('cryptopp', 'extraversion.h')],
+      versionbodies=[PY_VERSION_BODY, CPP_VERSION_BODY],
       )
