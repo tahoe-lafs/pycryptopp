@@ -36,6 +36,7 @@ typedef int Py_ssize_t;
 #include "ecdsamodule.hpp"
 
 /* from Crypto++ */
+#ifdef DISABLE_EMBEDDED_CRYPTOPP
 #include <cryptopp/filters.h>
 #include <cryptopp/osrng.h>
 #include <cryptopp/eccrypto.h>
@@ -47,6 +48,19 @@ typedef int Py_ssize_t;
 #include <iostream>
 #include <cryptopp/ecp.h>
 #include <cryptopp/hex.h>
+#else
+#include <embeddedcryptopp/filters.h>
+#include <embeddedcryptopp/osrng.h>
+#include <embeddedcryptopp/eccrypto.h>
+#include <embeddedcryptopp/oids.h>
+#include <embeddedcryptopp/tiger.h>
+#include <embeddedcryptopp/sha.h>
+#include <embeddedcryptopp/pubkey.h>
+// only needed for debugging -- the _dump() function
+#include <iostream>
+#include <embeddedcryptopp/ecp.h>
+#include <embeddedcryptopp/hex.h>
+#endif
 
 static const int KEY_SIZE_BITS=192;
 

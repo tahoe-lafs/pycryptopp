@@ -14,7 +14,7 @@ sys.path.insert(0, egg)
 from setuptools import Extension, find_packages, setup
 
 # ECDSA isn't yet supported, but it can be turned on by testing purposes.  But
-# you'll have to comment-in some lines in the C++ code to make it work.  Also
+
 # comment-in the unit tests.
 ECDSA=False
 # ECDSA=True
@@ -35,6 +35,8 @@ if "--disable-embedded-cryptopp" in sys.argv:
 # command-line argument check above.
 if os.environ.get('PYCRYPTOPP_DISABLE_EMBEDDED_CRYPTOPP') == "1":
     DISABLE_EMBEDDED_CRYPTOPP=True
+
+EMBEDDED_CRYPTOPP_DIR='embeddedcryptopp'
 
 TEST_DOUBLE_LOAD=False
 if "--test-double-load" in sys.argv:
@@ -72,6 +74,8 @@ else:
     extra_compile_args.append("-w")
 
 if DISABLE_EMBEDDED_CRYPTOPP:
+    define_macros.append(('DISABLE_EMBEDDED_CRYPTOPP', 1))
+
     # Link with a Crypto++ library that is already installed on the system.
 
     for inclpath in ["/usr/local/include/cryptopp", "/usr/include/cryptopp"]:
@@ -97,8 +101,8 @@ if DISABLE_EMBEDDED_CRYPTOPP:
         library_dirs.append("/usr/local/lib")
 
 else:
-    # Build the Crypto++ library which is included by source code in the pycryptopp tree and
-    # link against it.
+    # Build the bundled Crypto++ library which is included by source
+    # code in the pycryptopp tree and link against it.
     include_dirs.append(".")
 
     if 'sunos' in platform.system().lower():
@@ -117,10 +121,10 @@ else:
 
     if using_msvc:
         # We can handle out-of-line assembly.
-        cryptopp_src = [ os.path.join('cryptopp', x) for x in os.listdir('cryptopp') if x.endswith(('.cpp', '.asm')) ]
+        cryptopp_src = [ os.path.join(EMBEDDED_CRYPTOPP_DIR, x) for x in os.listdir(EMBEDDED_CRYPTOPP_DIR) if x.endswith(('.cpp', '.asm')) ]
     else:
         # We can't handle out-of-line assembly.
-        cryptopp_src = [ os.path.join('cryptopp', x) for x in os.listdir('cryptopp') if x.endswith('.cpp') ]
+        cryptopp_src = [ os.path.join(EMBEDDED_CRYPTOPP_DIR, x) for x in os.listdir(EMBEDDED_CRYPTOPP_DIR) if x.endswith('.cpp') ]
 
     # Mac OS X extended attribute files when written to a non-Mac-OS-X
     # filesystem come out as "._$FNAME", for example "._rdtables.cpp",
@@ -252,9 +256,9 @@ doc_loc = "share/doc/" + PKG
 data_files = [(doc_loc, data_fnames)]
 
 # Note that due to a bug in distutils we also have to maintain a
-# MANIFEST.in file specifying cryptopp/extraversion.h. This bug was
+# MANIFEST.in file specifying embeddedcryptopp/extraversion.h. This bug was
 # fixed in Python 2.7
-data_files.append(('cryptopp', ['cryptopp/extraversion.h']))
+data_files.append((EMBEDDED_CRYPTOPP_DIR, [EMBEDDED_CRYPTOPP_DIR+'/extraversion.h']))
 
 if ECDSA:
     long_description='RSA-PSS-SHA256 signatures, ECDSA(1363)/EMSA1(SHA-256) signatures, SHA-256 hashes, and AES-CTR encryption'
@@ -312,6 +316,6 @@ setup(name=PKG,
       ext_modules=ext_modules,
       test_suite=PKG+".test",
       zip_safe=False, # I prefer unzipped for easier access.
-      versionfiles=[os.path.join('pycryptopp', '_version.py'), os.path.join('cryptopp', 'extraversion.h')],
+      versionfiles=[os.path.join('pycryptopp', '_version.py'), os.path.join(EMBEDDED_CRYPTOPP_DIR, 'extraversion.h')],
       versionbodies=[PY_VERSION_BODY, CPP_VERSION_BODY],
       )

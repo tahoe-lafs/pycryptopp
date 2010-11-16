@@ -7,7 +7,11 @@
 #include "cipher/aesmodule.hpp"
 
 /* from Crypto++ */
+#ifdef DISABLE_EMBEDDED_CRYPTOPP
 #include <cryptopp/config.h>
+#else
+#include <embeddedcryptopp/config.h>
+#endif
 
 PyDoc_STRVAR(_pycryptopp__doc__,
 "_pycryptopp -- Python wrappers for a few algorithms from Crypto++\n\
