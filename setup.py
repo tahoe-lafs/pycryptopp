@@ -13,11 +13,8 @@ sys.path.insert(0, egg)
 
 from setuptools import Extension, find_packages, setup
 
-# ECDSA isn't yet supported, but it can be turned on by testing purposes.  But
-
-# comment-in the unit tests.
-ECDSA=False
-# ECDSA=True
+# ECDSA=False
+ECDSA=True
 
 DEBUG=False
 if "--debug" in sys.argv:
