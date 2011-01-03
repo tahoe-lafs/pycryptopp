@@ -1,4 +1,3 @@
-
 #include <Python.h>
 
 #include "publickey/ecdsamodule.hpp"
@@ -61,4 +60,3 @@ init_pycryptopp(void) {
     init_sha256(module);
     init_aes(module);
 }
-

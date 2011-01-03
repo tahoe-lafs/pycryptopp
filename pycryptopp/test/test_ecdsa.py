@@ -201,10 +201,10 @@ class SignAndVerify(unittest.TestCase):
         self.failUnlessEqual(len(vstr), PUBKEYBYTES)
         verifier2 = ecdsa.VerifyingKey(vstr)
         self._help_test_sign_and_check_good_keys(signer, verifier2)
-       
+
         signer2 = ecdsa.SigningKey(seed)
         self._help_test_sign_and_check_good_keys(signer2, verifier2)
-         
+
         verifier3 = signer2.get_verifying_key()
         self._help_test_sign_and_check_good_keys(signer, verifier3)
 
@@ -230,7 +230,7 @@ class SignAndVerify(unittest.TestCase):
             pass
         else:
             self._help_test_sign_and_check_bad_keys(signer, badverifier)
-        
+
         # Flip one bit of the private key.
         badseed = flip_one_bit(seed)
         badsigner = ecdsa.SigningKey(badseed)
