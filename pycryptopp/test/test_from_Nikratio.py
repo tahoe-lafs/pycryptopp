@@ -21,7 +21,7 @@ class T(unittest.TestCase):
             buf = cipher.process(buf)
             hash_ = cipher.process(hmac_.digest())
 
-            return b''.join(
+            return ''.join(
                             (struct.pack(b'<B', len(nonce)),
                             nonce, hash_, buf))
 
