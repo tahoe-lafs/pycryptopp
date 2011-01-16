@@ -8,7 +8,11 @@ class T(unittest.TestCase):
     def test_t(self):
         import hmac
         import pycryptopp
-        import hashlib
+        try:
+            import hashlib
+        except ImportError:
+            # Oh nevermind.
+            return
         import struct
 
         def encrypt(buf, passphrase, nonce):
