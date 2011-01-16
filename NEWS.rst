@@ -1,4 +1,4 @@
-2011-01-16 -- pycryptopp v0.5.26
+2011-01-16 -- pycryptopp v0.5.28
 
     * re-enable the ECDSA module, but please do not rely on it as it is expected to change in backwards-incompatible ways in future releases
     * several changes to the build system to make it tidier and less error-prone -- see revision control history for details

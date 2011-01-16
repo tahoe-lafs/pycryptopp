@@ -22,7 +22,7 @@ class T(unittest.TestCase):
             hash_ = cipher.process(hmac_.digest())
 
             return ''.join(
-                            (struct.pack(b'<B', len(nonce)),
+                            (struct.pack('<B', len(nonce)),
                             nonce, hash_, buf))
 
         encrypt('foobar', 'passphrase', 'nonce')
