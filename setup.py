@@ -233,12 +233,17 @@ setup_requires.append('darcsver >= 1.6.3')
 if 'flakes' in sys.argv[1:]:
     setup_requires.append('setuptools_pyflakes >= 1.0.0')
 
-# setuptools_darcs is required to produce complete distributions (such as
-# with "sdist" or "bdist_egg"), unless there is a
-# pycryptopp.egg-info/SOURCES.txt file present which contains a complete list
-# of needed files.
-# http://pypi.python.org/pypi/setuptools_darcs
-setup_requires.append('setuptools_darcs >= 1.0.5')
+# setuptools_darcs is required to produce complete distributions (such
+# as with "sdist" or "bdist_egg"), unless there is a
+# pycryptopp.egg-info/SOURCE.txt file present which contains a complete
+# list of files that should be included.
+# http://pypi.python.org/pypi/setuptools_darcs However, requiring it
+# runs afoul of a bug in Distribute, which was shipped in Ubuntu
+# Lucid, so for now you have to manually install it before building
+# sdists or eggs:
+# http://bitbucket.org/tarek/distribute/issue/55/revision-control-plugin-automatically-installed-as-a-build-dependency-is-not-present-when-another-build-dependency-is-being
+if False:
+    setup_requires.append('setuptools_darcs >= 1.1.0')
 
 # stdeb is required to produce Debian files with "sdist_dsc".
 # http://github.com/astraw/stdeb/tree/master
