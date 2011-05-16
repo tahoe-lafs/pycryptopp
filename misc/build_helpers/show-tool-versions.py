@@ -37,6 +37,20 @@ def print_stdout(cmdlist, label=None):
         sys.stderr.flush()
         pass
 
+def print_stderr(cmdlist, label=None):
+    print
+    try:
+        res = subprocess.Popen(cmdlist, stdin=open(os.devnull),
+                               stderr=subprocess.PIPE).communicate()[1]
+        if label is None:
+            label = cmdlist[0]
+        print label + ': ' + foldlines(res)
+    except EnvironmentError:
+        sys.stderr.write("\nGot exception invoking '%s'. Exception follows.\n" % (cmdlist[0],))
+        traceback.print_exc(file=sys.stderr)
+        sys.stderr.flush()
+        pass
+
 def print_as_ver():
     print
     if os.path.exists('a.out'):
@@ -102,7 +116,7 @@ print_platform()
 print_python_ver()
 
 print_stdout(['buildbot', '--version'])
-print_stdout(['cl'])
+print_stderr(['cl'])
 print_stdout(['g++', '--version'])
 print_stdout(['cryptest', 'V'])
 print_stdout(['darcs', '--version'])
