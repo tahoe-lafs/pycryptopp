@@ -1,8 +1,9 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-# pycryptopp -- Python wrappers for Crypto++
+# pycryptopp -- Python wrappers for a few algorithms from Crypto++
 #
-# Copyright (C) 2009-2010 Zooko Wilcox-O'Hearn
+# Copyright © 2009-2011 Zooko Wilcox-O'Hearn
 # Author: Zooko Wilcox-O'Hearn
 # See README.txt for licensing information.
 
