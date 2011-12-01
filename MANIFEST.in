@@ -1,1 +1,7 @@
-include embeddedcryptopp/extraversion.h
+include copyright COPYING.GPL COPYING.TGPPL.html ChangeLog NEWS.rst
+
+graft pycryptopp
+graft embeddedcryptopp
+graft misc
+graft darcsver-1.6.3.egg
+graft setuptools_darcs-1.2.11-py2.6.egg
