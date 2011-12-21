@@ -405,7 +405,7 @@ class UpdateVersion(Command):
         (rc, verstr) = update(pkgname=self.distribution.get_name(),
                               verfilename=self.distribution.versionfiles,
                               revision_number=True,
-                              versionbodies=self.distribution.versionbodies)
+                              version_body=self.distribution.versionbodies)
         if rc == 0:
             return verstr
 
