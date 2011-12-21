@@ -3,6 +3,8 @@ ABOUT THIS PACKAGE
 pycryptopp [1] is a python wrapper around a few algorithms from the
 Crypto++ library [2].
 
+It lives at https://tahoe-lafs.org/trac/pycryptopp
+
 LICENCE
 
 You may use this package under the GNU General Public License, version
