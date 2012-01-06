@@ -1,0 +1,20 @@
+
+/build/
+
+# _version.py is generated at build time, and never checked in
+/pycryptopp/_version.py
+/embeddedcryptopp/extraversion.h
+
+# the .egg-info is mostly generated during 'setup.py bdist_egg' ..
+/pycryptopp.egg-info/
+# .. but stdeb.cfg is persistent, and tracked in version-control
+!/pycryptopp.egg-info/stdeb.cfg
+
+# if setup.py needs to install plugins from eggs to satisfy setup_requires:
+/setuptools_darcs*.egg
+/darcsver*.egg
+/pyutil*.egg
+
+# if ez_setup.py needs to build setuptools, that goes here
+/setuptools-*.egg
+/ez_setup.pyc
