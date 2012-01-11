@@ -4,7 +4,6 @@
   use (not really, according to Ulrich Drepper) of uninitailised bytes by glibc in utimes()
   Memcheck:Param
   fun:utimes
-  obj:libpython2.4.so.1.0
 }
 
 {
