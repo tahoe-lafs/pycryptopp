@@ -1,4 +1,12 @@
-# all tool names: Addrcheck,Memcheck,cachegrind,helgrind,massif
+# glibc was apparently changed to avoid this: http://sources.redhat.com/bugzilla/show_bug.cgi?id=4306
+
+{
+  use (not really, according to Ulrich Drepper) of uninitailised bytes by glibc in utimes()
+  Memcheck:Param
+  fun:utimes
+  obj:libpython2.4.so.1.0
+}
+
 {
    ADDRESS_IN_RANGE/Invalid read of size 4
    Memcheck:Addr4
