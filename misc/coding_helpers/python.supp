@@ -1,10 +1,10 @@
-# glibc was apparently changed to avoid this: http://sources.redhat.com/bugzilla/show_bug.cgi?id=4306
-
-{
-  use (not really, according to Ulrich Drepper) of uninitailised bytes by glibc in utimes()
-  Memcheck:Param
-  fun:utimes
-}
+# # glibc was apparently changed to avoid this: http://sources.redhat.com/bugzilla/show_bug.cgi?id=4306
+# 
+# {
+#   use (not really, according to Ulrich Drepper) of uninitailised bytes by glibc in utimes()
+#   Memcheck:Param
+#   fun:utimes
+# }
 
 {
    ADDRESS_IN_RANGE/Invalid read of size 4
