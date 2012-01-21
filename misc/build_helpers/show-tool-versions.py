@@ -1,12 +1,14 @@
 #! /usr/bin/env python
 
-import os, subprocess, sys, traceback
+import errno, os, subprocess, sys, traceback
 
-def foldlines(s):
-    return s.replace("\n", " ").replace("\r", "")
+def foldlines(s, numlines=None):
+    lines = s.split("\n")
+    if numlines is not None:
+        lines = lines[:numlines]
+    return " ".join(lines).replace("\r", "")
 
 def print_platform():
-    print
     try:
         import platform
         out = platform.platform()
@@ -19,40 +21,43 @@ def print_platform():
         pass
 
 def print_python_ver():
-    print
     print "python:", foldlines(sys.version)
     print 'maxunicode: ' + str(sys.maxunicode)
 
-def print_stdout(cmdlist, label=None):
-    print
+def print_stdout(cmdlist, label=None, numlines=None):
+    if label is None:
+        label = cmdlist[0]
     try:
         res = subprocess.Popen(cmdlist, stdin=open(os.devnull),
                                stdout=subprocess.PIPE).communicate()[0]
-        if label is None:
-            label = cmdlist[0]
-        print label + ': ' + foldlines(res)
-    except EnvironmentError:
-        sys.stderr.write("\nGot exception invoking '%s'. Exception follows.\n" % (cmdlist[0],))
+        print label + ': ' + foldlines(res, numlines)
+    except EnvironmentError, e:
+        if isinstance(e, OSError) and e.errno == errno.ENOENT:
+            print str(label) + ': ' + str(cmdlist[0]) + ': no such file or directory'
+            return
+        sys.stderr.write("\n%s: Got exception invoking '%s'. Exception follows.\n" % (label, cmdlist[0],))
         traceback.print_exc(file=sys.stderr)
         sys.stderr.flush()
         pass
 
 def print_stderr(cmdlist, label=None):
-    print
+    if label is None:
+        label = cmdlist[0]
     try:
         res = subprocess.Popen(cmdlist, stdin=open(os.devnull),
                                stderr=subprocess.PIPE).communicate()[1]
-        if label is None:
-            label = cmdlist[0]
         print label + ': ' + foldlines(res)
-    except EnvironmentError:
-        sys.stderr.write("\nGot exception invoking '%s'. Exception follows.\n" % (cmdlist[0],))
+    except EnvironmentError, e:
+        if isinstance(e, OSError) and e.errno == errno.ENOENT:
+            print str(label) + ': ' + str(cmdlist[0]) + ': no such file or directory'
+            return
+        sys.stderr.write("\n%s: Got exception invoking '%s'. Exception follows.\n" % (label, cmdlist[0],))
         traceback.print_exc(file=sys.stderr)
         sys.stderr.flush()
         pass
 
+
 def print_as_ver():
-    print
     if os.path.exists('a.out'):
         print "WARNING: a file named a.out exists, and getting the version of the 'as' assembler writes to that filename, so I'm not attempting to get the version of 'as'."
         return
@@ -69,7 +74,6 @@ def print_as_ver():
         pass
 
 def print_setuptools_ver():
-    print
     try:
         import pkg_resources
         out = str(pkg_resources.require("setuptools"))
@@ -83,7 +87,6 @@ def print_setuptools_ver():
 def print_py_pkg_ver(pkgname, modulename=None):
     if modulename is None:
         modulename = pkgname
-
     print
     try:
         import pkg_resources
@@ -95,9 +98,7 @@ def print_py_pkg_ver(pkgname, modulename=None):
         sys.stderr.flush()
         pass
     except pkg_resources.DistributionNotFound:
-        sys.stderr.write("\npkg_resources reported no %s package installed. Exception follows.\n" % (pkgname,))
-        traceback.print_exc(file=sys.stderr)
-        sys.stderr.flush()
+        print pkgname + ': DistributionNotFound'
         pass
     try:
         __import__(modulename)
@@ -112,16 +113,18 @@ def print_py_pkg_ver(pkgname, modulename=None):
             pass
 
 print_platform()
-
+print
 print_python_ver()
-
+print
 print_stdout(['buildbot', '--version'])
+print_stdout(['buildmaster', '--version'])
+print_stdout(['buildslave', '--version'])
 print_stderr(['cl'])
-print_stdout(['g++', '--version'])
+print_stdout(['g++', '--version'], numlines=1)
 print_stdout(['cryptest', 'V'])
 print_stdout(['darcs', '--version'])
 print_stdout(['darcs', '--exact-version'], label='darcs-exact-version')
-print_stdout(['7za'])
+print_stdout(['7za'], numlines=3)
 print_stdout(['flappclient', '--version'])
 print_stdout(['valgrind', '--version'])
 
@@ -131,7 +134,6 @@ print_setuptools_ver()
 
 print_py_pkg_ver('coverage')
 print_py_pkg_ver('trialcoverage')
-print_py_pkg_ver('setuptools_trial')
 print_py_pkg_ver('setuptools_darcs')
 print_py_pkg_ver('darcsver')
 print_py_pkg_ver('Twisted', 'twisted')
