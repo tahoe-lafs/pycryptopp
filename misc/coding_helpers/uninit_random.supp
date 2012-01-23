@@ -1,0 +1,87 @@
+# If the system libcryptopp.so was built with the old behavior of mixing
+# uninitialized memory into the random pool, then you'll need to suppress
+# these...
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   fun:_ZN8CryptoPP8Rijndael4Base15UncheckedSetKeyEPKhjRKNS_14NameValuePairsE
+   fun:_ZN8CryptoPP21SimpleKeyingInterface6SetKeyEPKhjRKNS_14NameValuePairsE
+   fun:_ZN8CryptoPP10RandomPool34GenerateIntoBufferedTransformationERNS_22BufferedTransformationERKSsy
+   fun:_ZN8CryptoPP21RandomNumberGenerator13GenerateBlockEPhj
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   fun:_ZN8CryptoPP34Rijndael_Enc_AdvancedProcessBlocksEPvPKj
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN8CryptoPP7Integer6DecodeERNS_22BufferedTransformationEjNS0_10SignednessE
+   fun:_ZN8CryptoPP7Integer6DecodeEPKhjNS0_10SignednessE
+   fun:_ZN8CryptoPP7Integer9RandomizeERNS_21RandomNumberGeneratorEj
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZNK8CryptoPP7Integer9WordCountEv
+   fun:_ZNK8CryptoPP7Integer15PositiveCompareERKS0_
+   fun:_ZNK8CryptoPP7Integer7CompareERKS0_
+   fun:_ZN8CryptoPP7Integer9RandomizeERNS_21RandomNumberGeneratorERKS0_S4_
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZNK8CryptoPP7Integer15PositiveCompareERKS0_
+   fun:_ZNK8CryptoPP7Integer7CompareERKS0_
+   fun:_ZN8CryptoPP7Integer9RandomizeERNS_21RandomNumberGeneratorERKS0_S4_
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN8CryptoPP11PositiveAddERNS_7IntegerERKS0_S3_
+   fun:_ZN8CryptoPP7IntegerpLERKS0_
+   fun:_ZN8CryptoPP7Integer9RandomizeERNS_21RandomNumberGeneratorERKS0_S4_
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN8CryptoPP11PositiveAddERNS_7IntegerERKS0_S3_
+   fun:_ZNK8CryptoPP7Integer4PlusERKS0_
+   fun:_ZN8CryptoPP7Integer21GenerateRandomNoThrowERNS_21RandomNumberGeneratorERKNS_14NameValuePairsE
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZNK8CryptoPP7Integer9WordCountEv
+   fun:_ZNK8CryptoPP7Integer15PositiveCompareERKS0_
+   fun:_ZNK8CryptoPP7Integer7CompareERKS0_
+   fun:_ZN8CryptoPP7Integer21GenerateRandomNoThrowERNS_21RandomNumberGeneratorERKNS_14NameValuePairsE
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZNK8CryptoPP7Integer15PositiveCompareERKS0_
+   fun:_ZNK8CryptoPP7Integer7CompareERKS0_
+   fun:_ZN8CryptoPP7Integer21GenerateRandomNoThrowERNS_21RandomNumberGeneratorERKNS_14NameValuePairsE
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZNK8CryptoPP7Integer9WordCountEv
+   fun:_ZNK8CryptoPP7Integer15PositiveCompareERKS0_
+   fun:_ZNK8CryptoPP7Integer7CompareERKS0_
+   fun:_ZN8CryptoPP10FirstPrimeERNS_7IntegerERKS0_S3_S3_PKNS_13PrimeSelectorE
+   fun:_ZN8CryptoPP7Integer21GenerateRandomNoThrowERNS_21RandomNumberGeneratorERKNS_14NameValuePairsE
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZNK8CryptoPP7Integer9WordCountEv
+   fun:_ZN8CryptoPP16PositiveSubtractERNS_7IntegerERKS0_S3_
+   fun:_ZNK8CryptoPP7Integer5MinusERKS0_
+   fun:_ZN8CryptoPP10FirstPrimeERNS_7IntegerERKS0_S3_S3_PKNS_13PrimeSelectorE
+   fun:_ZN8CryptoPP10FirstPrimeERNS_7IntegerERKS0_S3_S3_PKNS_13PrimeSelectorE
+   fun:_ZN8CryptoPP7Integer21GenerateRandomNoThrowERNS_21RandomNumberGeneratorERKNS_14NameValuePairsE
+}
