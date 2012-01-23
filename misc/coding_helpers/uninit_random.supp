@@ -35,21 +35,6 @@
 {
    <insert_a_suppression_name_here>
    Memcheck:Cond
-   fun:_ZNK8CryptoPP7Integer9WordCountEv
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Cond
-   fun:_ZNK8CryptoPP7Integer15PositiveCompareERKS0_
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Cond
-   fun:_ZNK8CryptoPP7Integer9WordCountEv
-}
-{
-   <insert_a_suppression_name_here>
-   Memcheck:Cond
    fun:_ZN8CryptoPP16PositiveSubtractERNS_7IntegerERKS0_S3_
 }
 {
@@ -71,4 +56,51 @@
    <insert_a_suppression_name_here>
    Memcheck:Cond
    fun:_ZNK8CryptoPP7IntegerntEv
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZNSt6vectorIbSaIbEE14_M_fill_insertESt13_Bit_iteratorjb
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   fun:_ZNSt6vectorIbSaIbEE14_M_fill_insertESt13_Bit_iteratorjb
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN8CryptoPP10PrimeSieve11SieveSingleERSt6vectorIbSaIbEEtRKNS_7IntegerES7_t
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   fun:_ZN8CryptoPP10PrimeSieve11SieveSingleERSt6vectorIbSaIbEEtRKNS_7IntegerES7_t
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZSt6__findISt13_Bit_iteratorbET_S1_S1_RKT0_St26random_access_iterator_tag
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN8CryptoPP10PrimeSieve13NextCandidateERNS_7IntegerE
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:_ZN8CryptoPP7IntegeraSERKS0_
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:memcpy
+   fun:_ZN8CryptoPP6DivideEPjS0_S0_PKjjS2_j
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value4
+   fun:memcpy
+   fun:_ZN8CryptoPP6DivideEPjS0_S0_PKjjS2_j
 }
