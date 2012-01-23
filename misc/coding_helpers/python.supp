@@ -1,9 +1,10 @@
 # glibc was apparently changed to avoid this: http://sources.redhat.com/bugzilla/show_bug.cgi?id=4306
-
 {
-  use (not really, according to Ulrich Drepper) of uninitailised bytes by glibc in utimes()
-  Memcheck:Param
-  fun:utimes
+   use (not really, according to Ulrich Drepper) of uninitailised bytes by glibc in utimes()
+   Memcheck:Param
+   utimes(tvp[1])
+   fun:utimes
+   obj:/usr/lib/libpython2.4.so.1.0
 }
 
 {
