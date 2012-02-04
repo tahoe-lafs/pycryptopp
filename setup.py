@@ -9,9 +9,6 @@
 
 import glob, os, platform, re, subprocess, sys
 
-egg = os.path.realpath(glob.glob('darcsver-*.egg')[0])
-sys.path.insert(0, egg)
-
 from setuptools import Extension, find_packages, setup
 from setuptools import Command
 
@@ -217,19 +214,6 @@ dependency_links=[os.path.join(miscdeps, t) for t in os.listdir(miscdeps) if t.e
 setup_requires = []
 install_requires = ['setuptools >= 0.6a9'] # for pkg_resources for loading test vectors for unit tests
 
-# The darcsver command from the darcsver plugin is needed to initialize the
-# distribution's .version attribute. (It does this either by examining darcs
-# history, or if that fails by reading the pycryptopp/_version.py
-# file). darcsver will also write a new version stamp in
-# pycryptopp/_version.py, with a version number derived from darcs
-# history. Note that the setup.cfg file has an "[aliases]" section which
-# enumerates commands that you might run and specifies that it will run
-# darcsver before each one. If you add different commands (or if I forgot some
-# that are already in use), you may need to add it to setup.cfg and configure
-# it to run darcsver before your command, if you want the version number to be
-# correct when that command runs.  http://pypi.python.org/pypi/darcsver
-setup_requires.append('darcsver >= 1.6.3')
-
 # setuptools_pyflakes is needed only if you want "./setup.py flakes" to run
 # pyflakes on all the pycryptopp modules.
 if 'flakes' in sys.argv[1:]:
@@ -259,25 +243,11 @@ else:
 
 ###### Version updating code
 
-PY_DARCS_VERSION_BODY = '''
-# This _version.py is generated from darcs metadata by the pycryptopp
-# setup.py and the "darcsver" package. The main version number is taken from
-# the most recent release tag. If some patches have been added since the last
-# release, this will have a -NN "build number" suffix, or else a -rNN
-# "revision number" suffix. Please see pyutil.version_class for a description
-# of what the different fields mean.
-
-__pkgname__ = "%(pkgname)s"
-verstr = "%(pkgversion)s"
-__version__ = verstr
-'''
-
 PY_GIT_VERSION_BODY = '''
 # This _version.py is generated from git metadata by the pycryptopp setup.py.
 # The main version number is taken from the most recent release tag. If some
 # patches have been added since the last release, this will have a -NN "build
-# number" suffix, or else a -rNN "revision number" suffix. Please see
-# pyutil.version_class for a description of what the different fields mean.
+# number" suffix, or else a -rNN "revision number" suffix.
 
 __pkgname__ = "%(pkgname)s"
 real_version = "%(version)s"
@@ -286,25 +256,11 @@ verstr = "%(normalized)s"
 __version__ = verstr
 '''
 
-CPP_DARCS_VERSION_BODY = '''
-/* This _version.py is generated from darcs metadata by the pycryptopp
- * setup.py and the "darcsver" package. The main version number is taken from
- * the most recent release tag. If some patches have been added since the
- * last release, this will have a -NN "build number" suffix, or else a -rNN
- * "revision number" suffix. Please see pyutil.version_class for a
- * description of what the different fields mean.
- */
-
-#define CRYPTOPP_EXTRA_VERSION "%(pkgname)s-%(pkgversion)s"
-'''
-
 CPP_GIT_VERSION_BODY = '''
 /* This _version.py is generated from git metadata by the pycryptopp
  * setup.py. The main version number is taken from the most recent release
  * tag. If some patches have been added since the last release, this will
  * have a -NN "build number" suffix, or else a -rNN "revision number" suffix.
- * Please see pyutil.version_class for a description of what the different
- * fields mean.
  */
 
 #define CRYPTOPP_EXTRA_VERSION "%(pkgname)s-%(normalized)s"
@@ -344,8 +300,8 @@ def versions_from_git(tag_prefix, verbose=False):
     # the most recent tag was 1.9.0, and b73aba9 has 25 commits that weren't
     # in 1.9.0 . The narrow-minded NormalizedVersion parser that takes our
     # output (meant to enable sorting of version strings) refuses most of
-    # that. Tahoe uses a function named suggest_normalized_version() that can
-    # handle "1.9.0.post25", so dumb down our output to match.
+    # that. Tahoe-LAFS uses a function named suggest_normalized_version()
+    # that can handle "1.9.0.post25", so dumb down our output to match.
 
     try:
         source_dir = os.path.dirname(os.path.abspath(__file__))
@@ -390,24 +346,13 @@ class UpdateVersion(Command):
         pass
     def run(self):
         target = self.distribution.versionfiles[0]
-        if os.path.isdir(os.path.join(basedir, "_darcs")):
-            verstr = self.try_from_darcs(target)
-        elif os.path.isdir(os.path.join(basedir, ".git")):
+        if os.path.isdir(os.path.join(basedir, ".git")):
             verstr = self.try_from_git(target)
         else:
             print "no version-control data found, leaving _version.py alone"
             return
         if verstr:
             self.distribution.metadata.version = verstr
-
-    def try_from_darcs(self, target):
-        from darcsver.darcsvermodule import update
-        (rc, verstr) = update(pkgname=self.distribution.get_name(),
-                              verfilename=self.distribution.versionfiles,
-                              revision_number=True,
-                              version_body=self.distribution.versionbodies)
-        if rc == 0:
-            return verstr
 
     def try_from_git(self, target):
         versions = versions_from_git("pycryptopp-", verbose=True)
@@ -451,6 +396,6 @@ setup(name=PKG,
       zip_safe=False, # I prefer unzipped for easier access.
       versionfiles=[os.path.join('pycryptopp', '_version.py'),
                     os.path.join(EMBEDDED_CRYPTOPP_DIR, 'extraversion.h')],
-      versionbodies=[PY_DARCS_VERSION_BODY, CPP_DARCS_VERSION_BODY],
+      versionbodies=[PY_GIT_VERSION_BODY, CPP_GIT_VERSION_BODY],
       cmdclass={"update_version": UpdateVersion},
       )
