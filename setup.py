@@ -336,6 +336,10 @@ def versions_from_git(tag_prefix, verbose=False):
 
 
 basedir = os.path.dirname(os.path.abspath(__file__))
+VERSIONFILES = [os.path.join('pycryptopp', '_version.py'),
+                os.path.join(EMBEDDED_CRYPTOPP_DIR, 'extraversion.h'),
+                ]
+
 class UpdateVersion(Command):
     description = "update _version.py from revision-control metadata"
     user_options = []
@@ -345,19 +349,18 @@ class UpdateVersion(Command):
     def finalize_options(self):
         pass
     def run(self):
-        target = self.distribution.versionfiles[0]
         if os.path.isdir(os.path.join(basedir, ".git")):
-            verstr = self.try_from_git(target)
+            verstr = self.try_from_git()
         else:
             print "no version-control data found, leaving _version.py alone"
             return
         if verstr:
             self.distribution.metadata.version = verstr
 
-    def try_from_git(self, target):
+    def try_from_git(self):
         versions = versions_from_git("pycryptopp-", verbose=True)
         if versions:
-            for fn in self.distribution.versionfiles:
+            for fn in VERSIONFILES:
                 f = open(fn, "wb")
                 if fn.endswith(".py"):
                     BODY = PY_GIT_VERSION_BODY
@@ -394,8 +397,5 @@ setup(name=PKG,
       ext_modules=ext_modules,
       test_suite=PKG+".test",
       zip_safe=False, # I prefer unzipped for easier access.
-      versionfiles=[os.path.join('pycryptopp', '_version.py'),
-                    os.path.join(EMBEDDED_CRYPTOPP_DIR, 'extraversion.h')],
-      versionbodies=[PY_GIT_VERSION_BODY, CPP_GIT_VERSION_BODY],
       cmdclass={"update_version": UpdateVersion},
       )
