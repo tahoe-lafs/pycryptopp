@@ -1,4 +1,4 @@
-include copyright COPYING.GPL COPYING.TGPPL.html ChangeLog NEWS.rst
+include copyright COPYING.GPL COPYING.TGPPL.html ChangeLog NEWS.rst README.rst
 
 graft pycryptopp
 graft embeddedcryptopp

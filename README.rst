@@ -28,12 +28,12 @@ BUILDING
 To build it run "./setup.py build".  To test it run "./setup.py test".
 To install it into your system run "./setup.py install".  To create a
 binary package run "./setup.py bdist_egg".  There are more features of
-setup.py -- see the documentation of setuptools [3] for details.
+setup.py -- see the documentation of setuptools [1] for details.
 
 If "./setup.py test" doesn't print out "PASSED" and exit with exit
 code 0 then there is something seriously wrong.  Do not use this build
 of pycryptopp.  Please report the error to the cryptopp-users mailing
-list [4].  The next step in debugging if the pycryptopp tests fail is
+list [2].  The next step in debugging if the pycryptopp tests fail is
 to find out if the underlying Crypto++ tests fail on the same system.
 To do that, you have to acquire the Crypto++ source code from
 http://cryptopp.com , build it, and run the self-test, by executing
@@ -73,3 +73,7 @@ and fixing bugs.
 Zooko O'Whielacronx
 Boulder, Colorado
 January 7, 2012
+
+
+.. [1] http://peak.telecommunity.com/DevCenter/setuptools
+.. [2] http://groups.google.com/group/cryptopp-users
