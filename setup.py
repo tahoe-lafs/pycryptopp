@@ -5,7 +5,8 @@
 #
 # Copyright © 2009-2011 Zooko Wilcox-O'Hearn
 # Author: Zooko Wilcox-O'Hearn
-# See README.txt for licensing information.
+#
+# See README.rst for licensing information.
 
 import glob, os, platform, re, subprocess, sys
 
@@ -160,7 +161,7 @@ else:
 
 trove_classifiers=[
     "Environment :: Console",
-    "License :: OSI Approved :: GNU General Public License (GPL)",
+    "License :: OSI Approved :: GNU General Public License (GPL)", # See README.rst for alternative licensing.
     "License :: DFSG approved",
     "License :: Other/Proprietary License",
     "Intended Audience :: Developers",
@@ -224,7 +225,12 @@ if 'flakes' in sys.argv[1:]:
 if "sdist_dsc" in sys.argv:
     setup_requires.append('stdeb')
 
-data_fnames=['COPYING.GPL', 'COPYING.TGPPL.html', 'README.txt']
+data_fnames=['COPYING.GPL', 'COPYING.TGPPL.html', 'README.rst']
+
+readmetext = open('README.rst').read()
+if readmetext[:3] == '\xef\xbb\xbf':
+    # utf-8 "BOM"
+    readmetext = readmetext[3:].decode('utf-8')
 
 # In case we are building for a .deb with stdeb's sdist_dsc command, we put the
 # docs in "share/doc/pycryptopp".
@@ -235,11 +241,6 @@ data_files = [(doc_loc, data_fnames)]
 # MANIFEST.in file specifying embeddedcryptopp/extraversion.h. This bug was
 # fixed in Python 2.7
 data_files.append((EMBEDDED_CRYPTOPP_DIR, [EMBEDDED_CRYPTOPP_DIR+'/extraversion.h']))
-
-if ECDSA:
-    long_description='RSA-PSS-SHA256 signatures, ECDSA(1363)/EMSA1(SHA-256) signatures, SHA-256 hashes, and AES-CTR encryption'
-else:
-    long_description='RSA-PSS-SHA256 signatures, SHA-256 hashes, and AES-CTR encryption'
 
 ###### Version updating code
 
@@ -379,11 +380,11 @@ class UpdateVersion(Command):
 setup(name=PKG,
       version=verstr,
       description='Python wrappers for a few algorithms from the Crypto++ library',
-      long_description=long_description,
-      author='Zooko O\'Whielacronx',
+      long_description=readmetext,
+      author='Zooko Wilcox-O\'Hearn',
       author_email='zooko@zooko.com',
-      url='http://tahoe-lafs.org/trac/' + PKG,
-      license='GNU GPL', # see README.txt for details -- there is also an alternative licence
+      url='https://tahoe-lafs.org/trac/' + PKG,
+      license='GNU GPL', # see README.rst for details -- there is also an alternative licence
       packages=find_packages(),
       include_package_data=True,
       exclude_package_data={
