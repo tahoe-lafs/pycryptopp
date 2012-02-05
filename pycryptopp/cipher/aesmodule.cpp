@@ -118,6 +118,10 @@ AES_init(PyObject* self, PyObject *args, PyObject *kwdict) {
 
     if (!iv)
         iv = defaultiv;
+    else if (ivsize != 16) {
+        PyErr_Format(aes_error, "Precondition violation: if an IV is passed, it must be exactly 16 bytes, not %d", ivsize);
+        return -1;
+    }
     try {
         reinterpret_cast<AES*>(self)->e = new CryptoPP::CTR_Mode<CryptoPP::AES>::Encryption(reinterpret_cast<const byte*>(key), keysize, reinterpret_cast<const byte*>(iv));
     } catch (CryptoPP::InvalidKeyLength le) {

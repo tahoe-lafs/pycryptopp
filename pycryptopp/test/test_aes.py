@@ -103,5 +103,12 @@ class AES_from_Niels_Ferguson(unittest.TestCase):
     def test_from_Niels_AES256(self):
         return self._test_from_Niels_AES(32, 'c84b0f3a2c76dd9871900b07f09bdd3e')
 
+class PartialIV(unittest.TestCase):
+    def test_partial(self):
+        k = "k"*16
+        for iv_len in range(0, 16)+range(17,70): # all are wrong, 16 is right
+            self.failUnlessRaises(aes.Error,
+                                  aes.AES, k, iv="i"*iv_len)
+
 if __name__ == "__main__":
     unittest.main()
