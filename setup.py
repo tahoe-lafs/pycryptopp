@@ -228,9 +228,6 @@ if "sdist_dsc" in sys.argv:
 data_fnames=['COPYING.GPL', 'COPYING.TGPPL.html', 'README.rst']
 
 readmetext = open('README.rst').read()
-if readmetext[:3] == '\xef\xbb\xbf':
-    # utf-8 "BOM"
-    readmetext = readmetext[3:].decode('utf-8')
 
 # In case we are building for a .deb with stdeb's sdist_dsc command, we put the
 # docs in "share/doc/pycryptopp".
