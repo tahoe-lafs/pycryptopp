@@ -29,27 +29,26 @@ class XSalsaTest(unittest.TestCase):
 
 
     def test_XSalsa(self):
-        # The test vector is from Crypto++'s TestVectors/salsa.txt, comment there is:
-        # Source: created by Wei Dai using naclcrypto-20090308
-        # naclcrypto being DJB's crypto library and of course DJB designed XSalsa20
-        curfile = open( '../testvectors/testx1.txt', 'r')
-        s = curfile.read()
-        print s,"\n"
+        # The test vector is from Crypto++'s TestVectors/salsa.txt, comment
+        # there is: Source: created by Wei Dai using naclcrypto-20090308 .
+        # naclcrypto being DJB's crypto library and of course DJB designed
+        # XSalsa20
+        s = resource_string("pycryptopp", "testvectors/salsa.txt")
         return self._test_XSalsa(s)
 
     def _test_XSalsa(self, vects_str):
         for mo in TEST_XSALSA_RE.finditer(vects_str):
-            count = int(mo.group(1))
+            #count = int(mo.group(1))
             key = a2b_hex(mo.group(2))
             iv = a2b_hex(mo.group(3))
-#           plaintext = a2b_hex(mo.group(4))
-#           ciphertext= a2b_hex(mo.group(5))
+            #plaintext = a2b_hex(mo.group(4))
+            #ciphertext= a2b_hex(mo.group(5))
             plaintext = mo.group(4)
             ciphertext = mo.group(5)
             computedcipher=xsalsa.XSalsa(key,iv).process(a2b_hex(plaintext))
-#           print "ciphertext", b2a_hex(computedcipher), '\n'
-#           print "computedtext", ciphertext, '\n'
-#           print count, ": \n"
+            #print "ciphertext", b2a_hex(computedcipher), '\n'
+            #print "computedtext", ciphertext, '\n'
+            #print count, ": \n"
             self.failUnlessEqual(computedcipher,a2b_hex(ciphertext),"computedcipher: %s, ciphertext: %s" % (b2a_hex(computedcipher), ciphertext))
 
             #the random decomposing
@@ -83,7 +82,7 @@ class XSalsaTest(unittest.TestCase):
             self.failUnlessRaises(xsalsa.Error, xsalsa.XSalsa, "a"*1)
             self.failUnlessRaises(xsalsa.Error, xsalsa.XSalsa, "a"*17)
             self.failUnlessRaises(xsalsa.Error, xsalsa.XSalsa, "a"*18)
-#           self.failUnlessRaises(xsalsa.Error, xsalsa.XSalsa, "a"*32)
+            #self.failUnlessRaises(xsalsa.Error, xsalsa.XSalsa, "a"*32)
 
 if __name__ == "__main__":
     unittest.main()

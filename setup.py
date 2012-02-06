@@ -195,7 +195,12 @@ else:
         print "unable to find version in %s" % (VERSIONFILE,)
         raise RuntimeError("if %s.py exists, it is required to be well-formed" % (VERSIONFILE,))
 
-srcs = ['pycryptopp/_pycryptoppmodule.cpp', 'pycryptopp/publickey/rsamodule.cpp', 'pycryptopp/hash/sha256module.cpp', 'pycryptopp/cipher/aesmodule.cpp']
+srcs = ['pycryptopp/_pycryptoppmodule.cpp',
+        'pycryptopp/publickey/rsamodule.cpp',
+        'pycryptopp/hash/sha256module.cpp',
+        'pycryptopp/cipher/aesmodule.cpp',
+        'pycryptopp/cipher/xsalsamodule.cpp',
+        ]
 if ECDSA:
     srcs.append('pycryptopp/publickey/ecdsamodule.cpp')
 if TEST_DOUBLE_LOAD:
