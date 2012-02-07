@@ -77,12 +77,27 @@ class XSalsaTest(unittest.TestCase):
             self.failUnlessEqual(eccipher, ciphertext, "every byte computed cipher: %s, ciphertext: %s" % (eccipher, ciphertext))
 
 
-    def test_init_type_check(self):
-            self.failUnlessRaises(TypeError, xsalsa.XSalsa, None)
-            self.failUnlessRaises(xsalsa.Error, xsalsa.XSalsa, "a"*1)
-            self.failUnlessRaises(xsalsa.Error, xsalsa.XSalsa, "a"*17)
-            self.failUnlessRaises(xsalsa.Error, xsalsa.XSalsa, "a"*18)
-            #self.failUnlessRaises(xsalsa.Error, xsalsa.XSalsa, "a"*32)
+    def test_types_and_lengths(self):
+        # the key= argument must be a bytestring exactly 32 bytes long
+        self.failUnlessRaises(TypeError, xsalsa.XSalsa, None)
+        for i in range(70):
+            key = "a"*i
+            if i != 32:
+                self.failUnlessRaises(xsalsa.Error, xsalsa.XSalsa, key)
+            else:
+                self.failUnless(xsalsa.XSalsa(key))
+
+        # likewise, iv= (if provided) must be exactly 24 bytes long. Passing
+        # None is not treated the same as not passing the argument at all.
+        key = "a"*32
+        self.failUnlessRaises(TypeError, xsalsa.XSalsa, key, None)
+        for i in range(70):
+            iv = "i"*i
+            if i != 24:
+                self.failUnlessRaises(xsalsa.Error, xsalsa.XSalsa, key, iv)
+            else:
+                self.failUnless(xsalsa.XSalsa(key, iv))
+
 
 if __name__ == "__main__":
     unittest.main()

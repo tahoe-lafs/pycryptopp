@@ -98,15 +98,20 @@ static int XSalsa_init(PyObject* self, PyObject *args, PyObject *kwdict) {
 	assert (keysize >= 0);
 	assert (ivsize >= 0);
 
-	if(!iv)
+	if (!iv)
 		iv = defaultiv;
+        else if (ivsize != 24) {
+            PyErr_Format(xsalsa_error, "Precondition violation: if an IV is passed, it must be exactly 24 bytes, not %d", ivsize);
+            return -1;
+        }
+
 	try {
 		reinterpret_cast<XSalsa*>(self)->e = new CryptoPP::XSalsa20::Encryption(reinterpret_cast<const byte*>(key), keysize, reinterpret_cast<const byte*>(iv));
-	} 
+	}
 	catch (CryptoPP::InvalidKeyLength le)
 	{
 	        PyErr_Format(xsalsa_error, "Precondition violation: you are required to pass a valid key size.  Crypto++ gave this exception: %s", le.what());
-        	return -1;	
+        	return -1;
 	}
 	if (!reinterpret_cast<XSalsa*>(self)->e)
 	{
@@ -115,8 +120,8 @@ static int XSalsa_init(PyObject* self, PyObject *args, PyObject *kwdict) {
 	}
 	return 0;
 }
-	
-	
+
+
 static PyTypeObject XSalsa_type = {
 	PyObject_HEAD_INIT(NULL)
 	0,                       /*ob_size*/
@@ -159,7 +164,7 @@ static PyTypeObject XSalsa_type = {
 	XSalsa_new,   		 /*tp_new*/
 };
 
-void init_xsalsa(PyObject*const module) 
+void init_xsalsa(PyObject*const module)
 {
 	if (PyType_Ready(&XSalsa_type) < 0)
 		return;
