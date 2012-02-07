@@ -98,6 +98,39 @@ class XSalsaTest(unittest.TestCase):
             else:
                 self.failUnless(xsalsa.XSalsa(key, iv))
 
+    def test_recursive(self):
+        # Try to use the same technique as:
+        # http://blogs.msdn.com/si_team/archive/2006/05/19/aes-test-vectors.aspx
+        # It's not exactly the same, though, because XSalsa20 is a stream
+        # cipher, whereas the Ferguson code is exercising a block cipher. But
+        # we try to do something similar.
+
+        # the XSalsa20 internal function uses a 32-byte block. We want to
+        # exercise it twice for each key, to guard against
+        # clobbering-after-key-setup errors. Just doing enc(enc(p)) could let
+        # XOR errors slip through. So to be safe, use B=64.
+        B=64
+        N=24
+        K=32
+        s = "\x00"*(B+N+K)
+        def enc(key, nonce, plaintext):
+            p = xsalsa.XSalsa(key=key, iv=nonce)
+            return p.process(plaintext)
+        for i in range(1000):
+            plaintext = s[-K-N-B:-K-N]
+            nonce = s[-K-N:-K]
+            key = s[-K:]
+            ciphertext = enc(key, nonce, plaintext)
+            s += ciphertext
+            s = s[-K-N-B:]
+        output = b2a_hex(s[-B:])
+        # I've compared this output against pynacl -warner
+        self.failUnlessEqual(output,
+                             "77f8e2792dd4f2d44edf469c3a7ad5f7"
+                             "5cb373fe0c3d9c8ee570dc91e00f1caa"
+                             "25f725c202f3781869a40b8a2c856b55"
+                             "8178b6af9576a15799c445c30aeced66")
+
 
 if __name__ == "__main__":
     unittest.main()
