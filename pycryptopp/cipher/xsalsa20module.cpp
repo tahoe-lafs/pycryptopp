@@ -11,11 +11,9 @@ typedef int Py_ssize_t;
 #include "xsalsa20module.hpp"
 
 #ifdef USE_NAME_CRYPTO_PLUS_PLUS
-//#include <crypto++/modes.h>
 #include <crypto++/salsa.h>
 #else
-//#include <cryptopp/modes.h>
-#include <cryptopp/salsa.h>
+#include <embeddedcryptopp/salsa.h>
 #endif
 
 static const char* const xsalsa20__doc__ = "_xsalsa20 cipher";
