@@ -1,4 +1,4 @@
 import aes
-import xsalsa
+import xsalsa20
 
-quiet_pyflakes=[aes, xsalsa]
+quiet_pyflakes=[aes, xsalsa20]

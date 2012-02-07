@@ -1,12 +1,12 @@
 from pycryptopp import _import_my_names
 
-_import_my_names(globals(), "xsalsa_")
+_import_my_names(globals(), "xsalsa20_")
 
 del _import_my_names
 
 def selftest():
-    # pyflakes doesn't know that XSalsa is made available above
-    XSalsa = globals()["XSalsa"]
+    # pyflakes doesn't know that XSalsa20 is made available above
+    XSalsa20 = globals()["XSalsa20"]
     from binascii import unhexlify
     key = unhexlify("ad5eadf7163b0d36e44c126037a03419"
                     "fcda2b3a1bb4ab064b6070e61b0fa5ca")
@@ -15,12 +15,12 @@ def selftest():
                           "8bf88e6628c4c99ba36330c05cb919e7"
                           "901295db479c9a8a0401d5e040b8919b"
                           "7d64b2f728c59703c3")
-    p = XSalsa(key, iv)
+    p = XSalsa20(key, iv)
     decrypted = p.process(encrypted)
     expected = "crypto libraries should always test themselves at powerup"
     assert decrypted == expected
 
-    p = XSalsa(key, iv)
+    p = XSalsa20(key, iv)
     decrypted = ""
     offset = 0
     for chunksize in [13,11,1,2,3,20,999]:

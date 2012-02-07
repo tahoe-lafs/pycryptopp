@@ -6,20 +6,20 @@ import unittest
 from binascii import a2b_hex, b2a_hex
 from pkg_resources import resource_string
 
-from pycryptopp.cipher import xsalsa
+from pycryptopp.cipher import xsalsa20
 TEST_XSALSA_RE=re.compile("\nCOUNT=([0-9]+)\nKEY=([0-9a-f]+)\nIV=([0-9a-f]+)\nPLAINTEXT=([0-9a-f]+)\nCIPHERTEXT=([0-9a-f]+)")
 
-class XSalsaTest(unittest.TestCase):
+class XSalsa20Test(unittest.TestCase):
 
     enc0="eea6a7251c1e72916d11c2cb214d3c252539121d8e234e652d651fa4c8cff880309e645a74e9e0a60d8243acd9177ab51a1beb8d5a2f5d700c093c5e5585579625337bd3ab619d615760d8c5b224a85b1d0efe0eb8a7ee163abb0376529fcc09bab506c618e13ce777d82c3ae9d1a6f972d4160287cbfe60bf2130fc0a6ff6049d0a5c8a82f429231f0080"
 
-    def test_zero_XSalsa(self):
+    def test_zero_XSalsa20(self):
         key="1b27556473e985d462cd51197a9a46c76009549eac6474f206c4ee0844f68389"
         iv="69696ee955b62b73cd62bda875fc73d68219e0036b7a0b37"
-        computedcipher=xsalsa.XSalsa(a2b_hex(key),a2b_hex(iv)).process('\x00'*139)
+        computedcipher=xsalsa20.XSalsa20(a2b_hex(key),a2b_hex(iv)).process('\x00'*139)
         self.failUnlessEqual(a2b_hex(self.enc0), computedcipher, "enc0: %s, computedciper: %s" % (self.enc0, b2a_hex(computedcipher)))
 
-        cryptor=xsalsa.XSalsa(a2b_hex(key),a2b_hex(iv))
+        cryptor=xsalsa20.XSalsa20(a2b_hex(key),a2b_hex(iv))
 
         computedcipher1=cryptor.process('\x00'*69)
         computedcipher2=cryptor.process('\x00'*69)
@@ -33,7 +33,7 @@ class XSalsaTest(unittest.TestCase):
         # there is: Source: created by Wei Dai using naclcrypto-20090308 .
         # naclcrypto being DJB's crypto library and of course DJB designed
         # XSalsa20
-        s = resource_string("pycryptopp", "testvectors/salsa.txt")
+        s = resource_string("pycryptopp", "testvectors/xsalsa20.txt")
         return self._test_XSalsa(s)
 
     def _test_XSalsa(self, vects_str):
@@ -45,7 +45,7 @@ class XSalsaTest(unittest.TestCase):
             #ciphertext= a2b_hex(mo.group(5))
             plaintext = mo.group(4)
             ciphertext = mo.group(5)
-            computedcipher=xsalsa.XSalsa(key,iv).process(a2b_hex(plaintext))
+            computedcipher=xsalsa20.XSalsa20(key,iv).process(a2b_hex(plaintext))
             #print "ciphertext", b2a_hex(computedcipher), '\n'
             #print "computedtext", ciphertext, '\n'
             #print count, ": \n"
@@ -56,7 +56,7 @@ class XSalsaTest(unittest.TestCase):
             plaintext2 = ""
             length = len(plaintext)
             rccipher = ""
-            cryptor = xsalsa.XSalsa(key,iv)
+            cryptor = xsalsa20.XSalsa20(key,iv)
             if length > 2:
                 point = random.randint(0,length-3)
                 if (point%2) !=0:
@@ -68,7 +68,7 @@ class XSalsaTest(unittest.TestCase):
                 self.failUnlessEqual(rccipher, ciphertext, "random computed cipher: %s, ciphertext: %s" % (rccipher, ciphertext))
 
             #every byte encrypted
-            cryptor = xsalsa.XSalsa(key,iv)
+            cryptor = xsalsa20.XSalsa20(key,iv)
             eccipher=""
             l = 0
             while l<=(length-2):
@@ -79,24 +79,24 @@ class XSalsaTest(unittest.TestCase):
 
     def test_types_and_lengths(self):
         # the key= argument must be a bytestring exactly 32 bytes long
-        self.failUnlessRaises(TypeError, xsalsa.XSalsa, None)
+        self.failUnlessRaises(TypeError, xsalsa20.XSalsa20, None)
         for i in range(70):
             key = "a"*i
             if i != 32:
-                self.failUnlessRaises(xsalsa.Error, xsalsa.XSalsa, key)
+                self.failUnlessRaises(xsalsa20.Error, xsalsa20.XSalsa20, key)
             else:
-                self.failUnless(xsalsa.XSalsa(key))
+                self.failUnless(xsalsa20.XSalsa20(key))
 
         # likewise, iv= (if provided) must be exactly 24 bytes long. Passing
         # None is not treated the same as not passing the argument at all.
         key = "a"*32
-        self.failUnlessRaises(TypeError, xsalsa.XSalsa, key, None)
+        self.failUnlessRaises(TypeError, xsalsa20.XSalsa20, key, None)
         for i in range(70):
             iv = "i"*i
             if i != 24:
-                self.failUnlessRaises(xsalsa.Error, xsalsa.XSalsa, key, iv)
+                self.failUnlessRaises(xsalsa20.Error, xsalsa20.XSalsa20, key, iv)
             else:
-                self.failUnless(xsalsa.XSalsa(key, iv))
+                self.failUnless(xsalsa20.XSalsa20(key, iv))
 
     def test_recursive(self):
         # Try to use the same technique as:
@@ -114,7 +114,7 @@ class XSalsaTest(unittest.TestCase):
         K=32
         s = "\x00"*(B+N+K)
         def enc(key, nonce, plaintext):
-            p = xsalsa.XSalsa(key=key, iv=nonce)
+            p = xsalsa20.XSalsa20(key=key, iv=nonce)
             return p.process(plaintext)
         for i in range(1000):
             plaintext = s[-K-N-B:-K-N]
