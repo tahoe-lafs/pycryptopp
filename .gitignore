@@ -1,5 +1,6 @@
 
 /build/
+/dist/
 
 # _version.py is generated at build time, and never checked in
 /pycryptopp/_version.py
