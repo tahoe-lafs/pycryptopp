@@ -1,5 +1,5 @@
 ===========================================================
- pycryptopp—a small number of good cryptography algorithms
+ pycryptopp: a small number of good cryptography algorithms
 ===========================================================
 
 Introduction and Licence
