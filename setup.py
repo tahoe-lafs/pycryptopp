@@ -202,6 +202,17 @@ ext_modules.append(
     Extension('pycryptopp._pycryptopp', extra_srcs + srcs, include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
     )
 
+# python-ed25519
+sources = [os.path.join("src-ed25519","glue","ed25519module.c")]
+sources.extend([os.path.join("src-ed25519","supercop-ref",s)
+                for s in os.listdir(os.path.join("src-ed25519","supercop-ref"))
+                if s.endswith(".c") and s!="test.c"])
+m = Extension("pycryptopp.publickey.ed25519._ed25519",
+              include_dirs=[os.path.join("src-ed25519","supercop-ref")],
+              sources=sources)
+ext_modules.append(m)
+
+
 if TEST_DOUBLE_LOAD:
     ext_modules.append(
         Extension('_testdoubleload', extra_srcs + srcs, include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
