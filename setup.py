@@ -8,7 +8,7 @@
 #
 # See README.rst for licensing information.
 
-import glob, os, platform, re, subprocess, sys
+import os, platform, re, subprocess, sys
 
 from setuptools import Extension, find_packages, setup
 from setuptools import Command
