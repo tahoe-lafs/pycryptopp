@@ -2,8 +2,7 @@
 /build/
 /dist/
 
-# _version.py is generated at build time, and never checked in
-/pycryptopp/_version.py
+# extraversion.h is generated at build time, and never checked in
 /embeddedcryptopp/extraversion.h
 
 # the .egg-info is mostly generated during 'setup.py bdist_egg' ..
@@ -20,3 +19,4 @@
 /setuptools-*.egg
 /ez_setup.pyc
 /pycryptopp/_pycryptopp.so
+/MANIFEST

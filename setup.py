@@ -13,6 +13,12 @@ import glob, os, platform, re, subprocess, sys
 from setuptools import Extension, find_packages, setup
 from setuptools import Command
 
+import versioneer
+versioneer.versionfile_source = "pycryptopp/_version.py"
+versioneer.versionfile_build = "pycryptopp/_version.py"
+versioneer.tag_prefix = "pycryptopp-"
+versioneer.parentdir_prefix = "pycryptopp-"
+
 # ECDSA=False
 ECDSA=True
 
@@ -180,20 +186,6 @@ trove_classifiers=[
     ]
 
 PKG='pycryptopp'
-VERSIONFILE = os.path.join(PKG, "_version.py")
-verstr = "unknown"
-try:
-    verstrline = open(VERSIONFILE, "rt").read()
-except EnvironmentError:
-    pass # Okay, there is no version file.
-else:
-    VSRE = r"^verstr = ['\"]([^'\"]*)['\"]"
-    mo = re.search(VSRE, verstrline, re.M)
-    if mo:
-        verstr = mo.group(1)
-    else:
-        print "unable to find version in %s" % (VERSIONFILE,)
-        raise RuntimeError("if %s.py exists, it is required to be well-formed" % (VERSIONFILE,))
 
 srcs = ['pycryptopp/_pycryptoppmodule.cpp',
         'pycryptopp/publickey/rsamodule.cpp',
@@ -246,19 +238,6 @@ data_files.append((EMBEDDED_CRYPTOPP_DIR, [EMBEDDED_CRYPTOPP_DIR+'/extraversion.
 
 ###### Version updating code
 
-PY_GIT_VERSION_BODY = '''
-# This _version.py is generated from git metadata by the pycryptopp setup.py.
-# The main version number is taken from the most recent release tag. If some
-# patches have been added since the last release, this will have a -NN "build
-# number" suffix, or else a -rNN "revision number" suffix.
-
-__pkgname__ = "%(pkgname)s"
-real_version = "%(version)s"
-full_version = "%(full)s"
-verstr = "%(normalized)s"
-__version__ = verstr
-'''
-
 CPP_GIT_VERSION_BODY = '''
 /* This _version.py is generated from git metadata by the pycryptopp
  * setup.py. The main version number is taken from the most recent release
@@ -269,82 +248,19 @@ CPP_GIT_VERSION_BODY = '''
 #define CRYPTOPP_EXTRA_VERSION "%(pkgname)s-%(normalized)s"
 '''
 
-def run_command(args, cwd=None, verbose=False):
-    try:
-        # remember shell=False, so use git.cmd on windows, not just git
-        p = subprocess.Popen(args, stdout=subprocess.PIPE, cwd=cwd)
-    except EnvironmentError, e:
-        if verbose:
-            print "unable to run %s" % args[0]
-            print e
-        return None
-    stdout = p.communicate()[0].strip()
-    if p.returncode != 0:
-        if verbose:
-            print "unable to run %s (error)" % args[0]
-        return None
-    return stdout
-
-
-def versions_from_git(tag_prefix, verbose=False):
-    # this runs 'git' from the directory that contains this file. That either
-    # means someone ran a setup.py command (and this code is in
-    # versioneer.py, thus the containing directory is the root of the source
-    # tree), or someone ran a project-specific entry point (and this code is
-    # in _version.py, thus the containing directory is somewhere deeper in
-    # the source tree). This only gets called if the git-archive 'subst'
-    # variables were *not* expanded, and _version.py hasn't already been
-    # rewritten with a short version string, meaning we're inside a checked
-    # out source tree.
-
-    # versions_from_git (as copied from python-versioneer) returns strings
-    # like "1.9.0-25-gb73aba9-dirty", which means we're in a tree with
-    # uncommited changes (-dirty), the latest checkin is revision b73aba9,
-    # the most recent tag was 1.9.0, and b73aba9 has 25 commits that weren't
-    # in 1.9.0 . The narrow-minded NormalizedVersion parser that takes our
-    # output (meant to enable sorting of version strings) refuses most of
-    # that. Tahoe-LAFS uses a function named suggest_normalized_version()
-    # that can handle "1.9.0.post25", so dumb down our output to match.
-
-    try:
-        source_dir = os.path.dirname(os.path.abspath(__file__))
-    except NameError:
-        # some py2exe/bbfreeze/non-CPython implementations don't do __file__
-        return {} # not always correct
-    GIT = "git"
-    if sys.platform == "win32":
-        GIT = "git.cmd"
-    stdout = run_command([GIT, "describe", "--tags", "--dirty", "--always"],
-                         cwd=source_dir)
-    if stdout is None:
-        return {}
-    if not stdout.startswith(tag_prefix):
-        if verbose:
-            print "tag '%s' doesn't start with prefix '%s'" % (stdout, tag_prefix)
-        return {}
-    version = stdout[len(tag_prefix):]
-    pieces = version.split("-")
+def get_normalized_version():
+    pieces = versioneer.get_versions()["version"].split("-")
     if len(pieces) == 1:
         normalized_version = pieces[0]
     else:
         normalized_version = "%s.post%s" % (pieces[0], pieces[1])
-    stdout = run_command([GIT, "rev-parse", "HEAD"], cwd=source_dir)
-    if stdout is None:
-        return {}
-    full = stdout.strip()
-    if version.endswith("-dirty"):
-        full += "-dirty"
+    if pieces[-1] == "dirty":
         normalized_version += ".dev0"
-    return {"version": version, "normalized": normalized_version, "full": full}
+    return normalized_version
 
-
-basedir = os.path.dirname(os.path.abspath(__file__))
-VERSIONFILES = [os.path.join('pycryptopp', '_version.py'),
-                os.path.join(EMBEDDED_CRYPTOPP_DIR, 'extraversion.h'),
-                ]
 
 class UpdateVersion(Command):
-    description = "update _version.py from revision-control metadata"
+    description = "update extraversion.h from revision-control metadata"
     user_options = []
 
     def initialize_options(self):
@@ -352,35 +268,23 @@ class UpdateVersion(Command):
     def finalize_options(self):
         pass
     def run(self):
-        if os.path.isdir(os.path.join(basedir, ".git")):
-            verstr = self.try_from_git()
-        else:
-            print "no version-control data found, leaving _version.py alone"
-            return
-        if verstr:
-            self.distribution.metadata.version = verstr
+        versions = versioneer.get_versions()
+        fn = os.path.join(EMBEDDED_CRYPTOPP_DIR, 'extraversion.h')
+        f = open(fn, "wb")
+        BODY = CPP_GIT_VERSION_BODY
+        f.write(BODY %
+                { "pkgname": self.distribution.get_name(),
+                  "version": versions["version"],
+                  "normalized": get_normalized_version(),
+                  "full": versions["full"] })
+        f.close()
+        print "git-version: wrote '%s' into '%s'" % (versions["version"], fn)
 
-    def try_from_git(self):
-        versions = versions_from_git("pycryptopp-", verbose=True)
-        if versions:
-            for fn in VERSIONFILES:
-                f = open(fn, "wb")
-                if fn.endswith(".py"):
-                    BODY = PY_GIT_VERSION_BODY
-                else:
-                    assert fn.endswith(".h")
-                    BODY = CPP_GIT_VERSION_BODY
-                f.write(BODY %
-                        { "pkgname": self.distribution.get_name(),
-                          "version": versions["version"],
-                          "normalized": versions["normalized"],
-                          "full": versions["full"] })
-                f.close()
-                print "git-version: wrote '%s' into '%s'" % (versions["version"], fn)
-        return versions.get("normalized", None)
+commands = versioneer.get_cmdclass().copy()
+commands["update_version"] = UpdateVersion
 
 setup(name=PKG,
-      version=verstr,
+      version=get_normalized_version(),
       description='Python wrappers for a few algorithms from the Crypto++ library',
       long_description=readmetext,
       author='Zooko Wilcox-O\'Hearn',
@@ -400,5 +304,5 @@ setup(name=PKG,
       ext_modules=ext_modules,
       test_suite=PKG+".test",
       zip_safe=False, # I prefer unzipped for easier access.
-      cmdclass={"update_version": UpdateVersion},
+      cmdclass=commands,
       )
