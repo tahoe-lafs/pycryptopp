@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-import errno, os, subprocess, sys, traceback
+import errno, locale, os, subprocess, sys, traceback
 
 def foldlines(s, numlines=None):
     lines = s.split("\n")
@@ -13,7 +13,10 @@ def print_platform():
         import platform
         out = platform.platform()
         print
-        print "platform:", out.replace("\n", " ")
+        print "platform:", foldlines(out)
+        print "machine: ", platform.machine()
+        if hasattr(platform, 'linux_distribution'):
+            print "linux_distribution:", repr(platform.linux_distribution())
     except EnvironmentError:
         sys.stderr.write("Got exception using 'platform'. Exception follows\n")
         traceback.print_exc(file=sys.stderr)
@@ -23,6 +26,15 @@ def print_platform():
 def print_python_ver():
     print "python:", foldlines(sys.version)
     print 'maxunicode: ' + str(sys.maxunicode)
+
+def print_python_encoding_settings():
+    print 'filesystem.encoding: ' + str(sys.getfilesystemencoding())
+    print 'locale.getpreferredencoding: ' + str(locale.getpreferredencoding())
+    try:
+        print 'locale.defaultlocale: ' + str(locale.getdefaultlocale())
+    except ValueError, e:
+        print 'got exception from locale.getdefaultlocale(): ', e
+    print 'locale.locale: ' + str(locale.getlocale())
 
 def print_stdout(cmdlist, label=None, numlines=None):
     if label is None:
@@ -83,6 +95,9 @@ def print_setuptools_ver():
         traceback.print_exc(file=sys.stderr)
         sys.stderr.flush()
         pass
+    except pkg_resources.DistributionNotFound:
+        print 'setuptools: DistributionNotFound'
+        pass
 
 def print_py_pkg_ver(pkgname, modulename=None):
     if modulename is None:
@@ -116,6 +131,9 @@ print_platform()
 print
 print_python_ver()
 print
+print_stdout(['locale'])
+print_python_encoding_settings()
+print
 print_stdout(['buildbot', '--version'])
 print_stdout(['buildmaster', '--version'])
 print_stdout(['buildslave', '--version'])
@@ -133,5 +151,6 @@ print_setuptools_ver()
 
 print_py_pkg_ver('coverage')
 print_py_pkg_ver('trialcoverage')
+print_py_pkg_ver('pyflakes')
 print_py_pkg_ver('Twisted', 'twisted')
 print_py_pkg_ver('TwistedCore', 'twisted.python')
