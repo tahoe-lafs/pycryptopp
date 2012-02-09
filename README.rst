@@ -50,7 +50,7 @@ a Python interpreter use "help(pycryptopp)",
 CONTACT
 -------
 
-Please post to the cryptopp-users mailing list [4] with comments about
+Please post to the cryptopp-users mailing list [2] with comments about
 this package.
 
 BOOK REVIEW
