@@ -16,7 +16,14 @@
 
 #include <memory>
 
+#include "config.h"
+
+#include "extraversion.h"
+const char *cryptopp_extra_version = CRYPTOPP_EXTRA_VERSION;
+
 NAMESPACE_BEGIN(CryptoPP)
+
+const char *const cryptopp_extra_version = CRYPTOPP_EXTRA_VERSION;
 
 CRYPTOPP_COMPILE_ASSERT(sizeof(byte) == 1);
 CRYPTOPP_COMPILE_ASSERT(sizeof(word16) == 2);
