@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-import errno, locale, os, subprocess, sys, traceback
+import errno, locale, os, platform, subprocess, sys, traceback
 
 def foldlines(s, numlines=None):
     lines = s.split("\n")
@@ -135,13 +135,12 @@ print_stdout(['locale'])
 print_python_encoding_settings()
 print
 print_stdout(['buildbot', '--version'])
-print_stdout(['buildmaster', '--version'])
 print_stdout(['buildslave', '--version'])
-print_stderr(['cl'])
+if 'windows' in platform.system().lower():
+    print_stderr(['cl'])
 print_stdout(['g++', '--version'], numlines=1)
 print_stdout(['cryptest', 'V'])
 print_stdout(['git', '--version'])
-print_stdout(['7za'], numlines=3)
 print_stdout(['flappclient', '--version'])
 print_stdout(['valgrind', '--version'])
 
@@ -150,7 +149,6 @@ print_as_ver()
 print_setuptools_ver()
 
 print_py_pkg_ver('coverage')
-print_py_pkg_ver('trialcoverage')
 print_py_pkg_ver('pyflakes')
 print_py_pkg_ver('Twisted', 'twisted')
 print_py_pkg_ver('TwistedCore', 'twisted.python')
