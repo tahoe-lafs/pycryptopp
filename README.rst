@@ -22,6 +22,10 @@ COPYING.GPL for the terms of the GNU General Public License, version 2.
 See the file COPYING.TGPPL.html for the terms of the Transitive Grace
 Period Public Licence, version 1.0.
 
+The Ed25519 code comes from the python-ed25519 distribution [3]_, for which
+the basic C code is in the public domain, and the Python bindings are under
+the MIT license. See COPYING.ed25519 for details.
+
 BUILDING
 --------
 
@@ -46,6 +50,9 @@ The documentation is in the docstrings.  From a command-line, use
 "pydoc pycryptopp", "pydoc pycryptopp.cipher", and so on.  From within
 a Python interpreter use "help(pycryptopp)",
 "help(pycryptopp.cipher)", "help(pycryptopp.cipher.aes)" and so on.
+
+The documentation for pycryptopp.publickey.ed25519 is in README.ed25519,
+adapted from the upstream python-ed25519 library [3].
 
 CONTACT
 -------
@@ -77,3 +84,4 @@ January 7, 2012
 
 .. [1] http://peak.telecommunity.com/DevCenter/setuptools
 .. [2] http://groups.google.com/group/cryptopp-users
+.. [3] https://github.com/warner/python-ed25519

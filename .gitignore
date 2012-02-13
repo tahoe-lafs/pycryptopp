@@ -20,3 +20,4 @@
 /ez_setup.pyc
 /pycryptopp/_pycryptopp.so
 /MANIFEST
+/pycryptopp/publickey/ed25519/_ed25519.so
