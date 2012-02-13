@@ -46,8 +46,15 @@ init_pycryptopp(void) {
     PyObject* version;
 
     /* a tuple of (Crypto++ version, extra-version) */
-    #ifdef CRYPTOPP_EXTRA_VERSION
-    version = Py_BuildValue("is", CRYPTOPP_VERSION, CRYPTOPP_EXTRA_VERSION);
+    #ifndef DISABLE_EMBEDDED_CRYPTOPP
+    /* In the version of Crypto++ which is included in pycryptopp, there is a
+       symbol named `cryptopp_extra_version' which is declared (external
+       variable) in config.h and defined in cryptlib.cpp. Of course it is
+       possible that the header file we've #include'd is from the
+       embedded-in-pycryptopp version of Crypto++ but the dynamically linked
+       library that we load is from an older version which doesn't have this
+       symbol. In that case, the load will fail before we get this far. */
+    version = Py_BuildValue("is", CRYPTOPP_VERSION, cryptopp_extra_version);
     #else
     version = Py_BuildValue("iO", CRYPTOPP_VERSION, Py_None);
     #endif
