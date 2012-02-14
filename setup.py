@@ -14,7 +14,7 @@ from setuptools import Extension, find_packages, setup
 from setuptools import Command
 
 import versioneer
-versioneer.versionfile_source = "pycryptopp/_version.py"
+versioneer.versionfile_source = "src/pycryptopp/_version.py"
 versioneer.versionfile_build = "pycryptopp/_version.py"
 versioneer.tag_prefix = "pycryptopp-"
 versioneer.parentdir_prefix = "pycryptopp-"
@@ -187,14 +187,14 @@ trove_classifiers=[
 
 PKG='pycryptopp'
 
-srcs = ['pycryptopp/_pycryptoppmodule.cpp',
-        'pycryptopp/publickey/rsamodule.cpp',
-        'pycryptopp/hash/sha256module.cpp',
-        'pycryptopp/cipher/aesmodule.cpp',
-        'pycryptopp/cipher/xsalsa20module.cpp',
+srcs = ['src/pycryptopp/_pycryptoppmodule.cpp',
+        'src/pycryptopp/publickey/rsamodule.cpp',
+        'src/pycryptopp/hash/sha256module.cpp',
+        'src/pycryptopp/cipher/aesmodule.cpp',
+        'src/pycryptopp/cipher/xsalsa20module.cpp',
         ]
 if ECDSA:
-    srcs.append('pycryptopp/publickey/ecdsamodule.cpp')
+    srcs.append('src/pycryptopp/publickey/ecdsamodule.cpp')
 if TEST_DOUBLE_LOAD:
     srcs.append('_testdoubleloadmodule.cpp', )
 
@@ -302,12 +302,13 @@ setup(name=PKG,
       author_email='zooko@zooko.com',
       url='https://tahoe-lafs.org/trac/' + PKG,
       license='GNU GPL', # see README.rst for details -- there is also an alternative licence
-      packages=find_packages(),
+      packages=["pycryptopp"],
       include_package_data=True,
       exclude_package_data={
           '': [ '*.cpp', '*.hpp', ]
           },
       data_files=data_files,
+      package_dir={"pycryptopp": "src/pycryptopp"},
       setup_requires=setup_requires,
       install_requires=install_requires,
       dependency_links=dependency_links,
