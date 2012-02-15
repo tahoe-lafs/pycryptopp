@@ -10,8 +10,11 @@
 
 import os, platform, re, subprocess, sys
 
-from setuptools import Extension, find_packages, setup
+from setuptools import Extension, setup
 from setuptools import Command
+from distutils.util import get_platform
+from setuptools.command.test import ScanningLoader
+import unittest
 
 import versioneer
 versioneer.versionfile_source = "src/pycryptopp/_version.py"
@@ -247,6 +250,8 @@ data_files = [(doc_loc, data_fnames)]
 # fixed in Python 2.7
 data_files.append((EMBEDDED_CRYPTOPP_DIR, [EMBEDDED_CRYPTOPP_DIR+'/extraversion.h']))
 
+commands = versioneer.get_cmdclass().copy()
+
 ###### Version updating code
 
 CPP_GIT_VERSION_BODY = '''
@@ -290,9 +295,30 @@ class UpdateVersion(Command):
                   "full": versions["full"] })
         f.close()
         print "git-version: wrote '%s' into '%s'" % (versions["version"], fn)
-
-commands = versioneer.get_cmdclass().copy()
 commands["update_version"] = UpdateVersion
+
+class Test(Command):
+    description = "run tests"
+    user_options = []
+    def initialize_options(self):
+        self.test_suite = None
+    def finalize_options(self):
+        if self.test_suite is None:
+            self.test_suite = self.distribution.test_suite
+    def setup_path(self):
+        # copied from distutils/command/build.py
+        self.plat_name = get_platform()
+        plat_specifier = ".%s-%s" % (self.plat_name, sys.version[0:3])
+        self.build_lib = os.path.join("build", "lib"+plat_specifier)
+        sys.path.insert(0, self.build_lib)
+    def run(self):
+        self.setup_path()
+        loader = ScanningLoader()
+        test = loader.loadTestsFromName(self.test_suite)
+        runner = unittest.TextTestRunner(verbosity=2)
+        result = runner.run(test)
+        sys.exit(not result.wasSuccessful())
+commands["test"] = Test
 
 setup(name=PKG,
       version=get_normalized_version(),
@@ -302,7 +328,13 @@ setup(name=PKG,
       author_email='zooko@zooko.com',
       url='https://tahoe-lafs.org/trac/' + PKG,
       license='GNU GPL', # see README.rst for details -- there is also an alternative licence
-      packages=["pycryptopp"],
+      packages=["pycryptopp",
+                "pycryptopp.cipher",
+                "pycryptopp.hash",
+                "pycryptopp.publickey",
+                "pycryptopp.publickey.ed25519",
+                "pycryptopp.test",
+                ],
       include_package_data=True,
       exclude_package_data={
           '': [ '*.cpp', '*.hpp', ]
