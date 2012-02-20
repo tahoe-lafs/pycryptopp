@@ -2,5 +2,5 @@ include copyright COPYING.GPL COPYING.TGPPL.html ChangeLog NEWS.rst README.rst
 include versioneer.py
 
 graft src/pycryptopp
-graft src/embeddedcryptopp
-graft src/misc
+graft embeddedcryptopp
+graft misc

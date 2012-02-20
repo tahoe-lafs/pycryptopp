@@ -245,11 +245,6 @@ readmetext = open('README.rst').read()
 doc_loc = "share/doc/" + PKG
 data_files = [(doc_loc, data_fnames)]
 
-# Note that due to a bug in distutils we also have to maintain a
-# MANIFEST.in file specifying embeddedcryptopp/extraversion.h. This bug was
-# fixed in Python 2.7
-data_files.append((EMBEDDED_CRYPTOPP_DIR, [EMBEDDED_CRYPTOPP_DIR+'/extraversion.h']))
-
 commands = versioneer.get_cmdclass().copy()
 
 ###### Version updating code
