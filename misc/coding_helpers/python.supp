@@ -1,7 +1,7 @@
 # generated on buildbot.rubenkerkhof.com, which had, according to Ruben
 # Fedora's package "openssl-1.0.1-0.1.beta2.fc17.x86_64"
 {
-   buildbot.rubenkerkhof.com cond fips openssl
+   buildbot.rubenkerkhof.com cond fips openssl 1
    Memcheck:Cond
    fun:bcmp
    fun:fips_get_entropy
@@ -12,8 +12,17 @@
    fun:init_hashlib
 }
 
-# generated on buildbot.rubenkerkhof.com, which had, according to Ruben
-# Fedora's package "openssl-1.0.1-0.1.beta2.fc17.x86_64"
+{
+   buildbot.rubenkerkhof.com cond fips openssl 2
+   Memcheck:Cond
+   fun:fips_get_entropy
+   fun:FIPS_drbg_instantiate
+   fun:RAND_init_fips
+   fun:OPENSSL_init_library
+   fun:SSL_library_init
+   fun:init_hashlib
+}
+
 {
    buildbot.rubenkerkhof.com val _x86_64_AES_encrypt_compact
    Memcheck:Value8
