@@ -10,11 +10,14 @@
 
 import os, platform, re, subprocess, sys
 
-from setuptools import Extension, find_packages, setup
+from setuptools import Extension, setup
 from setuptools import Command
+from distutils.util import get_platform
+from setuptools.command.test import ScanningLoader
+import unittest
 
 import versioneer
-versioneer.versionfile_source = "pycryptopp/_version.py"
+versioneer.versionfile_source = "src/pycryptopp/_version.py"
 versioneer.versionfile_build = "pycryptopp/_version.py"
 versioneer.tag_prefix = "pycryptopp-"
 versioneer.parentdir_prefix = "pycryptopp-"
@@ -187,14 +190,14 @@ trove_classifiers=[
 
 PKG='pycryptopp'
 
-srcs = ['pycryptopp/_pycryptoppmodule.cpp',
-        'pycryptopp/publickey/rsamodule.cpp',
-        'pycryptopp/hash/sha256module.cpp',
-        'pycryptopp/cipher/aesmodule.cpp',
-        'pycryptopp/cipher/xsalsa20module.cpp',
+srcs = ['src/pycryptopp/_pycryptoppmodule.cpp',
+        'src/pycryptopp/publickey/rsamodule.cpp',
+        'src/pycryptopp/hash/sha256module.cpp',
+        'src/pycryptopp/cipher/aesmodule.cpp',
+        'src/pycryptopp/cipher/xsalsa20module.cpp',
         ]
 if ECDSA:
-    srcs.append('pycryptopp/publickey/ecdsamodule.cpp')
+    srcs.append('src/pycryptopp/publickey/ecdsamodule.cpp')
 if TEST_DOUBLE_LOAD:
     srcs.append('_testdoubleloadmodule.cpp', )
 
@@ -242,10 +245,7 @@ readmetext = open('README.rst').read()
 doc_loc = "share/doc/" + PKG
 data_files = [(doc_loc, data_fnames)]
 
-# Note that due to a bug in distutils we also have to maintain a
-# MANIFEST.in file specifying embeddedcryptopp/extraversion.h. This bug was
-# fixed in Python 2.7
-data_files.append((EMBEDDED_CRYPTOPP_DIR, [EMBEDDED_CRYPTOPP_DIR+'/extraversion.h']))
+commands = versioneer.get_cmdclass().copy()
 
 ###### Version updating code
 
@@ -290,9 +290,30 @@ class UpdateVersion(Command):
                   "full": versions["full"] })
         f.close()
         print "git-version: wrote '%s' into '%s'" % (versions["version"], fn)
-
-commands = versioneer.get_cmdclass().copy()
 commands["update_version"] = UpdateVersion
+
+class Test(Command):
+    description = "run tests"
+    user_options = []
+    def initialize_options(self):
+        self.test_suite = None
+    def finalize_options(self):
+        if self.test_suite is None:
+            self.test_suite = self.distribution.test_suite
+    def setup_path(self):
+        # copied from distutils/command/build.py
+        self.plat_name = get_platform()
+        plat_specifier = ".%s-%s" % (self.plat_name, sys.version[0:3])
+        self.build_lib = os.path.join("build", "lib"+plat_specifier)
+        sys.path.insert(0, self.build_lib)
+    def run(self):
+        self.setup_path()
+        loader = ScanningLoader()
+        test = loader.loadTestsFromName(self.test_suite)
+        runner = unittest.TextTestRunner(verbosity=2)
+        result = runner.run(test)
+        sys.exit(not result.wasSuccessful())
+commands["test"] = Test
 
 setup(name=PKG,
       version=get_normalized_version(),
@@ -302,12 +323,19 @@ setup(name=PKG,
       author_email='zooko@zooko.com',
       url='https://tahoe-lafs.org/trac/' + PKG,
       license='GNU GPL', # see README.rst for details -- there is also an alternative licence
-      packages=find_packages(),
+      packages=["pycryptopp",
+                "pycryptopp.cipher",
+                "pycryptopp.hash",
+                "pycryptopp.publickey",
+                "pycryptopp.publickey.ed25519",
+                "pycryptopp.test",
+                ],
       include_package_data=True,
       exclude_package_data={
           '': [ '*.cpp', '*.hpp', ]
           },
       data_files=data_files,
+      package_dir={"pycryptopp": "src/pycryptopp"},
       setup_requires=setup_requires,
       install_requires=install_requires,
       dependency_links=dependency_links,
