@@ -18,6 +18,4 @@
 # if ez_setup.py needs to build setuptools, that goes here
 /setuptools-*.egg
 /ez_setup.pyc
-/pycryptopp/_pycryptopp.so
 /MANIFEST
-/pycryptopp/publickey/ed25519/_ed25519.so
