@@ -3,7 +3,7 @@
 
 # pycryptopp -- Python wrappers for a few algorithms from Crypto++
 #
-# Copyright © 2009-2011 Zooko Wilcox-O'Hearn
+# Copyright © 2009-2012 Zooko Wilcox-O'Hearn
 # Author: Zooko Wilcox-O'Hearn
 #
 # See README.rst for licensing information.
@@ -44,10 +44,11 @@ if os.environ.get('PYCRYPTOPP_DISABLE_EMBEDDED_CRYPTOPP') == "1":
 
 EMBEDDED_CRYPTOPP_DIR='embeddedcryptopp'
 
-TEST_DOUBLE_LOAD=False
-if "--test-double-load" in sys.argv:
-    TEST_DOUBLE_LOAD=True
-    sys.argv.remove("--test-double-load")
+BUILD_DOUBLE_LOAD_TESTER=False
+BDLTARG="--build-double-load-tester"
+if BDLTARG in sys.argv:
+    BUILD_DOUBLE_LOAD_TESTER=True
+    sys.argv.remove(BDLTARG)
 
 # There are two ways that this setup.py script can build pycryptopp, either by using the
 # Crypto++ source code bundled in the pycryptopp source tree, or by linking to a copy of the
@@ -198,8 +199,8 @@ srcs = ['src/pycryptopp/_pycryptoppmodule.cpp',
         ]
 if ECDSA:
     srcs.append('src/pycryptopp/publickey/ecdsamodule.cpp')
-if TEST_DOUBLE_LOAD:
-    srcs.append('_testdoubleloadmodule.cpp', )
+if BUILD_DOUBLE_LOAD_TESTER:
+    srcs.append('_doubleloadtester.cpp', )
 
 ext_modules.append(
     Extension('pycryptopp._pycryptopp', extra_srcs + srcs, include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
@@ -216,9 +217,9 @@ m = Extension("pycryptopp.publickey.ed25519._ed25519",
 ext_modules.append(m)
 
 
-if TEST_DOUBLE_LOAD:
+if BUILD_DOUBLE_LOAD_TESTER:
     ext_modules.append(
-        Extension('_testdoubleload', extra_srcs + srcs, include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
+        Extension('_doubleloadtester', extra_srcs + srcs, include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
         )
 
 miscdeps=os.path.join(os.getcwd(), 'misc', 'dependencies')
