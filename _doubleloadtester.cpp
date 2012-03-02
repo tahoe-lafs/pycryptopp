@@ -1,11 +1,11 @@
 
 #include <Python.h>
 
-PyDoc_STRVAR(_testdoubleload__doc__,
-             "_testdoubleload -- just for testing ticket #9 per ticket #44\n\
+PyDoc_STRVAR(_doubleloadtester__doc__,
+             "_doubleloadtester -- just for testing ticket #9 per ticket #44\n\
 ");
 
-static PyMethodDef _testdoubleload_functions[] = {
+static PyMethodDef _doubleloadtester_functions[] = {
     {NULL, NULL, 0, NULL}  /* sentinel */
 };
 
@@ -20,16 +20,16 @@ static PyMethodDef _testdoubleload_functions[] = {
 #define PyMODINIT_FUNC void
 #endif
 PyMODINIT_FUNC
-init_testdoubleload(void) {
+init_doubleloadtester(void) {
     const CryptoPP::NameValuePairs &my_nullNameValuePairs = CryptoPP::g_nullNameValuePairs;
     PyObject *module;
 
 
-    printf("HELLO WORLD i'm testdoubleload\n");
+    printf("HELLO WORLD i'm doubleloadtester\n");
     printf("%d\n", my_nullNameValuePairs.GetVoidValue("anything", typeid(0), NULL));
-    printf("GOODBYE i'm testdoubleload\n");
+    printf("GOODBYE i'm doubleloadtester\n");
 
-    module = Py_InitModule3("_testdoubleload", _testdoubleload_functions, _testdoubleload__doc__);
+    module = Py_InitModule3("_doubleloadtester", _doubleloadtester_functions, _doubleloadtester__doc__);
     if (!module)
         return;
 }
