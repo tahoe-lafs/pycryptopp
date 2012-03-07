@@ -52,29 +52,6 @@ entropy. Ed25519 signatures are deterministic: using the same key to sign the
 same data any number of times will result in the same signature each time.
 
 
-Prefixes and Encodings
-----------------------
-
-The basic keypair/sign/verify operations work on binary bytestrings: signing
-keys are created with a 32-byte seed, verifying keys are serialized as
-32-byte binary strings, and signatures are 64-byte binary strings.
-
-The sign and verify methods take a prefix= argument, which is simply
-prepended to the output or stripped from the input. This can be used for a
-cheap version check: if you use e.g. prefix="sig0-" when handling signatures,
-and later update your application to use a different kind of message or key
-(and update to "sig1-"), then older receivers will throw a clean error when
-faced with a signature format that they cannot handle.
-
-These methods also accept an encoding= argument, which makes them return or
-accept an ASCII string instead of a binary bytestring. This makes it
-convenient to generate JSON-encodable signatures.
-
-encoding= can be set to one of "base64", "base32", "base16", or "hex" (an
-alias for "base16"). The strings are stripped of trailing "=" markers and
-lowercased (for base32/base16).
-
-
 Usage
 -----
 
@@ -85,13 +62,12 @@ way to generate a key seed is with os.urandom(32)::
 
  import os
  from pycryptopp.publickey import ed25519
- from binascii import hexlify, unhexlify
 
  sk_bytes = os.urandom(32)
  signing_key = ed25519.SigningKey(sk_bytes)
  open("my-secret-key","wb").write(sk_bytes)
 
- vkey_hex = hexlify(sk.get_verifying_key_bytes())
+ vkey_hex = sk.get_verifying_key_bytes().encode('hex')
  print "the public key is", vkey_hex
 
 To reconstruct the same key from the stored form later, just pass it back
@@ -102,20 +78,19 @@ into SigningKey::
 
 
 Once you have the SigningKey instance, use its .sign() method to sign a
-message. The signature is 64 bytes, but can be generated in printable form
-with the encoding= argument::
+message. The signature is 64 bytes::
 
- sig = signing_key.sign("hello world", encoding="base64")
- print "sig is:", sig
+ sig = signing_key.sign("hello world")
+ print "sig is:", sig.encode('hex')
 
 On the verifying side, the receiver first needs to construct a
 ed25519.VerifyingKey instance from the serialized form, then use its
 .verify() method on the signature and message::
 
  vkey_hex = "1246b84985e1ab5f83f4ec2bdf271114666fd3d9e24d12981a3c861b9ed523c6"
- verifying_key = ed25519.VerifyingKey(unhexlify(vkey_hex)
+ verifying_key = ed25519.VerifyingKey(vkey_hex.decode('hex'))
  try:
-   verifying_key.verify(sig, "hello world", encoding="base64")
+   verifying_key.verify(sig, "hello world")
    print "signature is good"
  except ed25519.BadSignatureError:
    print "signature is bad!"
@@ -142,8 +117,8 @@ The complete API is summarized here::
  vk_bytes = sk.get_verifying_key_bytes()
  vk = VerifyingKey(vk_bytes)
 
- signature = sk.sign(message, prefix=, encoding=)
- vk.verify(signature, message, prefix=, encoding=)
+ signature = sk.sign(message)
+ vk.verify(signature, message)
 
 
 footnotes
