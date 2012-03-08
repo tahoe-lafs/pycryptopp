@@ -31,11 +31,11 @@ class KnownAnswerTests(unittest.TestCase):
             #    print "msg len = %d" % len(msg), time.time()
 
             sk = ed25519.SigningKey(seed)
-            vk = sk.get_verifying_key()
-            self.failUnlessEqual(vk.to_bytes(), vk_s)
+            vkbs = sk.get_verifying_key_bytes()
+            self.failUnlessEqual(vkbs, vk_s)
+            vk = ed25519.VerifyingKey(vkbs)
             vk2 = ed25519.VerifyingKey(vk_s)
             self.failUnlessEqual(vk2, vk) # objects should compare equal
-            self.failUnlessEqual(vk2.to_bytes(), vk_s)
             newsig = sk.sign(msg)
             sig_R,sig_S = sig[:32],sig[32:]
             newsig_R,newsig_S = newsig[:32],newsig[32:]
