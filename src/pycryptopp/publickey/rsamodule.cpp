@@ -354,7 +354,12 @@ rsa_create_signing_key_from_string(PyObject *dummy, PyObject *args, PyObject *kw
         return NULL;
     StringSource ss(reinterpret_cast<const byte*>(serializedsigningkey), serializedsigningkeysize, true);
 
-    signer->k = new RSASS<PSS, SHA256>::Signer(ss);
+    try {
+        signer->k = new RSASS<PSS, SHA256>::Signer(ss);
+    } catch (CryptoPP::BERDecodeErr le) {
+        return PyErr_Format(rsa_error, "Serialized signing key was corrupted.  Crypto++ gave this exception: %s", le.what());
+    }
+
     if (!signer->k)
         return PyErr_NoMemory();
     return reinterpret_cast<PyObject*>(signer);
