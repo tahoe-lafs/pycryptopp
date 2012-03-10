@@ -1,4 +1,3 @@
-import os
 import _ed25519
 BadSignatureError = _ed25519.BadSignatureError
 
@@ -57,7 +56,7 @@ class VerifyingKey(object):
         assert msg2 == msg
 
 def selftest():
-    from binascii import unhexlify, hexlify
+    from binascii import unhexlify
     message = "crypto libraries should always test themselves at powerup"
     sk_bytes = unhexlify("548b1f9f938519ad3d527d8c47a1e6ec1439fbec61710b245363865c6f234899")
     sk = SigningKey(sk_bytes)
