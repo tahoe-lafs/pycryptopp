@@ -328,7 +328,12 @@ rsa_create_verifying_key_from_string(PyObject *dummy, PyObject *args, PyObject *
         return NULL;
     StringSource ss(reinterpret_cast<const byte*>(serializedverifyingkey), serializedverifyingkeysize, true);
 
-    verifier->k = new RSASS<PSS, SHA256>::Verifier(ss);
+    try {
+        verifier->k = new RSASS<PSS, SHA256>::Verifier(ss);
+    } catch (CryptoPP::BERDecodeErr le) {
+        return PyErr_Format(rsa_error, "Serialized verifying key was corrupted.  Crypto++ gave this exception: %s", le.what());
+    }
+
     if (!verifier->k)
         return PyErr_NoMemory();
     return reinterpret_cast<PyObject*>(verifier);
