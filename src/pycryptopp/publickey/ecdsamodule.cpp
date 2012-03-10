@@ -49,17 +49,17 @@ typedef int Py_ssize_t;
 #include <cryptopp/ecp.h>
 #include <cryptopp/hex.h>
 #else
-#include <embeddedcryptopp/filters.h>
-#include <embeddedcryptopp/osrng.h>
-#include <embeddedcryptopp/eccrypto.h>
-#include <embeddedcryptopp/oids.h>
-#include <embeddedcryptopp/tiger.h>
-#include <embeddedcryptopp/sha.h>
-#include <embeddedcryptopp/pubkey.h>
+#include <src-cryptopp/filters.h>
+#include <src-cryptopp/osrng.h>
+#include <src-cryptopp/eccrypto.h>
+#include <src-cryptopp/oids.h>
+#include <src-cryptopp/tiger.h>
+#include <src-cryptopp/sha.h>
+#include <src-cryptopp/pubkey.h>
 // only needed for debugging -- the _dump() function
 #include <iostream>
-#include <embeddedcryptopp/ecp.h>
-#include <embeddedcryptopp/hex.h>
+#include <src-cryptopp/ecp.h>
+#include <src-cryptopp/hex.h>
 #endif
 
 static const int KEY_SIZE_BITS=192;

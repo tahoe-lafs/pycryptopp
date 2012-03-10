@@ -13,7 +13,7 @@ typedef int Py_ssize_t;
 #ifdef DISABLE_EMBEDDED_CRYPTOPP
 #include <cryptopp/salsa.h>
 #else
-#include <embeddedcryptopp/salsa.h>
+#include <src-cryptopp/salsa.h>
 #endif
 
 static const char* const xsalsa20__doc__ = "_xsalsa20 cipher";

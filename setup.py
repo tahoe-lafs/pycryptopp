@@ -42,7 +42,7 @@ if "--disable-embedded-cryptopp" in sys.argv:
 if os.environ.get('PYCRYPTOPP_DISABLE_EMBEDDED_CRYPTOPP') == "1":
     DISABLE_EMBEDDED_CRYPTOPP=True
 
-EMBEDDED_CRYPTOPP_DIR='embeddedcryptopp'
+EMBEDDED_CRYPTOPP_DIR='src-cryptopp'
 
 BUILD_DOUBLE_LOAD_TESTER=False
 BDLTARG="--build-double-load-tester"

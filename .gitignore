@@ -3,7 +3,7 @@
 /dist/
 
 # extraversion.h is generated at build time, and never checked in
-/embeddedcryptopp/extraversion.h
+/src-cryptopp/extraversion.h
 
 # the .egg-info is mostly generated during 'setup.py bdist_egg' ..
 /pycryptopp.egg-info/

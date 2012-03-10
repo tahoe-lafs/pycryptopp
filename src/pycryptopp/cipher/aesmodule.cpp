@@ -16,8 +16,8 @@ typedef int Py_ssize_t;
 #include <cryptopp/modes.h>
 #include <cryptopp/aes.h>
 #else
-#include <embeddedcryptopp/modes.h>
-#include <embeddedcryptopp/aes.h>
+#include <src-cryptopp/modes.h>
+#include <src-cryptopp/aes.h>
 #endif
 
 static const char*const aes___doc__ = "_aes counter mode cipher\n\

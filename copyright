@@ -17,7 +17,7 @@ See the file COPYING.TGPPL.html for the terms of the Transitive Grace
 Period Public Licence, version 1.0.
 
 The following licensing text applies to a subset of the Crypto++ source code
-which is included in the pycryptopp source tree under the "embeddedcryptopp"
+which is included in the pycryptopp source tree under the "src-cryptopp"
 subdirectory.  That embedded subset of the Crypto++ source code is not used
 when pycryptopp is built for Debian -- instead the --disable-embedded-cryptopp
 option to "setup.py build" is used to for pycryptopp to build against the

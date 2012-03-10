@@ -10,7 +10,7 @@
 #ifdef DISABLE_EMBEDDED_CRYPTOPP
 #include <cryptopp/config.h>
 #else
-#include <embeddedcryptopp/config.h>
+#include <src-cryptopp/config.h>
 #endif
 
 PyDoc_STRVAR(_pycryptopp__doc__,

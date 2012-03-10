@@ -13,7 +13,7 @@ static PyMethodDef _doubleloadtester_functions[] = {
 #ifdef DISABLE_EMBEDDED_CRYPTOPP
 #include <cryptopp/cryptlib.h>
 #else
-#include <embeddedcryptopp/cryptlib.h>
+#include <src-cryptopp/cryptlib.h>
 #endif
 
 #ifndef PyMODINIT_FUNC /* declarations for DLL import/export */

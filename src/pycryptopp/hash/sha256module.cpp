@@ -16,9 +16,9 @@ typedef int Py_ssize_t;
 #include <cryptopp/hex.h>
 #include <cryptopp/filters.h>
 #else
-#include <embeddedcryptopp/sha.h>
-#include <embeddedcryptopp/hex.h>
-#include <embeddedcryptopp/filters.h>
+#include <src-cryptopp/sha.h>
+#include <src-cryptopp/hex.h>
+#include <src-cryptopp/filters.h>
 #endif
 
 static const char*const sha256___doc__ = "_sha256 hash function";
