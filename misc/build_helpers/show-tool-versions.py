@@ -141,6 +141,7 @@ if 'windows' in platform.system().lower():
 print_stdout(['g++', '--version'], numlines=1)
 print_stdout(['cryptest', 'V'])
 print_stdout(['git', '--version'])
+print_stdout(['openssl', 'version'])
 print_stdout(['flappclient', '--version'])
 print_stdout(['valgrind', '--version'])
 

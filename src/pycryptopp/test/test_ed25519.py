@@ -1,5 +1,4 @@
 
-import os
 import unittest
 import time
 from binascii import hexlify, unhexlify
@@ -95,7 +94,7 @@ class Basic(unittest.TestCase):
                              "a66d161e090652b054740748f059f92a"
                              "5b731f1c27b05571f6d942e4f8b7b264")
 
-        vk = ed25519.VerifyingKey(vk_bytes)
+        ed25519.VerifyingKey(vk_bytes)
         self.failUnlessRaises(ValueError, ed25519.VerifyingKey, "wrong length")
 
     def test_OOP(self):

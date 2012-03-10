@@ -349,15 +349,15 @@ rsa_create_signing_key_from_string(PyObject *dummy, PyObject *args, PyObject *kw
         return NULL;
     assert (serializedsigningkeysize >= 0);
 
-    SigningKey *verifier = SigningKey_construct();
-    if (!verifier)
+    SigningKey *signer = SigningKey_construct();
+    if (!signer)
         return NULL;
     StringSource ss(reinterpret_cast<const byte*>(serializedsigningkey), serializedsigningkeysize, true);
 
-    verifier->k = new RSASS<PSS, SHA256>::Signer(ss);
-    if (!verifier->k)
+    signer->k = new RSASS<PSS, SHA256>::Signer(ss);
+    if (!signer->k)
         return PyErr_NoMemory();
-    return reinterpret_cast<PyObject*>(verifier);
+    return reinterpret_cast<PyObject*>(signer);
 }
 
 const char*const rsa_create_signing_key_from_string__doc__ = "Create a signing key from its serialized state.";
