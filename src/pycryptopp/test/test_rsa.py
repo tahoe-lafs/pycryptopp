@@ -60,6 +60,13 @@ class Signer(unittest.TestCase):
         else:
             self.fail("Should have raised error from invalid string")
 
+        try:
+            rsa.create_verifying_key_from_string("invalid string")
+        except rsa.Error, le:
+            self.failUnless("decode error" in str(le), le)
+        else:
+            self.fail("Should have raised error from invalid string")
+
 class SignAndVerify(unittest.TestCase):
     def _help_test_sign_and_check(self, signer, verifier, msg):
         sig = signer.sign(msg)
