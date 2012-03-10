@@ -54,7 +54,7 @@ class Signer(unittest.TestCase):
 
     def test_create_from_string_invalid(self):
         try:
-            signer = rsa.create_signing_key_from_string("invalid string")
+            rsa.create_signing_key_from_string("invalid string")
         except rsa.Error, le:
             self.failUnless("decode error" in str(le), le)
         else:
