@@ -4,6 +4,7 @@
 
 # extraversion.h is generated at build time, and never checked in
 /src-cryptopp/extraversion.h
+/src/pycryptopp/_version.py
 
 # the .egg-info is mostly generated during 'setup.py bdist_egg' ..
 /pycryptopp.egg-info/

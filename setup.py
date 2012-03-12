@@ -246,7 +246,7 @@ readmetext = open('README.rst').read()
 doc_loc = "share/doc/" + PKG
 data_files = [(doc_loc, data_fnames)]
 
-commands = versioneer.get_cmdclass().copy()
+commands = {}
 
 ###### Version updating code
 
@@ -270,6 +270,34 @@ def get_normalized_version():
         normalized_version += ".dev0"
     return normalized_version
 
+def read_version_py(infname):
+    try:
+        verstrline = open(infname, "rt").read()
+    except EnvironmentError:
+        return None
+    else:
+        VSRE = r"^verstr = ['\"]([^'\"]*)['\"]"
+        mo = re.search(VSRE, verstrline, re.M)
+        if mo:
+            return mo.group(1)
+
+VERSION_BODY = '''
+# This is the version of this tree, as created by %(versiontool)s from the darcs patch
+# information: the main version number is taken from the most recent release
+# tag. If some patches have been added since the last release, this will have a
+# -NN "build number" suffix, or else a -rNN "revision number" suffix. Please see
+# pyutil.version_class for a description of what the different fields mean.
+
+__pkgname__ = "%(pkgname)s"
+verstr = "%(pkgversion)s"
+try:
+    from pyutil.version_class import Version as pyutil_Version
+    __version__ = pyutil_Version(verstr)
+except (ImportError, ValueError):
+    # Maybe there is no pyutil installed.
+    from distutils.version import LooseVersion as distutils_Version
+    __version__ = distutils_Version(verstr)
+'''
 
 class UpdateVersion(Command):
     description = "update extraversion.h from revision-control metadata"
@@ -290,7 +318,18 @@ class UpdateVersion(Command):
                   "normalized": get_normalized_version(),
                   "full": versions["full"] })
         f.close()
-        print "git-version: wrote '%s' into '%s'" % (versions["version"], fn)
+        self.write_version_py(get_normalized_version(), os.path.join('src', 'pycryptopp', '_version.py'), "pycryptopp's setup.py", VERSION_BODY, 'pycryptopp')
+        print "git-version: wrote '%s' into '%s' and '%s'" % (versions["version"], fn, os.path.join('src', 'pycryptopp', '_version.py'))
+
+    def write_version_py(self, verstr, outfname, EXE_NAME, version_body, pkgname):
+        f = open(outfname, "wb+")
+        f.write(version_body % {
+                'versiontool': EXE_NAME,
+                'pkgversion': verstr,
+                'pkgname': pkgname,
+                })
+        f.close()
+
 commands["update_version"] = UpdateVersion
 
 class Test(Command):
@@ -317,7 +356,7 @@ class Test(Command):
 commands["test"] = Test
 
 setup(name=PKG,
-      version=get_normalized_version(),
+      version=read_version_py(os.path.join('src', 'pycryptopp', '_version.py')),
       description='Python wrappers for a few algorithms from the Crypto++ library',
       long_description=readmetext,
       author='Zooko Wilcox-O\'Hearn',
