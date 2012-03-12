@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# pycryptopp -- Python wrappers for a few algorithms from Crypto++
-#
 # Copyright © 2009-2012 Zooko Wilcox-O'Hearn
 # Author: Zooko Wilcox-O'Hearn
 #
@@ -261,14 +259,41 @@ CPP_GIT_VERSION_BODY = '''
 '''
 
 def get_normalized_version():
-    pieces = versioneer.get_versions()["version"].split("-")
-    if len(pieces) == 1:
-        normalized_version = pieces[0]
-    else:
-        normalized_version = "%s.post%s" % (pieces[0], pieces[1])
-    if pieces[-1] == "dirty":
-        normalized_version += ".dev0"
-    return normalized_version
+    versions = versioneer.get_versions()
+
+    pieces = versions['version'].split("-")
+
+# examples: versions:  {'version': '2.3.4-dirty', 'full': '5ebdca46cf83a185710ecb9b29d46ec8ac70de61-dirty'}
+# examples versions:  {'version': '0.5.29-108-g5ebdca4-dirty', 'full': '5ebdca46cf83a185710ecb9b29d46ec8ac70de61-dirty'}
+# examples: pieces: ['0.5.29', '108', 'g5ebdca4', 'dirty']
+# examples: pieces: ['2.3.4', 'dirty']
+# examples: pieces: ['2.3.4']
+    
+    normalized_version = []
+    normalized_version.append(pieces.pop(0))
+
+    postrelease = None
+    dirty = False
+
+    while len(pieces) > 0:
+        nextpiece = pieces.pop(0)
+        if re.match('\d+$', nextpiece):
+            postrelease = nextpiece
+            normalized_version.append('.'+postrelease)
+        elif nextpiece.startswith('g'):
+            # Use the full version instead.
+            fullvhex = versions['full'].split('-')[0]
+            fullvint = int(fullvhex, 16)
+            normalized_version.append('.'+str(fullvint))
+        elif nextpiece == 'dirty':
+            dirty = True
+
+    if postrelease is not None:
+        normalized_version.append('.post'+postrelease)
+    if dirty is True:
+        normalized_version.append('.dev0')
+
+    return ''.join(normalized_version)
 
 def read_version_py(infname):
     try:
