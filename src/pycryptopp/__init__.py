@@ -7,7 +7,17 @@ pycryptopp - Python wrappers for Crypto++
 
 import _pycryptopp
 __doc__ = _pycryptopp.__doc__
-__version__ = _pycryptopp.__version__
+
+__version__ = "unknown"
+try:
+    import _version
+except ImportError:
+    # We're running in a tree that hasn't run "python ./setup.py
+    # update_version", and didn't come with a _version.py, so we don't know
+    # what our version is. This should not happen very often.
+    pass
+else:
+    __version__ = _version.__version__
 
 def _import_my_names(thismodule, prefix):
     for name in dir(_pycryptopp):

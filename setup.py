@@ -276,27 +276,20 @@ def read_version_py(infname):
     except EnvironmentError:
         return None
     else:
-        VSRE = r"^verstr = ['\"]([^'\"]*)['\"]"
+        VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
         mo = re.search(VSRE, verstrline, re.M)
         if mo:
             return mo.group(1)
 
 VERSION_BODY = '''
-# This is the version of this tree, as created by %(versiontool)s from the darcs patch
-# information: the main version number is taken from the most recent release
-# tag. If some patches have been added since the last release, this will have a
-# -NN "build number" suffix, or else a -rNN "revision number" suffix. Please see
-# pyutil.version_class for a description of what the different fields mean.
+# This is the version of this tree, as created by %(versiontool)s from the
+# git information: the main version number is taken from the most recent
+# release tag. If some patches have been added since the last release, this
+# will have a -NN "build number" suffix, followed by -gXXX "revid" suffix.
+# Please see versioneer.py for the source code that produces this.
 
 __pkgname__ = "%(pkgname)s"
-verstr = "%(pkgversion)s"
-try:
-    from pyutil.version_class import Version as pyutil_Version
-    __version__ = pyutil_Version(verstr)
-except (ImportError, ValueError):
-    # Maybe there is no pyutil installed.
-    from distutils.version import LooseVersion as distutils_Version
-    __version__ = distutils_Version(verstr)
+__version__ = "%(pkgversion)s"
 '''
 
 class UpdateVersion(Command):
