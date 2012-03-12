@@ -281,12 +281,14 @@ def get_normalized_version():
             postrelease = nextpiece
             normalized_version.append('.'+postrelease)
         elif nextpiece.startswith('g'):
-            # Use the full version instead.
-            fullvhex = versions['full'].split('-')[0]
-            fullvint = int(fullvhex, 16)
-            normalized_version.append('.'+str(fullvint))
+            continue
+            # Use the full version instead ,below
         elif nextpiece == 'dirty':
             dirty = True
+
+    fullvhex = versions['full'].split('-')[0]
+    full = int(fullvhex, 16)
+    normalized_version.append('.'+str(full))
 
     if postrelease is not None:
         normalized_version.append('.post'+postrelease)
@@ -337,7 +339,7 @@ class UpdateVersion(Command):
                   "full": versions["full"] })
         f.close()
         self.write_version_py(get_normalized_version(), os.path.join('src', 'pycryptopp', '_version.py'), "pycryptopp's setup.py", VERSION_BODY, 'pycryptopp')
-        print "git-version: wrote '%s' into '%s' and '%s'" % (versions["version"], fn, os.path.join('src', 'pycryptopp', '_version.py'))
+        print "git-version: wrote '%s' into '%s' and '%s'" % (get_normalized_version(), fn, os.path.join('src', 'pycryptopp', '_version.py'))
 
     def write_version_py(self, verstr, outfname, EXE_NAME, version_body, pkgname):
         f = open(outfname, "wb+")
