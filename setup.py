@@ -257,18 +257,8 @@ CPP_GIT_VERSION_BODY = '''
  * have a -NN "build number" suffix, or else a -rNN "revision number" suffix.
  */
 
-#define CRYPTOPP_EXTRA_VERSION "%(pkgname)s-%(normalized)s"
+#define CRYPTOPP_EXTRA_VERSION "%(pkgname)s-%(version)s"
 '''
-
-def get_normalized_version():
-    pieces = versioneer.get_versions()["version"].split("-")
-    if len(pieces) == 1:
-        normalized_version = pieces[0]
-    else:
-        normalized_version = "%s.post%s" % (pieces[0], pieces[1])
-    if pieces[-1] == "dirty":
-        normalized_version += ".dev0"
-    return normalized_version
 
 def read_version_py(infname):
     try:
@@ -302,17 +292,17 @@ class UpdateVersion(Command):
         pass
     def run(self):
         versions = versioneer.get_versions()
+        version = versions['version']
         fn = os.path.join(EMBEDDED_CRYPTOPP_DIR, 'extraversion.h')
         f = open(fn, "wb")
         BODY = CPP_GIT_VERSION_BODY
         f.write(BODY %
                 { "pkgname": self.distribution.get_name(),
-                  "version": versions["version"],
-                  "normalized": get_normalized_version(),
+                  "version": version,
                   "full": versions["full"] })
         f.close()
-        self.write_version_py(get_normalized_version(), os.path.join('src', 'pycryptopp', '_version.py'), "pycryptopp's setup.py", VERSION_BODY, 'pycryptopp')
-        print "git-version: wrote '%s' into '%s' and '%s'" % (versions["version"], fn, os.path.join('src', 'pycryptopp', '_version.py'))
+        self.write_version_py(version, os.path.join('src', 'pycryptopp', '_version.py'), "pycryptopp's setup.py", VERSION_BODY, 'pycryptopp')
+        print "git-version: wrote '%s' into '%s' and '%s'" % (version, fn, os.path.join('src', 'pycryptopp', '_version.py'))
 
     def write_version_py(self, verstr, outfname, EXE_NAME, version_body, pkgname):
         f = open(outfname, "wb+")
