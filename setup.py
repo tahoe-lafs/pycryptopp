@@ -255,12 +255,10 @@ CPP_GIT_VERSION_BODY = '''
  * have a -NN "build number" suffix, or else a -rNN "revision number" suffix.
  */
 
-#define CRYPTOPP_EXTRA_VERSION "%(pkgname)s-%(normalized)s"
+#define CRYPTOPP_EXTRA_VERSION "%(pkgname)s-%(pkgversion)s"
 '''
 
-def get_normalized_version():
-    versions = versioneer.get_versions()
-
+def get_normalized_version(versions):
     pieces = versions['version'].split("-")
 
 # examples: versions:  {'version': '2.3.4-dirty', 'full': '5ebdca46cf83a185710ecb9b29d46ec8ac70de61-dirty'}
@@ -308,12 +306,17 @@ def read_version_py(infname):
         if mo:
             return mo.group(1)
 
+VERSION_PY_FNAME = os.path.join('src', 'pycryptopp', '_version.py')
+
+version_from_file = read_version_py(VERSION_PY_FNAME)
+
+EXTRAVERSION_H_FNAME = os.path.join(EMBEDDED_CRYPTOPP_DIR, 'extraversion.h')
+
 VERSION_BODY = '''
 # This is the version of this tree, as created by %(versiontool)s from the
 # git information: the main version number is taken from the most recent
 # release tag. If some patches have been added since the last release, this
 # will have a -NN "build number" suffix, followed by -gXXX "revid" suffix.
-# Please see versioneer.py for the source code that produces this.
 
 __pkgname__ = "%(pkgname)s"
 __version__ = "%(pkgversion)s"
@@ -328,27 +331,63 @@ class UpdateVersion(Command):
     def finalize_options(self):
         pass
     def run(self):
-        versions = versioneer.get_versions()
-        fn = os.path.join(EMBEDDED_CRYPTOPP_DIR, 'extraversion.h')
-        f = open(fn, "wb")
-        BODY = CPP_GIT_VERSION_BODY
-        f.write(BODY %
-                { "pkgname": self.distribution.get_name(),
-                  "version": versions["version"],
-                  "normalized": get_normalized_version(),
-                  "full": versions["full"] })
-        f.close()
-        self.write_version_py(get_normalized_version(), os.path.join('src', 'pycryptopp', '_version.py'), "pycryptopp's setup.py", VERSION_BODY, 'pycryptopp')
-        print "git-version: wrote '%s' into '%s' and '%s'" % (get_normalized_version(), fn, os.path.join('src', 'pycryptopp', '_version.py'))
 
-    def write_version_py(self, verstr, outfname, EXE_NAME, version_body, pkgname):
+        versions = versioneer.versions_from_vcs(versioneer.tag_prefix, '.')
+        assert isinstance(versions, dict)
+
+        if not versions and version_from_file is None:
+            raise Exception("problem: couldn't get version information from revision control history, and there is no version information in '%s'. Stopping." % (VERFILE,))
+
+        if versions:
+            version = get_normalized_version(versions)
+        else:
+            version = version_from_file
+
+        # Let's avoid touching the change time (ctime) on the files unless
+        # they actually need to be updated.
+
+        if self.read_extraversion_h(EXTRAVERSION_H_FNAME) != version:
+            self.write_extraversion_h(
+                self.distribution.get_name(),
+                version,
+                EXTRAVERSION_H_FNAME,
+                CPP_GIT_VERSION_BODY
+                )
+
+        if read_version_py(VERSION_PY_FNAME) != version:
+            self.write_version_py(
+                self.distribution.get_name(),
+                version,
+                VERSION_PY_FNAME,
+                VERSION_BODY,
+                "pycryptopp's setup.py"
+                )
+        print "git-version: ensured '%s' in '%s' and '%s'" % (version, EXTRAVERSION_H_FNAME, VERSION_PY_FNAME)
+
+    def write_version_py(self, pkgname, version, outfname, body, EXE_NAME):
         f = open(outfname, "wb+")
-        f.write(version_body % {
+        f.write(body % {
                 'versiontool': EXE_NAME,
-                'pkgversion': verstr,
+                'pkgversion': version,
                 'pkgname': pkgname,
                 })
         f.close()
+
+    def write_extraversion_h(self, pkgname, version, outfname, body):
+        f = open(outfname, "wb")
+        f.write(body % {"pkgname": pkgname, "pkgversion": version})
+        f.close()
+
+    def read_extraversion_h(self, infname):
+        try:
+            verstrline = open(infname, "rt").read()
+        except EnvironmentError:
+            return None
+        else:
+            VSRE = r"^#define CRYPTOPP_EXTRA_VERSION +\"([^\"]*)\""
+            mo = re.search(VSRE, verstrline, re.M)
+            if mo:
+                return mo.group(1)
 
 commands["update_version"] = UpdateVersion
 
@@ -376,7 +415,7 @@ class Test(Command):
 commands["test"] = Test
 
 setup(name=PKG,
-      version=read_version_py(os.path.join('src', 'pycryptopp', '_version.py')),
+      version=version_from_file,
       description='Python wrappers for a few algorithms from the Crypto++ library',
       long_description=readmetext,
       author='Zooko Wilcox-O\'Hearn',
