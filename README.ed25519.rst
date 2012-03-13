@@ -20,21 +20,27 @@ and RSA-3072.
 Speed and Key Sizes
 -------------------
 
-Signing key seeds are merely 32 bytes of random data, so generating a signing
-key is trivial. Deriving a public verifying key takes more time, as do the
-actual signing and verifying operations.
+Signing keys are just 32 bytes (256 bits) of random data, so generating a
+signing key is trivial: signingkey = os.urandom(32). Deriving a public
+verifying key takes more time, as do the actual signing and verifying
+operations.
 
-On my 2010-era Mac laptop (2.8GHz Core2Duo), deriving a verifying key takes
-1.9ms, signing takes 1.9ms, and verification takes 6.3ms. The
+A 256-bit elliptic curve key is estimated to be as strong as a much larger
+RSA key. The "ECRYPT II" cryptographic experts group estimate the strength of
+a 256-bit elliptic curve key to similar to the strength of a 3248-bit RSA
+public key: http://keylength.com
+
+On Brian Warner's 2010-era Mac laptop (2.8GHz Core2Duo), deriving a verifying
+key takes 1.9ms, signing takes 1.9ms, and verification takes 6.3ms. The
 high-performance assembly code in SUPERCOP (amd64-51-30k and amd64-64-24k) is
 up to 100x faster than the portable reference version, and the python
 overhead appears to be minimal (1-2us), so future releases may run even
 faster.
 
-Ed25519 private signing keys are 32 bytes long (this seed is expanded to 64
-bytes when necessary). The public verifying keys are also 32 bytes long.
-Signatures are 64 bytes long. All operations provide a 128-bit security
-level.
+Ed25519 private signing keys are 32 bytes long (this is expanded internally
+to 64 bytes when necessary). The public verifying keys are also 32 bytes
+long.  Signatures are 64 bytes long. All operations provide a 128-bit
+security level.
 
 
 Security
@@ -57,8 +63,8 @@ Usage
 
 The first step is to generate a signing key and store it. At the same time,
 you'll probably need to derive the verifying key and give it to someone else.
-Signing keys are generated from 32-byte uniformly-random seeds. The safest
-way to generate a key seed is with os.urandom(32)::
+Signing keys are 32-byte uniformly-random strings. The safest way to generate
+a key is with os.urandom(32)::
 
  import os
  from pycryptopp.publickey import ed25519
@@ -67,7 +73,7 @@ way to generate a key seed is with os.urandom(32)::
  signing_key = ed25519.SigningKey(sk_bytes)
  open("my-secret-key","wb").write(sk_bytes)
 
- vkey_hex = sk.get_verifying_key_bytes().encode('hex')
+ vkey_hex = signing_key.get_verifying_key_bytes().encode('hex')
  print "the public key is", vkey_hex
 
 To reconstruct the same key from the stored form later, just pass it back
@@ -100,7 +106,7 @@ you can derive it with .get_verifying_key_bytes(). This allows the sending
 side to hold just 32 bytes of data and derive everything else from that.
 Deriving a verifying key takes about 1.9ms::
 
- sk_bytes = open("my-secret-seed","rb").read()
+ sk_bytes = open("my-secret-key","rb").read()
  signing_key = ed25519.SigningKey(sk_bytes)
  verifying_key = ed25519.VerifyingKey(signing_key.get_verifying_key_bytes())
 
