@@ -1,6 +1,10 @@
 include copyright COPYING.GPL COPYING.TGPPL.html ChangeLog NEWS.rst README.rst
+include COPYING.ed25519 README.ed25519.rst
+include MANIFEST.in
 include versioneer.py
+include _doubleloadtester.cpp
 
 graft src/pycryptopp
 graft src-cryptopp
+graft src-ed25519
 graft misc
