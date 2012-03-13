@@ -351,7 +351,6 @@ class UpdateVersion(object):
                 VERSION_BODY,
                 "pycryptopp's setup.py"
                 )
-        print "git-version: ensured '%s' in '%s' and '%s'" % (version, EXTRAVERSION_H_FNAME, VERSION_PY_FNAME)
 
         return version
 
