@@ -14,11 +14,10 @@ from distutils.util import get_platform
 from setuptools.command.test import ScanningLoader
 import unittest
 
+PKG='pycryptopp'
+VERSION_PY_FNAME = os.path.join('src', PKG, '_version.py')
+
 import versioneer
-versioneer.versionfile_source = "src/pycryptopp/_version.py"
-versioneer.versionfile_build = "pycryptopp/_version.py"
-versioneer.tag_prefix = "pycryptopp-"
-versioneer.parentdir_prefix = "pycryptopp-"
 
 # ECDSA=False
 ECDSA=True
@@ -184,10 +183,9 @@ trove_classifiers=[
     "Programming Language :: Python :: 2.4",
     "Programming Language :: Python :: 2.5",
     "Programming Language :: Python :: 2.6",
+    "Programming Language :: Python :: 2.7",
     "Topic :: Software Development :: Libraries",
     ]
-
-PKG='pycryptopp'
 
 srcs = ['src/pycryptopp/_pycryptoppmodule.cpp',
         'src/pycryptopp/publickey/rsamodule.cpp',
@@ -306,10 +304,6 @@ def read_version_py(infname):
         if mo:
             return mo.group(1)
 
-VERSION_PY_FNAME = os.path.join('src', 'pycryptopp', '_version.py')
-
-version_from_file = read_version_py(VERSION_PY_FNAME)
-
 EXTRAVERSION_H_FNAME = os.path.join(EMBEDDED_CRYPTOPP_DIR, 'extraversion.h')
 
 VERSION_BODY = '''
@@ -322,33 +316,28 @@ __pkgname__ = "%(pkgname)s"
 __version__ = "%(pkgversion)s"
 '''
 
-class UpdateVersion(Command):
-    description = "update extraversion.h from revision-control metadata"
-    user_options = []
-
-    def initialize_options(self):
-        pass
-    def finalize_options(self):
-        pass
+class UpdateVersion(object):
     def run(self):
 
-        versions = versioneer.versions_from_vcs(versioneer.tag_prefix, '.')
+        versions = versioneer.versions_from_vcs(PKG+'-', '.')
         assert isinstance(versions, dict)
 
-        if not versions and version_from_file is None:
+        vers_f_file = read_version_py(VERSION_PY_FNAME)
+
+        if not versions and vers_f_file is None:
             raise Exception("problem: couldn't get version information from revision control history, and there is no version information in '%s'. Stopping." % (VERFILE,))
 
         if versions:
             version = get_normalized_version(versions)
         else:
-            version = version_from_file
+            version = vers_f_file
 
         # Let's avoid touching the change time (ctime) on the files unless
         # they actually need to be updated.
 
         if self.read_extraversion_h(EXTRAVERSION_H_FNAME) != version:
             self.write_extraversion_h(
-                self.distribution.get_name(),
+                PKG,
                 version,
                 EXTRAVERSION_H_FNAME,
                 CPP_GIT_VERSION_BODY
@@ -356,13 +345,15 @@ class UpdateVersion(Command):
 
         if read_version_py(VERSION_PY_FNAME) != version:
             self.write_version_py(
-                self.distribution.get_name(),
+                PKG,
                 version,
                 VERSION_PY_FNAME,
                 VERSION_BODY,
                 "pycryptopp's setup.py"
                 )
         print "git-version: ensured '%s' in '%s' and '%s'" % (version, EXTRAVERSION_H_FNAME, VERSION_PY_FNAME)
+
+        return version
 
     def write_version_py(self, pkgname, version, outfname, body, EXE_NAME):
         f = open(outfname, "wb+")
@@ -389,7 +380,7 @@ class UpdateVersion(Command):
             if mo:
                 return mo.group(1)
 
-commands["update_version"] = UpdateVersion
+version = UpdateVersion().run()
 
 class Test(Command):
     description = "run tests"
@@ -415,7 +406,7 @@ class Test(Command):
 commands["test"] = Test
 
 setup(name=PKG,
-      version=version_from_file,
+      version=version,
       description='Python wrappers for a few algorithms from the Crypto++ library',
       long_description=readmetext,
       author='Zooko Wilcox-O\'Hearn',
