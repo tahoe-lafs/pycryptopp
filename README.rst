@@ -72,9 +72,9 @@ bugs, and Daniel J. Bernstein for Ed25519.
 
 Zooko Wilcox-O'Hearn
 
-$LOCATION
+Santa Clara, California, USA
 
-$DATE
+2012-03-12
 
 
 .. _¹: https://github.com/warner/python-ed25519

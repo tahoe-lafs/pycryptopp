@@ -325,7 +325,7 @@ class UpdateVersion(object):
         vers_f_file = read_version_py(VERSION_PY_FNAME)
 
         if not versions and vers_f_file is None:
-            raise Exception("problem: couldn't get version information from revision control history, and there is no version information in '%s'. Stopping." % (VERFILE,))
+            raise Exception("problem: couldn't get version information from revision control history, and there is no version information in '%s'. Stopping." % (VERSION_PY_FNAME,))
 
         if versions:
             version = get_normalized_version(versions)
