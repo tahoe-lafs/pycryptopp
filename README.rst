@@ -1,3 +1,5 @@
+﻿
+
 ===========================================================
  pycryptopp: a small number of good cryptography algorithms
 ===========================================================
@@ -5,10 +7,28 @@
 Introduction and Licence
 ========================
 
-pycryptopp is a python wrapper around a few algorithms from the Crypto++ and
-python-Ed25519 libraries.
+Pycryptopp is a collection of Python interfaces to a few good crypto
+algorithms. It lives at https://tahoe-lafs.org/trac/pycryptopp
 
-It lives at https://tahoe-lafs.org/trac/pycryptopp
+RECOMMENDED algorithms:
+
+• AES-CTR ; from the Crypto++ library ; see pycryptopp.cipher.aes
+• XSalsa20 ; from the Crypto++ library ; see pycryptopp.cipher.xsalsa20
+• Ed25519 ; from the supercop library ; see pycryptopp.publickey.ed25519
+
+DEPRECATED algorithms:
+
+The maintainers of pycryptopp intend to stop supporting these soon. Please
+migrate away from depending on pycryptopp's implementation of these
+algorithms, or else write to us and offer some inducement to continue
+supporting them.
+
+• RSA from the Crypto++ library ; see pycryptopp.publickey.rsa ; deprecated
+  in favor of Ed25519
+• Ecdsa from the Crypto++ library ; see pycryptopp.publickey.ecdsa ;
+  deprecated in favor of Ed25519
+• SHA-256 from the Crypto++ library ; see pycryptopp.hash.sha256 ; deprecated
+  in favor of the Python Standard Library's hashlib module
 
 LICENCE
 -------
@@ -28,12 +48,12 @@ MIT license. See COPYING.ed25519 for details.
 BUILDING
 --------
 
-To build it run "./setup.py build". To test it run "./setup.py test". To
-install it into your system run "./setup.py install". To create a binary
-package run "./setup.py bdist_egg".
+To build it run "python ./setup.py build". To test it run "python ./setup.py
+test". To install it into your system run "./setup.py install". To create a
+binary package run "python ./setup.py bdist_egg".
 
-If "./setup.py test" doesn't print out "PASSED" and exit with exit code 0
-then there is something seriously wrong. Do not use this build of
+If "python ./setup.py test" doesn't print out "PASSED" and exit with exit
+code 0 then there is something seriously wrong. Do not use this build of
 pycryptopp. Please report the error to the tahoe-dev mailing list ²_.
 
 DOCUMENTATION
@@ -44,7 +64,7 @@ pycryptopp", "pydoc pycryptopp.cipher", and so on. From within a Python
 interpreter use "help(pycryptopp)", "help(pycryptopp.cipher)",
 "help(pycryptopp.cipher.aes)" and so on.
 
-The documentation for pycryptopp.publickey.ed25519 is in README.ed25519,
+The documentation for pycryptopp.publickey.ed25519 is in README.ed25519.rst,
 adapted from the upstream python-ed25519 library.
 
 CONTACT
@@ -56,9 +76,9 @@ package.
 BOOK REVIEW
 -----------
 
-If you are not already acquainted with how to use modern cryptography, buy a
-copy of Ferguson, Schneier, and Kohno "Cryptography Engineering" and read it.
-It is easy going and will increase your understanding greatly.
+If you are not already acquainted with how to use modern cryptography, read
+Ferguson, Schneier, and Kohno “Cryptography Engineering”.  It is easy going
+and will increase your understanding greatly.
 
 ACKNOWLEDGEMENTS
 ----------------
@@ -72,9 +92,9 @@ bugs, and Daniel J. Bernstein for Ed25519.
 
 Zooko Wilcox-O'Hearn
 
-Santa Clara, California, USA
+Boulder, Colorado, USA
 
-2012-03-12
+2012-03-18
 
 
 .. _¹: https://github.com/warner/python-ed25519
