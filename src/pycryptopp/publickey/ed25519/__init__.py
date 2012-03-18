@@ -1,6 +1,6 @@
-from keys import (BadSignatureError, SigningKey, VerifyingKey)
+from keys import (BadSignatureError, SigningKey, VerifyingKey, __doc__)
 
-(BadSignatureError, SigningKey, VerifyingKey) # hush pyflakes
+(BadSignatureError, SigningKey, VerifyingKey, __doc__) # hush pyflakes
 
 from _version import get_versions
 __version__ = get_versions()['version']

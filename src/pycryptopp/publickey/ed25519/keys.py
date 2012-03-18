@@ -1,6 +1,13 @@
 import _ed25519
 BadSignatureError = _ed25519.BadSignatureError
 
+__doc__ = """
+ed25519 -- Ed25519\n\
+\n\
+To create a signing key, construct an instance of the class, passing 32 bytes of unguessable random data, i.e. signingkey = SigningKey(os.urandom(32)).\n\
+\n\
+To get a verifying key from a signing key, verifyingkey = VerifyingKey(signingkey.get_verifying_key_bytes())."""
+
 class SigningKey(object):
     # this is how all keys are created
     def __init__(self, sk_bytes):
