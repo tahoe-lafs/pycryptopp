@@ -1,12 +1,22 @@
 import _ed25519
 BadSignatureError = _ed25519.BadSignatureError
 
-__doc__ = """
-ed25519 -- Ed25519\n\
-\n\
-To create a signing key, construct an instance of the class, passing 32 bytes of unguessable random data, i.e. signingkey = SigningKey(os.urandom(32)).\n\
-\n\
-To get a verifying key from a signing key, verifyingkey = VerifyingKey(signingkey.get_verifying_key_bytes())."""
+__doc__ = """\
+ed25519 -- Ed25519 public-key signatures
+
+To create a new Ed25519 signing key, create a 32-byte unguessable bytestring,
+with keybytes=os.urandom(32), and pass it to the SigningKey(keybytes)
+constructor. To create the same key in the future, call the constructor with
+the same string.
+
+To get a verifying key from a signing key, first get the verifying key bytes
+with verfbytes=sk.get_verifying_key_bytes(), then construct the VerifyingKey
+instance with VerifyingKey(verfbytes).
+
+To sign a message, use sig=sk.sign(msg), which returns the signature as a
+64-byte binary bytestring. To verify a signature, use vk.verify(sig, msg),
+which either returns None or raises BadSignatureError.
+"""
 
 class SigningKey(object):
     # this is how all keys are created
