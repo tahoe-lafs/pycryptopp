@@ -1,20 +1,22 @@
+﻿
+
 =====================================================
  Python Bindings to Ed25519 Digital Signature System
 =====================================================
 
 This package provides python bindings to a C implementation of the Ed25519
-public-key signature system [1]_. The C code is copied from the SUPERCOP
-benchmark suite [2]_, using the portable "ref" implementation (not the
+public-key signature system ¹_. The C code is copied from the SUPERCOP
+benchmark suite ²_, using the portable "ref" implementation (not the
 high-performance assembly code), and is very similar to the copy in the NaCl
-library [3]_. The C code is in the public domain [4]_. This python binding is
-released under the MIT license [5]_.
+library ³_. The C code is in the public domain ⁴_. This python binding is
+released under the MIT license ⁵_.
 
 With this library, you can quickly (2ms) create signing+verifying keypairs,
 derive a verifying key from a signing key, sign messages, and verify the
 signatures. The keys and signatures are very short, making them easy to
 handle and incorporate into other protocols. All known attacks take at least
-2^128 operations, providing the same security level as AES-128, NIST P-256,
-and RSA-3072.
+2¹²⁸ operations, providing a security level comparable to AES-128, NIST
+P-256, and RSA-3248.
 
 
 Speed and Key Sizes
@@ -130,8 +132,8 @@ The complete API is summarized here::
 footnotes
 ---------
 
-.. [1] http://ed25519.cr.yp.to/
-.. [2] http://bench.cr.yp.to/supercop.html
-.. [3] http://nacl.cr.yp.to/
-.. [4] http://ed25519.cr.yp.to/software.html "Copyrights"
-.. [5] LICENSE, included in this distribution
+.. _¹: http://ed25519.cr.yp.to/
+.. _²: http://bench.cr.yp.to/supercop.html
+.. _³: http://nacl.cr.yp.to/
+.. _⁴: http://ed25519.cr.yp.to/software.html
+.. _⁵: file:COPYING.ed25519
