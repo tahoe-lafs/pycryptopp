@@ -403,6 +403,25 @@ class Test(Command):
         sys.exit(not result.wasSuccessful())
 commands["test"] = Test
 
+class Bench(Command):
+    description = "run benchmarks"
+    user_options = []
+    def initialize_options(self):
+        pass
+    def finalize_options(self):
+        pass
+    def setup_path(self):
+        # copied from distutils/command/build.py
+        self.plat_name = get_platform()
+        plat_specifier = ".%s-%s" % (self.plat_name, sys.version[0:3])
+        self.build_lib = os.path.join("build", "lib"+plat_specifier)
+        sys.path.insert(0, self.build_lib)
+    def run(self):
+        self.setup_path()
+        from pycryptopp.bench import bench_sigs
+        bench_sigs.bench_with_pyutil()
+commands["bench"] = Bench
+
 setup(name=PKG,
       version=version,
       description='Python wrappers for a few algorithms from the Crypto++ library',
