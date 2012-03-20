@@ -53,11 +53,9 @@ def div_ceil(n, d):
     """
     return (n/d) + (n%d != 0)
 
-KEYBITS=192
+KEYBITS =256
 
-# The number of bytes required for a seed to have the same security level as a
-# key in this elliptic curve: 2 bits of public key per bit of security.
-SEEDBITS=div_ceil(192, 2)
+SEEDBITS=256
 SEEDBYTES=div_ceil(SEEDBITS, 8)
 
 # The number of bytes required to encode a public key in this elliptic curve.
@@ -246,16 +244,15 @@ class Compatibility(unittest.TestCase):
     def test_compatibility(self):
         # Confirm that the KDF used by the SigningKey constructor doesn't
         # change without suitable backwards-compability
-        seed = base64.b32decode('XS27TJRP3JBZKDEFBDKQ====')
+        seed = 'bd616451f65d151ddd63efef42202c13457d1a0a44fb6f642be4bf9567ef19c6'.decode('hex')
         signer = ecdsa.SigningKey(seed)
         v1 = signer.get_verifying_key()
         vs = v1.serialize()
         vs32 = base64.b32encode(vs)
-        self.failUnlessEqual(vs32, "ANPNDWJWHQXYSQMD4L36D7WQEGXA42MS5JRUFIWA")
+        self.failUnlessEqual(vs32, "AIWKEM44YHQCR3VI7SF7IJI7SSW6YNLMGMWBIXQWXC5522H2KXXHO===")
         v2 = ecdsa.VerifyingKey(vs)
-        #print base64.b32encode(signer.sign("message"))
-        sig32 = "EA3Y7A4T62J3K6MUPJQN3WJ5S4SS53EGZXOSTQW7EQ7OXEMS6QJLYL63BLHMHZD7KFT37KEPJBAKI==="
-        sig = base64.b32decode(sig32)
+        # print signer.sign("message").encode('hex')
+        sig = 'a914953c6e6cecaf97d3d7f142ed1da88014752c3e1cd43b38f3327a73be67075bda7ec4a2ead5bb8a3471271a44ffbbd456b4d3ca470584c05703fdbe7b5bc0'.decode('hex')
         self.failUnless(v1.verify("message", sig))
         self.failUnless(v2.verify("message", sig))
 
