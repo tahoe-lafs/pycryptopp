@@ -6,7 +6,7 @@ msg = "crypto libraries should come with benchmarks"
 
 class ECDSA192(object):
     def __init__(self):
-        self.seed = os.urandom(32)
+        self.seed = os.urandom(12)
         self.signer = None
 
     def gen(self, N):
