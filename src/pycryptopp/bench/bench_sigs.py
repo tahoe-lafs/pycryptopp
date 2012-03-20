@@ -4,9 +4,9 @@ import os
 
 msg = "crypto libraries should come with benchmarks"
 
-class ECDSA192(object):
+class ECDSA256(object):
     def __init__(self):
-        self.seed = os.urandom(12)
+        self.seed = os.urandom(32)
         self.signer = None
 
     def gen(self, N):
@@ -60,8 +60,8 @@ class Ed25519(object):
         for i in xrange(N):
             verifier.verify(sig, msg)
         
-class RSA(object):
-    SIZEINBITS=2048
+class RSA3248(object):
+    SIZEINBITS=3248
 
     def __init__(self):
         self.signer = None
@@ -93,7 +93,7 @@ class RSA(object):
 def bench_with_pyutil(duration):
     from pyutil.benchutil import rep_bench, print_bench_footer
 
-    for klass in [ECDSA192, Ed25519, RSA]:
+    for klass in [ECDSA256, Ed25519, RSA3248]:
         print klass
         ob = klass()
         print "generate key"
@@ -146,7 +146,7 @@ def bench_without_pyutil(duration):
         print "all results are in time units per N"
         print "time units per second: %s; seconds per time unit: %s" % (UNITS_PER_SECOND, Decimal(1)/UNITS_PER_SECOND)
 
-    for klass in [ECDSA192, Ed25519, RSA]:
+    for klass in [ECDSA256, Ed25519, RSA3248]:
         print klass
         ob = klass()
         print "generate key"
