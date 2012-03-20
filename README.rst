@@ -48,13 +48,18 @@ MIT license. See COPYING.ed25519 for details.
 BUILDING
 --------
 
-To build it run "python ./setup.py build". To test it run "python ./setup.py
-test". To install it into your system run "./setup.py install". To create a
-binary package run "python ./setup.py bdist_egg".
+To build it run "python setup.py build". To test it run "python setup.py
+test". To install it into your system run "python setup.py install". To
+create a binary package run "python setup.py bdist_egg".
 
-If "python ./setup.py test" doesn't print out "PASSED" and exit with exit
+If "python setup.py test" doesn't print out "PASSED" and exit with exit
 code 0 then there is something seriously wrong. Do not use this build of
 pycryptopp. Please report the error to the tahoe-dev mailing list ²_.
+
+To see some simple benchmarks run "python setup.py bench". If the "pyutil"
+library is installed then the benchmarks will include mean, best, worst, and
+quartiles of wall-clock time, else they will just report the mean wall-clock
+time per operation.
 
 DOCUMENTATION
 -------------
