@@ -90,33 +90,36 @@ class RSA(object):
             verifier.verify(msg, sig)
         
 
-def bench_with_pyutil(N):
+def bench_with_pyutil(duration):
     from pyutil.benchutil import rep_bench, print_bench_footer
 
     for klass in [ECDSA192, Ed25519, RSA]:
         print klass
         ob = klass()
-        print "gen"
-        rep_bench(ob.gen, N, UNITS_PER_SECOND=1000)
+        print "generate key"
+        rep_bench(ob.gen, 100, UNITS_PER_SECOND=1000, MAXTIME=duration, MAXREPS=100)
         print "sign"
-        rep_bench(ob.sign, N, UNITS_PER_SECOND=1000, initfunc=ob.sign_init)
-        print "ver"
-        rep_bench(ob.ver, N, UNITS_PER_SECOND=1000, initfunc=ob.ver_init)
+        rep_bench(ob.sign, 100, UNITS_PER_SECOND=1000, initfunc=ob.sign_init, MAXTIME=duration, MAXREPS=100)
+        print "verify"
+        rep_bench(ob.ver, 100, UNITS_PER_SECOND=1000, initfunc=ob.ver_init, MAXTIME=duration, MAXREPS=100)
 
     print
     print_bench_footer(UNITS_PER_SECOND=1000)
 
 
-def bench_without_pyutil(N):
-    def rep_bench(func, N, UNITS_PER_SECOND, initfunc=None):
+def bench_without_pyutil(duration):
+    def rep_bench(func, N, UNITS_PER_SECOND, MAXTIME, MAXREPS, initfunc=None):
         import time
 
         if initfunc is not None:
             initfunc(N)
 
         mean = 0
-        num = 10
-        for i in range(num):
+        MAXREPS = 100
+
+        timeout = time.time() + MAXTIME
+
+        for i in range(MAXREPS):
             start = time.time()
 
             func(N)
@@ -125,8 +128,12 @@ def bench_without_pyutil(N):
 
             mean += (stop - start)
 
+            if stop >= timeout:
+                break
+
+        num = i+1
         mean *= UNITS_PER_SECOND
-        mean /= N
+        mean /= num
 
         res = {
             'mean': mean/num,
@@ -142,21 +149,21 @@ def bench_without_pyutil(N):
     for klass in [ECDSA192, Ed25519, RSA]:
         print klass
         ob = klass()
-        print "gen"
-        rep_bench(ob.gen, N, UNITS_PER_SECOND=1000)
+        print "generate key"
+        rep_bench(ob.gen, 100, UNITS_PER_SECOND=1000, MAXTIME=duration, MAXREPS=100)
         print "sign"
-        rep_bench(ob.sign, N, UNITS_PER_SECOND=1000, initfunc=ob.sign_init)
-        print "ver"
-        rep_bench(ob.ver, N, UNITS_PER_SECOND=1000, initfunc=ob.ver_init)
+        rep_bench(ob.sign, 100, UNITS_PER_SECOND=1000, initfunc=ob.sign_init, MAXTIME=duration, MAXREPS=100)
+        print "verify"
+        rep_bench(ob.ver, 100, UNITS_PER_SECOND=1000, initfunc=ob.ver_init, MAXTIME=duration, MAXREPS=100)
 
     print
     print_bench_footer(UNITS_PER_SECOND=1000)
 
-def bench(N=10):
+def bench(duration=10.0):
     try:
-        bench_with_pyutil(N=N)
+        bench_with_pyutil(duration=duration)
     except ImportError:
-        bench_without_pyutil(N=N)
+        bench_without_pyutil(duration=duration)
 
 if __name__ == '__main__':
     bench()
