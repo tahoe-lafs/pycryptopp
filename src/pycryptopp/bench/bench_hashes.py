@@ -2,7 +2,7 @@ from pycryptopp.hash import sha256
 
 from common import insecurerandstr, rep_bench, print_bench_footer
 
-UNITS_PER_SECOND = 10**6
+UNITS_PER_SECOND = 10**9
 
 class SHA256(object):
     def proc_init(self, N):
@@ -43,7 +43,7 @@ def bench_hashes(MAXTIME):
             rep_bench(ob.proc, size, UNITS_PER_SECOND=UNITS_PER_SECOND, MAXTIME=MAXTIME, MAXREPS=100, initfunc=ob.proc_init)
             print
 
-    print "time units per byte hashed"
+    print "nanoseconds per byte hashed"
     print_bench_footer(UNITS_PER_SECOND=UNITS_PER_SECOND)
     print
 

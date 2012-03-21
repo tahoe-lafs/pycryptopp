@@ -130,7 +130,7 @@ def bench_sigs(MAXTIME):
         rep_bench(ob.ver, 100, UNITS_PER_SECOND=1000, initfunc=ob.ver_init, MAXTIME=MAXTIME, MAXREPS=100)
         print
 
-    print "time units per operation"
+    print "milliseconds per operation"
     print_bench_footer(UNITS_PER_SECOND=1000)
     print
 
