@@ -1,6 +1,6 @@
 import bench_sigs, bench_ciphers, bench_hashes
 
-def bench(MAXTIME=1.0):
+def bench(MAXTIME=10.0):
     bench_sigs.bench(MAXTIME)
     bench_ciphers.bench(MAXTIME)
     bench_hashes.bench(MAXTIME)

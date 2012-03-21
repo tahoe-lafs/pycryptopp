@@ -419,7 +419,7 @@ class Bench(Command):
     def run(self):
         self.setup_path()
         from pycryptopp.bench import bench_algs
-        bench_algs.bench()
+        bench_algs.bench(MAXTIME=1.0)
 commands["bench"] = Bench
 
 setup(name=PKG,

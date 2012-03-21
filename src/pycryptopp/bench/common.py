@@ -30,6 +30,7 @@ except (ImportError, AttributeError):
         num = i+1
         mean *= UNITS_PER_SECOND
         mean /= num
+        mean /= N
 
         res = {
             'mean': mean/num,
