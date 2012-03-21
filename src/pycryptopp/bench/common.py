@@ -44,8 +44,9 @@ try:
     print_bench_footer = pyutil.benchutil.print_bench_footer
 except (ImportError, AttributeError):
     def this_print_bench_footer(UNITS_PER_SECOND=1):
-        from decimal import Decimal
-        print "time units per second: %s; seconds per time unit: %s" % (UNITS_PER_SECOND, Decimal(1)/UNITS_PER_SECOND)
+        from decimal import Decimal as D
+
+        print "time units per second: %s; seconds per time unit: %s" % (UNITS_PER_SECOND, D(1)/UNITS_PER_SECOND)
     print_bench_footer = this_print_bench_footer
 
 import random as insecurerandom

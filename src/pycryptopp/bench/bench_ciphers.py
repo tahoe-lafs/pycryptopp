@@ -8,8 +8,8 @@ INNER_REPS=10**3 # because these are too fast to measure
 # to do a 1000-iteration inner loop.
 REAL_UNITS_PER_SECOND=10**3 # microseconds
 
-# This is used to report a measurement of how many microseconds it took to do
-# 1 of those inner loops.
+# This is used to report a measurement of how many microseconds it must have
+# taken to do 1 of those inner loops.
 NOMINAL_UNITS_PER_SECOND=REAL_UNITS_PER_SECOND * INNER_REPS
 
 UNITS_PER_SECOND = NOMINAL_UNITS_PER_SECOND
@@ -41,9 +41,9 @@ def bench_ciphers(MAXTIME):
         ob = BenchCrypt(klass, keysize)
         print ob
         for (legend, size) in [
-            ("small (%d B)",  500),
-            ("medium (%d B)",  5000),
-            ("large (%d B)",  50000),
+            ("small (%d B)",  100),
+            ("medium (%d B)",  10000),
+            ("large (%d B)",  100000),
             ]:
             print legend % size
             rep_bench(ob.crypt, size, UNITS_PER_SECOND=UNITS_PER_SECOND, MAXTIME=MAXTIME, MAXREPS=100, initfunc=ob.crypt_init)
