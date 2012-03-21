@@ -149,6 +149,7 @@ print_as_ver()
 
 print_setuptools_ver()
 
+print_py_pkg_ver('pyutil')
 print_py_pkg_ver('coverage')
 print_py_pkg_ver('pyflakes')
 print_py_pkg_ver('Twisted', 'twisted')
