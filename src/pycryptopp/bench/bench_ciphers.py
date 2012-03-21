@@ -2,18 +2,7 @@ from pycryptopp.cipher import aes, xsalsa20
 
 from common import insecurerandstr, rep_bench, print_bench_footer
 
-INNER_REPS=10**3 # because these are too fast to measure
-
-# This is used to calculate a measurement of how many milliseconds it takes
-# to do a 1000-iteration inner loop.
-REAL_UNITS_PER_SECOND=10**3 # microseconds
-
-# This is used to report a measurement of how many microseconds it must have
-# taken to do 1 of those inner loops.
-NOMINAL_UNITS_PER_SECOND=REAL_UNITS_PER_SECOND * INNER_REPS
-
-UNITS_PER_SECOND = NOMINAL_UNITS_PER_SECOND
-
+UNITS_PER_SECOND = 10**6
 
 class BenchCrypt(object):
     def __init__(self, klass, keysize):
@@ -28,9 +17,8 @@ class BenchCrypt(object):
         self.key = insecurerandstr(self.keysize)
 
     def crypt(self, N):
-        for i in range(INNER_REPS):
-            cryptor = self.klass(self.key)
-            cryptor.process(self.msg)
+        cryptor = self.klass(self.key)
+        cryptor.process(self.msg)
         
 def bench_ciphers(MAXTIME):
     for (klass, keysize) in [
@@ -41,7 +29,7 @@ def bench_ciphers(MAXTIME):
         ob = BenchCrypt(klass, keysize)
         print ob
         for (legend, size) in [
-            ("small (%d B)",  100),
+            ("small (%d B)",  1000),
             ("medium (%d B)",  10000),
             ("large (%d B)",  100000),
             ]:
