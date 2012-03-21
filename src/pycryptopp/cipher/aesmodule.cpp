@@ -50,7 +50,7 @@ this:\n\
 Where 'masterkey' is a secret key used only for generating onetimekeys this\
 way, and 'nonce' is a value that is guaranteed to never repeat.\
 \n\
-@param key: the symmetric encryption key; a string of exactly 16 bytes\
+@param key: the symmetric encryption key; a string of exactly 16 or 32 bytes\
 ");
 
 static PyObject *
