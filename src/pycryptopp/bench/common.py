@@ -3,8 +3,7 @@ msg = "crypto libraries should come with benchmarks"
 try:
     import pyutil.benchutil
     rep_bench = pyutil.benchutil.rep_bench
-    print_bench_footer = pyutil.benchutil.print_bench_footer
-except ImportError:
+except (ImportError, AttributeError):
     def this_rep_bench(func, N, UNITS_PER_SECOND, MAXTIME, MAXREPS, initfunc=None):
         import time
 
@@ -37,12 +36,15 @@ except ImportError:
             'num': num
             }
         print "mean: %(mean)#8.03e (of %(num)6d)" % res
+    rep_bench = this_rep_bench
 
+try:
+    import pyutil.benchutil
+    print_bench_footer = pyutil.benchutil.print_bench_footer
+except (ImportError, AttributeError):
     def this_print_bench_footer(UNITS_PER_SECOND=1):
         from decimal import Decimal
         print "time units per second: %s; seconds per time unit: %s" % (UNITS_PER_SECOND, Decimal(1)/UNITS_PER_SECOND)
-
-    rep_bench = this_rep_bench
     print_bench_footer = this_print_bench_footer
 
 import random as insecurerandom
