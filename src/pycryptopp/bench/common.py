@@ -42,7 +42,7 @@ except ImportError:
         from decimal import Decimal
         print "time units per second: %s; seconds per time unit: %s" % (UNITS_PER_SECOND, Decimal(1)/UNITS_PER_SECOND)
 
-    rep_bench = this_print_bench_footer
+    rep_bench = this_rep_bench
     print_bench_footer = this_print_bench_footer
 
 import random as insecurerandom
