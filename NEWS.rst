@@ -1,20 +1,28 @@
-2011-01-16 -- pycryptopp v0.5.28
+﻿2012-03-13  Zooko Wilcox-O'Hearn  <zooko@zooko.com>
 
-    * re-enable the ECDSA module, but please do not rely on it as it is expected to change in backwards-incompatible ways in future releases
-    * several changes to the build system to make it tidier and less error-prone -- see revision control history for details
+	• src/pycryptopp/_version.py: release pycryptopp-0.6.0
+	• add Ed25519 signatures (#75)
+	• add XSalsa20 cipher (#40)
+	• switch from darcs to git for revision control
+	• pycryptopp version numbers now include a decimal encoding of the
+	  git revid
+	• reorganize the source tree and the version number generation
+	• aesmodule.cpp: validate size of IV and throw exception if it is not 16 (#70)
+	• fixed compile errors with gcc-4.7.0 (#78)
+	• fixed compile errors concerning "CryptoPP::g_nullNameValuePairs" (#77)
+	• suppress warnings from valgrind with new OpenSSL 1.0.1 on Fedora (#82)
+	• raise Python exception instead of uncaught C++ exception
+	  (resulting in abort) when deserializing malformed RSA keys (#83)
 
-2010-09-20 -- pycryptopp v0.5.25
+2009-09-15  Zooko Wilcox-O'Hearn  <zooko@zooko.com>
 
-    * make setup backwards-compatible to Python 2.4
-    * fix incompatibilities between setup script and older versions of darcsver
-    * don't attempt to compile Mac OS X extended attribute files (this fixes the build breaking)
-    * include a version number of the specific version of Crypto++ in extraversion.h
-    * small changes to docs
+	• release pycryptopp-0.5.17
+	• publickey/rsamodule.cpp, publickey/ecdsamodule.cpp,
+	  hash/sha256module.cpp, cipher/aesmodule.cpp: fix a segfault bug
+	  when sizeof(size_t) > sizeof(int) (not exploitable); thanks Nathan
+	  Wilcox and Brian Warner. (#19)
 
-2010-09-18 -- pycryptopp v0.5.20
+2009-07-27  Zooko Wilcox-O'Hearn  <zooko@zooko.com>
 
-    * fix bugs in assembly implementation of SHA-256 from Crypto++
-    * fix it to compile on \*BSD (#39)
-    * improve doc strings
-    * add a quick start-up-self-test of SHA256 (#43)
-    * execute the quick start-up-self-tests of AES and SHA256 on module import
+	• release pycryptopp-0.5.16
+	• setup.py, misc/: a few improvements to the build/packaging
