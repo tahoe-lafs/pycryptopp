@@ -30,7 +30,7 @@ except (ImportError, AttributeError):
 
             deltat = stopt - startt
             deltac = stopc - startc
-            if (deltat <= 0) or (deltac <= 0):
+            if (deltat <= 0) or (deltac <= 0) or (abs(deltat - deltac) > 0.001):
                 print "startt: %s, stopt: %s, deltat: %s, startc: %s, stopc: %s, deltac: %s" % (startt, stopt, deltat, startc, stopc, deltac)
 
             meant += deltat
