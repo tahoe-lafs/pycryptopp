@@ -1,42 +1,55 @@
 msg = "crypto libraries should come with benchmarks"
 
 try:
+    raise ImportError
     import pyutil.benchutil
     rep_bench = pyutil.benchutil.rep_bench
 except (ImportError, AttributeError):
     def this_rep_bench(func, N, UNITS_PER_SECOND, MAXTIME, MAXREPS, initfunc=None):
         import time
+        tt = time.time
+        tc = time.clock
 
         if initfunc is not None:
             initfunc(N)
 
-        mean = 0
+        meant = 0
+        meanc = 0
         MAXREPS = 100
 
-        timeout = time.time() + MAXTIME
+        timeout = tt() + MAXTIME
 
         for i in range(MAXREPS):
-            start = time.time()
+            startt = tt()
+            startc = tc()
 
             func(N)
 
-            stop = time.time()
+            stopt = time.time()
+            stopc = time.clock()
 
-            mean += (stop - start)
+            deltat = stopt - startt
+            deltac = stopc - startc
+            if (deltat <= 0) or (deltac <= 0):
+                print "startt: %s, startc: %s, stopt: %s, stopc: %s" % (startt, startc, stopt, stopc,)
 
-            if stop >= timeout:
+            meant += deltat
+            meanc += deltac
+
+            if stopt >= timeout:
                 break
 
         num = i+1
-        mean *= UNITS_PER_SECOND
-        mean /= num
-        mean /= N
+        meant *= UNITS_PER_SECOND
+        meant /= num
+        meant /= N
 
         res = {
-            'mean': mean/num,
+            'meant': meant,
+            'meanc': meanc,
             'num': num
             }
-        print "mean: %(mean)#8.03e (of %(num)6d)" % res
+        print "mean: %(meant)#8.03e or %(meanc)#8.03e (of %(num)6d)" % res
     rep_bench = this_rep_bench
 
 try:
