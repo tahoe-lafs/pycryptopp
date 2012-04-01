@@ -65,7 +65,7 @@
 }
 
 # generated on luther sid with "python: 2.7.3rc2 (default, Mar 21 2012, 16:14:45)  [GCC 4.6.3]"
-https://tahoe-lafs.org/buildbot-pycryptopp/builders/luther%20sid/builds/106/steps/test%20valgrind/logs/valgrind
+# e.g. https://tahoe-lafs.org/buildbot-pycryptopp/builders/luther%20sid/builds/106/steps/test%20valgrind/logs/valgrind
 {
    luther sid addr4 realloc
    Memcheck:Addr4
