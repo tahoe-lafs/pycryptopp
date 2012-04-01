@@ -1,58 +1,52 @@
 msg = "crypto libraries should come with benchmarks"
 
 try:
-    raise ImportError
     import pyutil.benchutil
     rep_bench = pyutil.benchutil.rep_bench
 except (ImportError, AttributeError):
+    import platform, time
+    if 'windows' in platform.system().lower():
+        clock = time.clock
+    else:
+        clock = time.time
+
     def this_rep_bench(func, N, UNITS_PER_SECOND, MAXTIME, MAXREPS, initfunc=None):
-        import time
         tt = time.time
-        tc = time.clock
 
         if initfunc is not None:
             initfunc(N)
 
-        meant = 0
         meanc = 0
         MAXREPS = 100
 
         timeout = tt() + MAXTIME
 
         for i in range(MAXREPS):
-            startt = tt()
-            startc = tc()
+            startc = clock()
 
             func(N)
 
-            stopt = time.time()
-            stopc = time.clock()
+            stopc = clock()
 
-            deltat = stopt - startt
             deltac = stopc - startc
-            if (deltat <= 0) or (deltac <= 0) or (abs(deltat - deltac) > 0.001):
-                print "startt: %s, stopt: %s, deltat: %s, startc: %s, stopc: %s, deltac: %s, ddelta: %s" % (startt, stopt, deltat, startc, stopc, deltac, deltac-deltat)
+            if deltac <= 0:
+                print "clock jump backward or wrapped -- ignoring this sample. startc: %s, stopc: %s, deltac: %s" % (startc, stopc, deltac,)
+            else:
+                meanc += deltac
 
-            meant += deltat
-            meanc += deltac
-
-            if stopt >= timeout:
+            if time.time() >= timeout:
                 break
 
         num = i+1
-        meant *= UNITS_PER_SECOND
-        meant /= num
-        meant /= N
         meanc *= UNITS_PER_SECOND
         meanc /= num
         meanc /= N
 
         res = {
-            'meant': meant,
             'meanc': meanc,
             'num': num
             }
-        print "mean: %(meant)#8.03e or %(meanc)#8.03e (of %(num)6d)" % res
+        print "mean: %(meanc)#8.03e (of %(num)6d)" % res
     rep_bench = this_rep_bench
 
 try:
