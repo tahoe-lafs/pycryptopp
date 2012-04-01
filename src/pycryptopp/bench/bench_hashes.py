@@ -35,8 +35,7 @@ def bench_hashes(MAXTIME):
         print klass
         ob = klass()
         for (legend, size) in [
-            ("large (%d B)",  10**6),
-            ("huge (%d B)",  10**7),
+            ("large (%d B)",  10**7),
             ]:
             print legend % size
             rep_bench(ob.proc, size, UNITS_PER_SECOND=UNITS_PER_SECOND, MAXTIME=MAXTIME, MAXREPS=100, initfunc=ob.proc_init)
