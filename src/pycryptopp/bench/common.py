@@ -31,7 +31,7 @@ except (ImportError, AttributeError):
             deltat = stopt - startt
             deltac = stopc - startc
             if (deltat <= 0) or (deltac <= 0):
-                print "startt: %s, startc: %s, stopt: %s, stopc: %s" % (startt, startc, stopt, stopc,)
+                print "startt: %s, stopt: %s, deltat: %s, startc: %s, stopc: %s, deltac: %s" % (startt, stopt, deltat, startc, stopc, deltac)
 
             meant += deltat
             meanc += deltac
