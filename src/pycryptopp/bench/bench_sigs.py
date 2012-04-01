@@ -60,54 +60,6 @@ class Ed25519(object):
         for i in xrange(N):
             verifier.verify(sig, msg)
         
-import time
-class SleepSign(object):
-    def __init__(self):
-        pass
-
-    def gen(self, N):
-        time.sleep(N*self.SLEEPINESS)
-        
-    def sign_init(self, N):
-        pass
-        
-    def sign(self, N):
-        time.sleep(N*self.SLEEPINESS)
-        
-    def ver_init(self, N):
-        pass
-        
-    def ver(self, N):
-        time.sleep(N*self.SLEEPINESS)
-       
-class Sleep10msSign(SleepSign):
-    SLEEPINESS = 0.01
-
-class Sleep10usSign(SleepSign):
-    SLEEPINESS = 0.00001
-
-class NullSign(object):
-    def __init__(self):
-        pass
-
-    def gen(self, N):
-        for i in xrange(N):
-            pass
-        
-    def sign_init(self, N):
-        pass
-        
-    def sign(self, N):
-        for i in xrange(N):
-            pass
-        
-    def ver_init(self, N):
-        pass
-        
-    def ver(self, N):
-        for i in xrange(N):
-            pass
-        
 class Ed25519(object):
     def __init__(self):
         self.seed = insecurerandstr(32)
@@ -195,7 +147,7 @@ class RSA3248(object):
             verifier.verify(msg, sig)
         
 def bench_sigs(MAXTIME):
-    for klass in [ECDSA256, Ed25519, NullSign, Sleep10msSign, Sleep10usSign]:
+    for klass in [ECDSA256, Ed25519,]:
         print klass
         ob = klass()
         print "generate key"
