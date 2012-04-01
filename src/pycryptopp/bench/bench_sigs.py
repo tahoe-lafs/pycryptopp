@@ -123,11 +123,11 @@ def bench_sigs(MAXTIME):
         print klass
         ob = klass()
         print "generate key"
-        rep_bench(ob.gen, 4, UNITS_PER_SECOND=1000, MAXTIME=MAXTIME, MAXREPS=100)
+        rep_bench(ob.gen, 800, UNITS_PER_SECOND=1000, MAXTIME=MAXTIME, MAXREPS=100)
         print "sign"
-        rep_bench(ob.sign, 20, UNITS_PER_SECOND=1000, initfunc=ob.sign_init, MAXTIME=MAXTIME, MAXREPS=100)
+        rep_bench(ob.sign, 8, UNITS_PER_SECOND=1000, initfunc=ob.sign_init, MAXTIME=MAXTIME, MAXREPS=100)
         print "verify"
-        rep_bench(ob.ver, 100, UNITS_PER_SECOND=1000, initfunc=ob.ver_init, MAXTIME=MAXTIME, MAXREPS=100)
+        rep_bench(ob.ver, 4, UNITS_PER_SECOND=1000, initfunc=ob.ver_init, MAXTIME=MAXTIME, MAXREPS=100)
         print
 
     print "milliseconds per operation"
