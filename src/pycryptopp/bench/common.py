@@ -43,6 +43,9 @@ except (ImportError, AttributeError):
         meant *= UNITS_PER_SECOND
         meant /= num
         meant /= N
+        meanc *= UNITS_PER_SECOND
+        meanc /= num
+        meanc /= N
 
         res = {
             'meant': meant,
