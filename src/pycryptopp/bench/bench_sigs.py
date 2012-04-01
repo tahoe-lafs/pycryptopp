@@ -60,6 +60,82 @@ class Ed25519(object):
         for i in xrange(N):
             verifier.verify(sig, msg)
         
+import time
+class SleepSign(object):
+    def __init__(self):
+        pass
+
+    def gen(self, N):
+        time.sleep(N*self.SLEEPINESS)
+        
+    def sign_init(self, N):
+        pass
+        
+    def sign(self, N):
+        time.sleep(N*self.SLEEPINESS)
+        
+    def ver_init(self, N):
+        pass
+        
+    def ver(self, N):
+        time.sleep(N*self.SLEEPINESS)
+       
+class Sleep10msSign(SleepSign):
+    SLEEPINESS = 0.01
+
+class Sleep10usSign(SleepSign):
+    SLEEPINESS = 0.00001
+
+class NullSign(object):
+    def __init__(self):
+        pass
+
+    def gen(self, N):
+        for i in xrange(N):
+            pass
+        
+    def sign_init(self, N):
+        pass
+        
+    def sign(self, N):
+        for i in xrange(N):
+            pass
+        
+    def ver_init(self, N):
+        pass
+        
+    def ver(self, N):
+        for i in xrange(N):
+            pass
+        
+class Ed25519(object):
+    def __init__(self):
+        self.seed = insecurerandstr(32)
+        self.signer = None
+
+    def gen(self, N):
+        for i in xrange(N):
+             ed25519.SigningKey(self.seed)
+        
+    def sign_init(self, N):
+        self.signer = ed25519.SigningKey(self.seed)
+        
+    def sign(self, N):
+        signer = self.signer
+        for i in xrange(N):
+            signer.sign(msg)
+        
+    def ver_init(self, N):
+        signer = ed25519.SigningKey(self.seed)
+        self.sig = signer.sign(msg)
+        self.verifier = ed25519.VerifyingKey(signer.get_verifying_key_bytes())
+        
+    def ver(self, N):
+        sig = self.sig
+        verifier = self.verifier
+        for i in xrange(N):
+            verifier.verify(sig, msg)
+        
 class RSA2048(object):
     SIZEINBITS=2048
 
@@ -119,7 +195,7 @@ class RSA3248(object):
             verifier.verify(msg, sig)
         
 def bench_sigs(MAXTIME):
-    for klass in [ECDSA256, Ed25519,]:
+    for klass in [ECDSA256, Ed25519, NullSign, Sleep10msSign, Sleep10usSign]:
         print klass
         ob = klass()
         print "generate key"
