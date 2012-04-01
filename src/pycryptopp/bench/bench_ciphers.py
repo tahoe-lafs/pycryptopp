@@ -29,8 +29,8 @@ def bench_ciphers(MAXTIME):
         ob = BenchCrypt(klass, keysize)
         print ob
         for (legend, size) in [
-            ("medium (%d B)",  150000),
-            ("large (%d B)",  1500000),
+            ("large (%d B)",  10**6),
+            ("huge (%d B)",  10**7),
             ]:
             print legend % size
             rep_bench(ob.crypt, size, UNITS_PER_SECOND=UNITS_PER_SECOND, MAXTIME=MAXTIME, MAXREPS=100, initfunc=ob.crypt_init)

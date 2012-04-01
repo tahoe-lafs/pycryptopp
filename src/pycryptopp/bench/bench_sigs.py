@@ -199,11 +199,11 @@ def bench_sigs(MAXTIME):
         print klass
         ob = klass()
         print "generate key"
-        rep_bench(ob.gen, 800, UNITS_PER_SECOND=1000, MAXTIME=MAXTIME, MAXREPS=100)
+        rep_bench(ob.gen, 1000, UNITS_PER_SECOND=1000, MAXTIME=MAXTIME, MAXREPS=100)
         print "sign"
-        rep_bench(ob.sign, 8, UNITS_PER_SECOND=1000, initfunc=ob.sign_init, MAXTIME=MAXTIME, MAXREPS=100)
+        rep_bench(ob.sign, 1000, UNITS_PER_SECOND=1000, initfunc=ob.sign_init, MAXTIME=MAXTIME, MAXREPS=100)
         print "verify"
-        rep_bench(ob.ver, 4, UNITS_PER_SECOND=1000, initfunc=ob.ver_init, MAXTIME=MAXTIME, MAXREPS=100)
+        rep_bench(ob.ver, 1000, UNITS_PER_SECOND=1000, initfunc=ob.ver_init, MAXTIME=MAXTIME, MAXREPS=100)
         print
 
     for klass in [RSA2048, RSA3248]:
@@ -212,9 +212,9 @@ def bench_sigs(MAXTIME):
         print "generate key"
         rep_bench(ob.gen, 1, UNITS_PER_SECOND=1000, MAXTIME=MAXTIME, MAXREPS=100)
         print "sign"
-        rep_bench(ob.sign, 8, UNITS_PER_SECOND=1000, initfunc=ob.sign_init, MAXTIME=MAXTIME, MAXREPS=100)
+        rep_bench(ob.sign, 1000, UNITS_PER_SECOND=1000, initfunc=ob.sign_init, MAXTIME=MAXTIME, MAXREPS=100)
         print "verify"
-        rep_bench(ob.ver, 4, UNITS_PER_SECOND=1000, initfunc=ob.ver_init, MAXTIME=MAXTIME, MAXREPS=100)
+        rep_bench(ob.ver, 10000, UNITS_PER_SECOND=1000, initfunc=ob.ver_init, MAXTIME=MAXTIME, MAXREPS=100)
         print
 
     print "milliseconds per operation"
