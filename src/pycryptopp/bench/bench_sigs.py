@@ -60,34 +60,6 @@ class Ed25519(object):
         for i in xrange(N):
             verifier.verify(sig, msg)
         
-class Ed25519(object):
-    def __init__(self):
-        self.seed = insecurerandstr(32)
-        self.signer = None
-
-    def gen(self, N):
-        for i in xrange(N):
-             ed25519.SigningKey(self.seed)
-        
-    def sign_init(self, N):
-        self.signer = ed25519.SigningKey(self.seed)
-        
-    def sign(self, N):
-        signer = self.signer
-        for i in xrange(N):
-            signer.sign(msg)
-        
-    def ver_init(self, N):
-        signer = ed25519.SigningKey(self.seed)
-        self.sig = signer.sign(msg)
-        self.verifier = ed25519.VerifyingKey(signer.get_verifying_key_bytes())
-        
-    def ver(self, N):
-        sig = self.sig
-        verifier = self.verifier
-        for i in xrange(N):
-            verifier.verify(sig, msg)
-        
 class RSA2048(object):
     SIZEINBITS=2048
 
