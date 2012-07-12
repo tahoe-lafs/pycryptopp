@@ -64,6 +64,26 @@
    fun:PyObject_Realloc.part.0.20700
 }
 
+# generated on luther sid
+# e.g. https://tahoe-lafs.org/buildbot-pycryptopp/builders/luther%20sid/builds/116/steps/double%20load%20valgrind/logs/valgrind
+{
+   luther sid addr4 realloc
+   Memcheck:Addr4
+   fun:PyObject_Realloc.part.0.20856
+}
+
+{
+   luther sid cond realloc
+   Memcheck:Cond
+   fun:PyObject_Realloc.part.0.20856
+}
+
+{
+   luther sid value4 realloc
+   Memcheck:Value4
+   fun:PyObject_Realloc.part.0.20856
+}
+
 # glibc was apparently changed to avoid this: http://sources.redhat.com/bugzilla/show_bug.cgi?id=4306
 {
    use (not really, according to Ulrich Drepper) of uninitailised bytes by glibc in utimes()
