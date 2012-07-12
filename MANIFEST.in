@@ -1,4 +1,4 @@
-include copyright COPYING.GPL COPYING.TGPPL.html ChangeLog NEWS.rst README.rst
+include copyright COPYING.GPL COPYING.TGPPL.html NEWS.rst README.rst
 include COPYING.ed25519 README.ed25519.rst
 include MANIFEST.in
 include versioneer.py
