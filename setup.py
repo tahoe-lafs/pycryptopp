@@ -427,33 +427,39 @@ class Bench(Command):
         bench_algs.bench(MAXTIME=1.0)
 commands["bench"] = Bench
 
-setup(name=PKG,
-      version=version,
-      description='Python wrappers for a few algorithms from the Crypto++ library',
-      long_description=readmetext,
-      author='Zooko Wilcox-O\'Hearn',
-      author_email='zooko@zooko.com',
-      url='https://tahoe-lafs.org/trac/' + PKG,
-      license='GNU GPL', # see README.rst for details -- there is also an alternative licence
-      packages=["pycryptopp",
-                "pycryptopp.cipher",
-                "pycryptopp.hash",
-                "pycryptopp.publickey",
-                "pycryptopp.publickey.ed25519",
-                "pycryptopp.test",
-                ],
-      include_package_data=True,
-      exclude_package_data={
-          '': [ '*.cpp', '*.hpp', ]
-          },
-      data_files=data_files,
-      package_dir={"pycryptopp": "src/pycryptopp"},
-      setup_requires=setup_requires,
-      install_requires=install_requires,
-      dependency_links=dependency_links,
-      classifiers=trove_classifiers,
-      ext_modules=ext_modules,
-      test_suite=PKG+".test",
-      zip_safe=False, # I prefer unzipped for easier access.
-      cmdclass=commands,
-      )
+def _setup(longdescription):
+    setup(name=PKG,
+          version=version,
+          description='Python wrappers for a few algorithms from the Crypto++ library',
+          long_description=longdescription,
+          author='Zooko Wilcox-O\'Hearn',
+          author_email='zooko@zooko.com',
+          url='https://tahoe-lafs.org/trac/' + PKG,
+          license='GNU GPL', # see README.rst for details -- there is also an alternative licence
+          packages=["pycryptopp",
+                    "pycryptopp.cipher",
+                    "pycryptopp.hash",
+                    "pycryptopp.publickey",
+                    "pycryptopp.publickey.ed25519",
+                    "pycryptopp.test",
+                    ],
+          include_package_data=True,
+          exclude_package_data={
+              '': [ '*.cpp', '*.hpp', ]
+              },
+          data_files=data_files,
+          package_dir={"pycryptopp": "src/pycryptopp"},
+          setup_requires=setup_requires,
+          install_requires=install_requires,
+          dependency_links=dependency_links,
+          classifiers=trove_classifiers,
+          ext_modules=ext_modules,
+          test_suite=PKG+".test",
+          zip_safe=False, # I prefer unzipped for easier access.
+          cmdclass=commands,
+          )
+
+try:
+    _setup(readmetext)
+except UnicodeEncodeError:
+    _setup(repr(readmetext))
