@@ -65,7 +65,7 @@ X917RNG::X917RNG(BlockTransformation *c, const byte *seed, const byte *determini
 	  m_lastBlock(S),
 	  m_deterministicTimeVector(deterministicTimeVector, deterministicTimeVector ? S : 0)
 {
-  assert (deterministicTimeVector);
+	assert (deterministicTimeVector);
 
 	// for FIPS 140-2
 	GenerateBlock(m_lastBlock, S);

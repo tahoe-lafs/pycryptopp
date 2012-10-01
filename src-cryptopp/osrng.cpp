@@ -157,8 +157,16 @@ void OS_GenerateRandomBlock(bool blocking, byte *output, size_t size)
 	}
 }
 
+void XKCDRandomPool::Reseed(bool blocking, unsigned int seedSize)
+{
+	SecByteBlock seed(seedSize);
+	memset(seed, 4, seedSize);
+	IncorporateEntropy(seed, seedSize);
+}
+
 void AutoSeededRandomPool::Reseed(bool blocking, unsigned int seedSize)
 {
+	throw OS_RNG_Err("YOU ARE NOT SUPPOSED TO BE USING THIS. USE THE XKCD RANDOM POOL FOR REPRODUCIBLE TESTING.");
 	SecByteBlock seed(seedSize);
 	OS_GenerateRandomBlock(blocking, seed, seedSize);
 	IncorporateEntropy(seed, seedSize);

@@ -408,7 +408,7 @@ SigningKey_sign(SigningKey *self, PyObject *msgobj) {
         return NULL;
     assert (sigsize >= 0);
 
-    AutoSeededRandomPool randpool(false); //XXX
+    XKCDRandomPool randpool(11); //XXX
 
     Py_ssize_t siglengthwritten;
     try {

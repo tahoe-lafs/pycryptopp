@@ -1,5 +1,6 @@
 // rsa.cpp - written and placed in the public domain by Wei Dai
 
+#include <iostream>
 #include "pch.h"
 #include "rsa.h"
 #include "asn.h"
@@ -223,10 +224,18 @@ void InvertibleRSAFunction::DEREncodePrivateKey(BufferedTransformation &bt) cons
 Integer InvertibleRSAFunction::CalculateInverse(RandomNumberGenerator &rng, const Integer &x) const 
 {
 	DoQuickSanityCheck();
+	Validate(rng, 2);
 	ModularArithmetic modn(m_n);
 	Integer r, rInv;
 	do {	// do this in a loop for people using small numbers for testing
 		r.Randomize(rng, Integer::One(), m_n - Integer::One());
+        std::cout << "Hi I just generated a random r and it is " << r << std::endl;
+		if (r.IsZero())
+			throw Exception(Exception::OTHER_ERROR, "InvertibleRSAFunction: internal error in Randomize() -- it returned 0 when asked for something from [1, n).");
+		if (r == m_p)
+			throw Exception(Exception::OTHER_ERROR, "InvertibleRSAFunction: internal error in Randomize() -- it returned p when asked for something from [1, n).");
+		if (r == m_q)
+			throw Exception(Exception::OTHER_ERROR, "InvertibleRSAFunction: internal error in Randomize() -- it returned q when asked for something from [1, n).");
 		rInv = modn.MultiplicativeInverse(r);
 	} while (rInv.IsZero());
 	Integer re = modn.Exponentiate(r, m_e);

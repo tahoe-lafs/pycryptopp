@@ -79,6 +79,19 @@ protected:
 
 CRYPTOPP_DLL void CRYPTOPP_API OS_GenerateRandomBlock(bool blocking, byte *output, size_t size);
 
+//! RNG inspired by http://xkcd.com/221/ . For testing. Do not use for other
+//! purposes!
+
+class CRYPTOPP_DLL XKCDRandomPool : public RandomPool
+{
+public:
+//! use blocking to choose seeding with BlockingRng or NonblockingRng. the parameter is ignored if only one of these is available
+	explicit XKCDRandomPool(int unused)
+		{Reseed(false, 32);}
+	void Reseed(bool blocking = false, unsigned int seedSize = 32);
+};
+
+
 //! Automaticly Seeded Randomness Pool
 /*! This class seeds itself using an operating system provided RNG. */
 class CRYPTOPP_DLL AutoSeededRandomPool : public RandomPool

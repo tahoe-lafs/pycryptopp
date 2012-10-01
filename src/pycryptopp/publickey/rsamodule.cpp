@@ -17,11 +17,13 @@ typedef int Py_ssize_t;
 #ifdef DISABLE_EMBEDDED_CRYPTOPP
 #include <cryptopp/filters.h>
 #include <cryptopp/osrng.h>
+#include <cryptopp/rng.h>
 #include <cryptopp/pssr.h>
 #include <cryptopp/rsa.h>
 #else
 #include <src-cryptopp/filters.h>
 #include <src-cryptopp/osrng.h>
+#include <src-cryptopp/rng.h>
 #include <src-cryptopp/pssr.h>
 #include <src-cryptopp/rsa.h>
 #endif
@@ -177,7 +179,7 @@ SigningKey_sign(SigningKey *self, PyObject *msgobj) {
         return NULL;
     assert (sigsize >= 0);
 
-    AutoSeededRandomPool randpool(false);
+    XKCDRandomPool randpool(9);
     Py_ssize_t siglengthwritten = self->k->SignMessage(
         randpool,
         reinterpret_cast<const byte*>(msg),
@@ -294,7 +296,8 @@ rsa_generate(PyObject *dummy, PyObject *args, PyObject *kwdict) {
     if (sizeinbits < MIN_KEY_SIZE_BITS)
         return PyErr_Format(rsa_error, "Precondition violation: size in bits is required to be >= %d, but it was %d", MIN_KEY_SIZE_BITS, sizeinbits);
 
-    AutoSeededRandomPool osrng(false);
+    XKCDRandomPool osrng(7);
+
     SigningKey *signer = SigningKey_construct();
     if (!signer)
         return NULL;

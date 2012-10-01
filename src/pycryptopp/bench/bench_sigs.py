@@ -119,7 +119,8 @@ class RSA3248(object):
             verifier.verify(msg, sig)
         
 def bench_sigs(MAXTIME):
-    for klass in [ECDSA256, Ed25519,]:
+    # for klass in [ECDSA256, Ed25519,]:
+    for klass in []:
         print klass
         ob = klass()
         print "generate key"
