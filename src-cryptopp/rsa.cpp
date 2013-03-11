@@ -1,5 +1,6 @@
 // rsa.cpp - written and placed in the public domain by Wei Dai
 
+#include <iostream>
 #include "pch.h"
 #include "rsa.h"
 #include "asn.h"
@@ -223,13 +224,27 @@ void InvertibleRSAFunction::DEREncodePrivateKey(BufferedTransformation &bt) cons
 Integer InvertibleRSAFunction::CalculateInverse(RandomNumberGenerator &rng, const Integer &x) const 
 {
 	DoQuickSanityCheck();
+	Validate(rng, 2);
 	ModularArithmetic modn(m_n);
-	Integer r, rInv;
+	Integer r, rInv, rDoubleCheck, rTripleCheck;
 	do {	// do this in a loop for people using small numbers for testing
 		r.Randomize(rng, Integer::One(), m_n - Integer::One());
+		rDoubleCheck = r + Integer::One(); // The +1 is just to make sure nobody's doing tricksy aliasing instead of making rDoubleCheck be a true bitwise copy of r, which is what we need.
+		//std::cout << "Hi I just generated a random r and it is " << r << std::endl;
+		if (r.IsZero())
+			throw Exception(Exception::OTHER_ERROR, "InvertibleRSAFunction: internal error in Randomize() -- it returned 0 when asked for something from [1, n).");
+		if (r == m_p)
+			throw Exception(Exception::OTHER_ERROR, "InvertibleRSAFunction: internal error in Randomize() -- it returned p when asked for something from [1, n).");
+		if (r == m_q)
+			throw Exception(Exception::OTHER_ERROR, "InvertibleRSAFunction: internal error in Randomize() -- it returned q when asked for something from [1, n).");
 		rInv = modn.MultiplicativeInverse(r);
+		rTripleCheck = modn.MultiplicativeInverse(rInv) + Integer::One();
+		if (rDoubleCheck != rTripleCheck)
+			throw Exception(Exception::OTHER_ERROR, "InvertibleRSAFunction: internal error in Randomize() -- inv(inv(r)) != r (because r changed after Randomize() had returned?).");
 	} while (rInv.IsZero());
 	Integer re = modn.Exponentiate(r, m_e);
+	if (rDoubleCheck != (r + Integer::One()))
+		throw Exception(Exception::OTHER_ERROR, "InvertibleRSAFunction: internal error in Randomize() -- r changed after Randomize() had returned?.");
 	re = modn.Multiply(re, x);			// blind
 	// here we follow the notation of PKCS #1 and let u=q inverse mod p
 	// but in ModRoot, u=p inverse mod q, so we reverse the order of p and q
