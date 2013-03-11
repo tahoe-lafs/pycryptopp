@@ -49,45 +49,24 @@
 {
    luther sid addr4 realloc
    Memcheck:Addr4
-   fun:PyObject_Realloc.part.0.20700
+   fun:PyObject_Realloc.*
 }
 
 {
    luther sid cond realloc
    Memcheck:Cond
-   fun:PyObject_Realloc.part.0.20700
+   fun:PyObject_Realloc.*
 }
 
 {
    luther sid value4 realloc
    Memcheck:Value4
-   fun:PyObject_Realloc.part.0.20700
+   fun:PyObject_Realloc.*
 }
-
-# generated on luther sid with "python: 2.7.3rc2 (default, Mar 21 2012, 16:14:45)  [GCC 4.6.3]"
-# e.g. https://tahoe-lafs.org/buildbot-pycryptopp/builders/luther%20sid/builds/106/steps/test%20valgrind/logs/valgrind
-{
-   luther sid addr4 realloc
-   Memcheck:Addr4
-   fun:PyObject_Realloc.part.0.20707
-}
-
-{
-   luther sid cond realloc
-   Memcheck:Cond
-   fun:PyObject_Realloc.part.0.20707
-}
-
-{
-   luther sid value4 realloc
-   Memcheck:Value4
-   fun:PyObject_Realloc.part.0.20707
-}
-
 
 # glibc was apparently changed to avoid this: http://sources.redhat.com/bugzilla/show_bug.cgi?id=4306
 {
-   use (not really, according to Ulrich Drepper) of uninitailised bytes by glibc in utimes()
+   use (not really, according to Ulrich Drepper) of uninitialised bytes by glibc in utimes()
    Memcheck:Param
    utimes(tvp[1])
    fun:utimes
@@ -193,7 +172,7 @@
 {
    ADDRESS_IN_RANGE/Invalid read of size 8
    Memcheck:Value8
-   fun:PyObject_Realloc
+   fun:PyObject_Realloc.*
 }
 
 {
@@ -203,14 +182,94 @@
 }
 
 {
+   python mem management stuff I assume
+   Memcheck:Addr4
+   obj:/usr/bin/python2.7
+   fun:_PyObject_GC_Resize
+   fun:PyFrame_New
+}
+
+{
+   more python mem management stuff I assume
+   Memcheck:Cond
+   obj:/usr/bin/python2.7
+   fun:_PyObject_GC_Resize
+   fun:PyFrame_New
+}
+
+{
+   more python mem management stuff I assume
+   Memcheck:Value8
+   obj:/usr/bin/python2.7
+   fun:_PyObject_GC_Resize
+   fun:PyFrame_New
+}
+
+{
+   more python mem management stuff I assume
+   Memcheck:Addr4
+   obj:/usr/bin/python2.7
+   fun:_PyString_Resize
+}
+
+{
+   more python mem management stuff I assume
+   Memcheck:Cond
+   obj:/usr/bin/python2.7
+   fun:_PyString_Resize
+}
+
+{
+   more python mem management stuff I assume
+   Memcheck:Value8
+   obj:/usr/bin/python2.7
+   fun:_PyString_Resize
+}
+
+{
+   more python mem management stuff I assume
+   Memcheck:Cond
+   obj:/usr/bin/python2.7
+   fun:PyNode_AddChild
+}
+
+{
+   more python mem management stuff I assume
+   Memcheck:Value8
+   obj:/usr/bin/python2.7
+   fun:PyNode_AddChild
+}
+
+{
+   more python mem management stuff I assume
+   Memcheck:Addr4
+   obj:/usr/bin/python2.7
+   fun:PyNode_AddChild
+}
+
+{
+   more python mem management stuff I assume
+   Memcheck:Addr4
+   obj:/usr/bin/python2.7
+   ...
+   obj:/usr/bin/python2.7
+   fun:PyAST_Compile
+}
+
+{
+   more python mem management stuff I assume
+   Memcheck:Addr4
+   obj:/usr/bin/python2.7
+   ...
+   obj:/usr/bin/python2.7
+   fun:PyAST_Compile
+}
+
+{
    some unknown problem in python getdynloadfunc
    Memcheck:Addr8
    obj:/lib/ld-2.7.so
-   obj:/lib/ld-2.7.so
-   obj:/lib/ld-2.7.so
-   obj:/lib/ld-2.7.so
-   obj:/lib/ld-2.7.so
-   obj:/lib/ld-2.7.so
+   ...
    obj:/lib/ld-2.7.so
    obj:/lib/libdl-2.7.so
    obj:/lib/ld-2.7.so
@@ -223,14 +282,7 @@
    some other unknown problem in python libdl stuff
    Memcheck:Addr8
    obj:/lib/ld-2.7.so
-   obj:/lib/ld-2.7.so
-   obj:/lib/ld-2.7.so
-   obj:/lib/ld-2.7.so
-   obj:/lib/ld-2.7.so
-   obj:/lib/ld-2.7.so
-   obj:/lib/ld-2.7.so
-   obj:/lib/ld-2.7.so
-   obj:/lib/ld-2.7.so
+   ...
    obj:/lib/ld-2.7.so
    obj:/lib/libdl-2.7.so
    obj:/lib/ld-2.7.so
