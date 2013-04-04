@@ -8,8 +8,7 @@ This package provides python bindings to a C implementation of the Ed25519
 public-key signature system ¹_. The C code is copied from the SUPERCOP
 benchmark suite ²_, using the portable "ref" implementation (not the
 high-performance assembly code), and is very similar to the copy in the NaCl
-library ³_. The C code is in the public domain ⁴_. This python binding is
-released under the MIT license ⁵_.
+library ³_.
 
 With this library, you can quickly (2ms) create signing+verifying keypairs,
 derive a verifying key from a signing key, sign messages, and verify the
@@ -135,5 +134,3 @@ footnotes
 .. _¹: http://ed25519.cr.yp.to/
 .. _²: http://bench.cr.yp.to/supercop.html
 .. _³: http://nacl.cr.yp.to/
-.. _⁴: http://ed25519.cr.yp.to/software.html
-.. _⁵: file:COPYING.ed25519

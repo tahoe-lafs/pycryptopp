@@ -49,17 +49,19 @@ except (ImportError, AttributeError):
         print "mean: %(meanc)#8.03e (of %(num)6d)" % res
     rep_bench = this_rep_bench
 
-try:
-    import pyutil.benchutil
-    print_bench_footer = pyutil.benchutil.print_bench_footer
-except (ImportError, AttributeError):
-    def this_print_bench_footer(UNITS_PER_SECOND=1):
-        from decimal import Decimal as D
-
-        print "time units per second: %s; seconds per time unit: %s" % (UNITS_PER_SECOND, D(1)/UNITS_PER_SECOND)
-    print_bench_footer = this_print_bench_footer
-
 import random as insecurerandom
 def insecurerandstr(n):
     return ''.join(map(chr, map(insecurerandom.randrange, [0]*n, [256]*n)))
 
+def calib_clock():
+    interval = 1.0
+    
+    import time
+    tc = time.clock
+    tt = time.time
+
+    def measure_sleep(x, clock):
+        st = clock()
+        time.sleep(x)
+        
+    

@@ -1,6 +1,6 @@
 from pycryptopp.publickey import ecdsa, ed25519, rsa
 
-from common import insecurerandstr, rep_bench, print_bench_footer
+from common import insecurerandstr, rep_bench
 
 msg = 'crypto libraries should come with benchmarks'
 
@@ -170,7 +170,6 @@ def bench_sigs(MAXTIME):
         print
 
     print "milliseconds per operation"
-    print_bench_footer(UNITS_PER_SECOND=1000)
     print
 
 def bench(MAXTIME=10.0):

@@ -62,7 +62,7 @@ extra_srcs=[] # This is for Crypto++ .cpp files if they are needed.
 
 #
 # Fix the build on OpenBSD
-# http://tahoe-lafs/trac/pycryptopp/ticket/32
+# https://tahoe-lafs/trac/pycryptopp/ticket/32
 #
 if 'openbsd' in platform.system().lower():
     extra_link_args.append("-fpic")
@@ -169,7 +169,6 @@ trove_classifiers=[
     "Environment :: Console",
     "License :: OSI Approved :: GNU General Public License (GPL)", # See README.rst for alternative licensing.
     "License :: DFSG approved",
-    "License :: Other/Proprietary License",
     "Intended Audience :: Developers",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: Unix",
@@ -179,8 +178,6 @@ trove_classifiers=[
     "Programming Language :: C++",
     "Programming Language :: Python",
     "Programming Language :: Python :: 2",
-    "Programming Language :: Python :: 2.4",
-    "Programming Language :: Python :: 2.5",
     "Programming Language :: Python :: 2.6",
     "Programming Language :: Python :: 2.7",
     "Topic :: Software Development :: Libraries",
@@ -232,9 +229,17 @@ if 'flakes' in sys.argv[1:]:
 if "sdist_dsc" in sys.argv:
     setup_requires.append('stdeb')
 
-data_fnames=['COPYING.GPL', 'COPYING.TGPPL.html', 'README.rst']
+data_fnames=['COPYING.GPL', 'COPYING.TGPPL.rst', 'COPYING.MIT.txt', 'COPYING.SPL.txt', 'README.rst']
 
 readmetext = open('README.rst').read()
+if readmetext[:3] == '\xef\xbb\xbf':
+    # utf-8 "BOM" 
+    readmetext = readmetext[3:]
+
+try:
+    readmetext = readmetext.decode('utf-8')
+except UnicodeDecodeError:
+    pass
 
 # In case we are building for a .deb with stdeb's sdist_dsc command, we put the
 # docs in "share/doc/pycryptopp".
@@ -422,33 +427,39 @@ class Bench(Command):
         bench_algs.bench(MAXTIME=1.0)
 commands["bench"] = Bench
 
-setup(name=PKG,
-      version=version,
-      description='Python wrappers for a few algorithms from the Crypto++ library',
-      long_description=readmetext,
-      author='Zooko Wilcox-O\'Hearn',
-      author_email='zooko@zooko.com',
-      url='https://tahoe-lafs.org/trac/' + PKG,
-      license='GNU GPL', # see README.rst for details -- there is also an alternative licence
-      packages=["pycryptopp",
-                "pycryptopp.cipher",
-                "pycryptopp.hash",
-                "pycryptopp.publickey",
-                "pycryptopp.publickey.ed25519",
-                "pycryptopp.test",
-                ],
-      include_package_data=True,
-      exclude_package_data={
-          '': [ '*.cpp', '*.hpp', ]
-          },
-      data_files=data_files,
-      package_dir={"pycryptopp": "src/pycryptopp"},
-      setup_requires=setup_requires,
-      install_requires=install_requires,
-      dependency_links=dependency_links,
-      classifiers=trove_classifiers,
-      ext_modules=ext_modules,
-      test_suite=PKG+".test",
-      zip_safe=False, # I prefer unzipped for easier access.
-      cmdclass=commands,
-      )
+def _setup(longdescription):
+    setup(name=PKG,
+          version=version,
+          description='Python wrappers for a few algorithms from the Crypto++ library',
+          long_description=longdescription,
+          author='Zooko Wilcox-O\'Hearn',
+          author_email='zooko@zooko.com',
+          url='https://tahoe-lafs.org/trac/' + PKG,
+          license='GNU GPL', # see README.rst for details -- there is also an alternative licence
+          packages=["pycryptopp",
+                    "pycryptopp.cipher",
+                    "pycryptopp.hash",
+                    "pycryptopp.publickey",
+                    "pycryptopp.publickey.ed25519",
+                    "pycryptopp.test",
+                    ],
+          include_package_data=True,
+          exclude_package_data={
+              '': [ '*.cpp', '*.hpp', ]
+              },
+          data_files=data_files,
+          package_dir={"pycryptopp": "src/pycryptopp"},
+          setup_requires=setup_requires,
+          install_requires=install_requires,
+          dependency_links=dependency_links,
+          classifiers=trove_classifiers,
+          ext_modules=ext_modules,
+          test_suite=PKG+".test",
+          zip_safe=False, # I prefer unzipped for easier access.
+          cmdclass=commands,
+          )
+
+try:
+    _setup(readmetext)
+except UnicodeEncodeError:
+    _setup(repr(readmetext))

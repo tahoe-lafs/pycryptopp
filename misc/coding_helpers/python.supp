@@ -64,26 +64,24 @@
    fun:PyObject_Realloc.part.0.20700
 }
 
-# generated on luther sid with "python: 2.7.3rc2 (default, Mar 21 2012, 16:14:45)  [GCC 4.6.3]"
-# e.g. https://tahoe-lafs.org/buildbot-pycryptopp/builders/luther%20sid/builds/106/steps/test%20valgrind/logs/valgrind
+# generated on luther sid
+# e.g. https://tahoe-lafs.org/buildbot-pycryptopp/builders/luther%20sid/builds/116/steps/double%20load%20valgrind/logs/valgrind
 {
    luther sid addr4 realloc
    Memcheck:Addr4
-   fun:PyObject_Realloc.part.0.20707
+   fun:PyObject_Realloc.part.*
 }
 
 {
    luther sid cond realloc
    Memcheck:Cond
-   fun:PyObject_Realloc.part.0.20707
+   fun:PyObject_Realloc.part.*
 }
 
 {
    luther sid value4 realloc
    Memcheck:Value4
-   fun:PyObject_Realloc.part.0.20707
-}
-
+   fun:PyObject_Realloc.part.*
 
 # glibc was apparently changed to avoid this: http://sources.redhat.com/bugzilla/show_bug.cgi?id=4306
 {
