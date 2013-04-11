@@ -83,8 +83,16 @@ void NonblockingRng::GenerateBlock(byte *output, size_t size)
 	if (!CryptGenRandom(m_Provider.GetProviderHandle(), (DWORD)size, output))
 		throw OS_RNG_Err("CryptGenRandom");
 #else
-	if (read(m_fd, output, size) != size)
+    byte tmpbuf[size * 2];
+    size_t i;
+    for (i = size ; i < size * 2; i++)
+        tmpbuf[i] = i;
+	if (read(m_fd, tmpbuf, size) != size)
 		throw OS_RNG_Err("read /dev/urandom");
+    for (i = size ; i < size * 2; i++)
+        if (tmpbuf[i] != i)
+            throw OS_RNG_Err("read /dev/urandom overran buffer");
+    memcpy(output, tmpbuf, size);
 #endif
 }
 
