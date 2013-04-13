@@ -18,9 +18,6 @@ VERSION_PY_FNAME = os.path.join('src', PKG, '_version.py')
 
 import versioneer
 
-# ECDSA=False
-ECDSA=True
-
 DEBUG=False
 if "--debug" in sys.argv:
     DEBUG=True
@@ -150,8 +147,6 @@ srcs = ['src/pycryptopp/_pycryptoppmodule.cpp',
         'src/pycryptopp/cipher/aesmodule.cpp',
         'src/pycryptopp/cipher/xsalsa20module.cpp',
         ]
-if ECDSA:
-    srcs.append('src/pycryptopp/publickey/ecdsamodule.cpp')
 if BUILD_DOUBLE_LOAD_TESTER:
     srcs.append('_doubleloadtester.cpp', )
 
