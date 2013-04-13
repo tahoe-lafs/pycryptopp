@@ -1,6 +1,5 @@
 #include <Python.h>
 
-#include "publickey/ecdsamodule.hpp"
 #include "publickey/rsamodule.hpp"
 #include "hash/sha256module.hpp"
 #include "cipher/aesmodule.hpp"
@@ -17,7 +16,7 @@ PyDoc_STRVAR(_pycryptopp__doc__,
 "_pycryptopp -- Python wrappers for a few algorithms from Crypto++\n\
 \n\
 from pycryptopp import publickey\n\
-from pycryptopp.publickey import ecdsa\n\
+from pycryptopp.publickey import ed25519\n\
 from pycryptopp.publickey import rsa\n\
 from pycryptopp import cipher\n\
 from pycryptopp.cipher import aes\n\
@@ -64,7 +63,6 @@ init_pycryptopp(void) {
         return;
 
 
-    init_ecdsa(module);
     init_rsa(module);
     init_sha256(module);
     init_aes(module);
