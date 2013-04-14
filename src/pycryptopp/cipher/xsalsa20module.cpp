@@ -10,7 +10,7 @@ typedef int Py_ssize_t;
 
 #include "xsalsa20module.hpp"
 
-#ifdef DISABLE_EMBEDDED_CRYPTOPP
+#ifdef PYCRYPTOPP_USE_SYSTEM_CRYPTOPP
 #include <cryptopp/salsa.h>
 #else
 #include <src-cryptopp/salsa.h>
