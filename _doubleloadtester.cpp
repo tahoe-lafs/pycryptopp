@@ -10,7 +10,7 @@ static PyMethodDef _doubleloadtester_functions[] = {
 };
 
 /* from Crypto++ */
-#ifdef DISABLE_EMBEDDED_CRYPTOPP
+#ifdef PYCRYPTOPP_USE_SYSTEM_CRYPTOPP
 #include <cryptopp/cryptlib.h>
 #else
 #include <src-cryptopp/cryptlib.h>

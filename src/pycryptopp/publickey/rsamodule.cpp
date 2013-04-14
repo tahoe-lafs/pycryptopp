@@ -14,7 +14,7 @@ typedef int Py_ssize_t;
 #include "rsamodule.hpp"
 
 /* from Crypto++ */
-#ifdef DISABLE_EMBEDDED_CRYPTOPP
+#ifdef PYCRYPTOPP_USE_SYSTEM_CRYPTOPP
 #include <cryptopp/filters.h>
 #include <cryptopp/osrng.h>
 #include <cryptopp/pssr.h>
