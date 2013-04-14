@@ -11,7 +11,7 @@ typedef int Py_ssize_t;
 #include <assert.h>
 
 /* from Crypto++ */
-#ifdef DISABLE_EMBEDDED_CRYPTOPP
+#ifdef PYCRYPTOPP_USE_SYSTEM_CRYPTOPP
 #include <cryptopp/sha.h>
 #include <cryptopp/hex.h>
 #include <cryptopp/filters.h>
