@@ -1,6 +1,16 @@
-﻿2012-03-13  Zooko Wilcox-O'Hearn  <zooko@zooko.com>
+﻿
 
-	• src/pycryptopp/_version.py: release pycryptopp-0.6.0
+2013-04-13 Zooko Wilcox-O'Hearn  <zookog@gmail.com>
+
+	• removed the --disable-embedded-cryptopp option; replaced with
+      either --use-system-cryptopp-with-asm
+      or --use-system-cryptopp-without-asm (#85)
+	• the embedded version of Crypto++ is always built with asm disabled
+      (#85)
+
+2012-03-13  Zooko Wilcox-O'Hearn  <zooko@zooko.com>
+
+	• release pycryptopp-0.6.0
 	• add Ed25519 signatures (#75)
 	• add XSalsa20 cipher (#40)
 	• switch from darcs to git for revision control
