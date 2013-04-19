@@ -82,6 +82,7 @@
    luther sid value4 realloc
    Memcheck:Value4
    fun:PyObject_Realloc.part.*
+}
 
 # glibc was apparently changed to avoid this: http://sources.redhat.com/bugzilla/show_bug.cgi?id=4306
 {
