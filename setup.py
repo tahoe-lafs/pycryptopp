@@ -32,7 +32,7 @@ if "--disable-embedded-cryptopp" in sys.argv:
 # pass environment variables, so we here check for that in addition to the
 # command-line argument check above.
 if os.environ.get('PYCRYPTOPP_DISABLE_EMBEDDED_CRYPTOPP') == "1":
-    print "The PYCRYPTOPP_DISABLE_EMBEDDED_CRYPTOPP environment variable is not supoprted. Use either PYCRYPTOPP_USE_SYSTEM_CRYPTOPP_WITH_ASM or PYCRYPTOPP_USE_SYSTEM_CRYPTOPP_WITHOUT_ASM."
+    print "The PYCRYPTOPP_DISABLE_EMBEDDED_CRYPTOPP environment variable is not supported. Use either PYCRYPTOPP_USE_SYSTEM_CRYPTOPP_WITH_ASM or PYCRYPTOPP_USE_SYSTEM_CRYPTOPP_WITHOUT_ASM."
     sys.exit(1)
 
 USE_SYSTEM_CRYPTOPP=False # False, "with asm", or "without asm"
