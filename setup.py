@@ -31,7 +31,7 @@ if "--disable-embedded-cryptopp" in sys.argv:
 # arguments to setup.py when building for Debian, but it does offer a way to
 # pass environment variables, so we here check for that in addition to the
 # command-line argument check above.
-if os.environ.get('PYCRYPTOPP_DISABLE_EMBEDDED_CRYPTOPP') == "1":
+if os.environ.get('PYCRYPTOPP_DISABLE_EMBEDDED_CRYPTOPP') is not None:
     print "The PYCRYPTOPP_DISABLE_EMBEDDED_CRYPTOPP environment variable is not supported. Use either PYCRYPTOPP_USE_SYSTEM_CRYPTOPP_WITH_ASM or PYCRYPTOPP_USE_SYSTEM_CRYPTOPP_WITHOUT_ASM."
     sys.exit(1)
 
@@ -42,6 +42,11 @@ if "--use-system-cryptopp-with-asm" in sys.argv:
 elif "--use-system-cryptopp-without-asm" in sys.argv:
     USE_SYSTEM_CRYPTOPP='without asm'
     sys.argv.remove("--use-system-cryptopp-without-asm")
+
+if os.environ.get('PYCRYPTOPP_USE_SYSTEM_CRYPTOPP_WITH_ASM') == "1":
+    USE_SYSTEM_CRYPTOPP='with asm'
+elif os.environ.get('PYCRYPTOPP_USE_SYSTEM_CRYPTOPP_WITHOUT_ASM') == "1":
+    USE_SYSTEM_CRYPTOPP='without asm'
 
 EMBEDDED_CRYPTOPP_DIR='src-cryptopp'
 
