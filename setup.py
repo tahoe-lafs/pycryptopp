@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-# Copyright © 2009-2012 Zooko Wilcox-O'Hearn
+# Copyright © 2009-2013 Zooko Wilcox-O'Hearn
 # Author: Zooko Wilcox-O'Hearn
 #
 # See README.rst for licensing information.
 
-import os, platform, re, subprocess, sys
+import os, platform, re, sys
 
 from setuptools import Extension, setup
 from setuptools import Command
@@ -18,25 +18,35 @@ VERSION_PY_FNAME = os.path.join('src', PKG, '_version.py')
 
 import versioneer
 
-# ECDSA=False
-ECDSA=True
-
 DEBUG=False
 if "--debug" in sys.argv:
     DEBUG=True
     sys.argv.remove("--debug")
 
-DISABLE_EMBEDDED_CRYPTOPP=False
 if "--disable-embedded-cryptopp" in sys.argv:
-    DISABLE_EMBEDDED_CRYPTOPP=True
-    sys.argv.remove("--disable-embedded-cryptopp")
+    print "The --disable-embedded-cryptopp option has been removed. Use either --use-system-cryptopp-with-asm or --use-system-cryptopp-without-asm."
+    sys.exit(1)
 
 # Unfortunately stdeb v0.3 doesn't seem to offer a way to pass command-line
 # arguments to setup.py when building for Debian, but it does offer a way to
 # pass environment variables, so we here check for that in addition to the
 # command-line argument check above.
-if os.environ.get('PYCRYPTOPP_DISABLE_EMBEDDED_CRYPTOPP') == "1":
-    DISABLE_EMBEDDED_CRYPTOPP=True
+if os.environ.get('PYCRYPTOPP_DISABLE_EMBEDDED_CRYPTOPP') is not None:
+    print "The PYCRYPTOPP_DISABLE_EMBEDDED_CRYPTOPP environment variable is not supported. Use either PYCRYPTOPP_USE_SYSTEM_CRYPTOPP_WITH_ASM or PYCRYPTOPP_USE_SYSTEM_CRYPTOPP_WITHOUT_ASM."
+    sys.exit(1)
+
+USE_SYSTEM_CRYPTOPP=False # False, "with asm", or "without asm"
+if "--use-system-cryptopp-with-asm" in sys.argv:
+    USE_SYSTEM_CRYPTOPP='with asm'
+    sys.argv.remove("--use-system-cryptopp-with-asm")
+elif "--use-system-cryptopp-without-asm" in sys.argv:
+    USE_SYSTEM_CRYPTOPP='without asm'
+    sys.argv.remove("--use-system-cryptopp-without-asm")
+
+if os.environ.get('PYCRYPTOPP_USE_SYSTEM_CRYPTOPP_WITH_ASM') == "1":
+    USE_SYSTEM_CRYPTOPP='with asm'
+elif os.environ.get('PYCRYPTOPP_USE_SYSTEM_CRYPTOPP_WITHOUT_ASM') == "1":
+    USE_SYSTEM_CRYPTOPP='without asm'
 
 EMBEDDED_CRYPTOPP_DIR='src-cryptopp'
 
@@ -76,8 +86,11 @@ if DEBUG:
 else:
     extra_compile_args.append("-w")
 
-if DISABLE_EMBEDDED_CRYPTOPP:
-    define_macros.append(('DISABLE_EMBEDDED_CRYPTOPP', 1))
+if USE_SYSTEM_CRYPTOPP:
+    define_macros.append(('PYCRYPTOPP_USE_SYSTEM_CRYPTOPP', 1))
+
+    if USE_SYSTEM_CRYPTOPP == "without asm":
+        define_macros.append(('CRYPTOPP_DISABLE_ASM', 1))
 
     # Link with a Crypto++ library that is already installed on the system.
 
@@ -106,28 +119,14 @@ if DISABLE_EMBEDDED_CRYPTOPP:
 else:
     # Build the bundled Crypto++ library which is included by source
     # code in the pycryptopp tree and link against it.
+    define_macros.append(('CRYPTOPP_DISABLE_ASM', 1))
+
     include_dirs.append(".")
 
     if 'sunos' in platform.system().lower():
         extra_compile_args.append('-Wa,--divide') # allow use of "/" operator
 
-    if 'win32' in sys.platform.lower():
-        try:
-            res = subprocess.Popen(['cl'], stdin=open(os.devnull), stdout=subprocess.PIPE).communicate()
-        except EnvironmentError, le:
-            # Okay I guess we're not using the "cl.exe" compiler.
-            using_msvc = False
-        else:
-            using_msvc = True
-    else:
-        using_msvc = False
-
-    if using_msvc:
-        # We can handle out-of-line assembly.
-        cryptopp_src = [ os.path.join(EMBEDDED_CRYPTOPP_DIR, x) for x in os.listdir(EMBEDDED_CRYPTOPP_DIR) if x.endswith(('.cpp', '.asm')) ]
-    else:
-        # We can't handle out-of-line assembly.
-        cryptopp_src = [ os.path.join(EMBEDDED_CRYPTOPP_DIR, x) for x in os.listdir(EMBEDDED_CRYPTOPP_DIR) if x.endswith('.cpp') ]
+    cryptopp_src = [ os.path.join(EMBEDDED_CRYPTOPP_DIR, x) for x in os.listdir(EMBEDDED_CRYPTOPP_DIR) if x.endswith('.cpp') ]
 
     # Mac OS X extended attribute files when written to a non-Mac-OS-X
     # filesystem come out as "._$FNAME", for example "._rdtables.cpp",
@@ -136,34 +135,6 @@ else:
     cryptopp_src = [ c for c in cryptopp_src if not os.path.basename(c).startswith('._') ]
 
     extra_srcs.extend(cryptopp_src)
-
-# In either case, we must provide a value for CRYPTOPP_DISABLE_ASM that
-# matches the one used when Crypto++ was originally compiled. The Crypto++
-# GNUmakefile tests the assembler version and only enables assembly for
-# recent versions of the GNU assembler (2.10 or later). The /usr/bin/as on
-# Mac OS-X 10.6 is too old.
-
-try:
-    sp = subprocess.Popen(['as', '-v'], stdin=subprocess.PIPE,
-                          stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                          universal_newlines=True)
-    sp.stdin.close()
-    sp.wait()
-    if re.search("GNU assembler version (0|1|2.0)", sp.stderr.read()):
-        define_macros.append(('CRYPTOPP_DISABLE_ASM', 1))
-except EnvironmentError:
-    # Okay, nevermind. Maybe there isn't even an 'as' executable on this
-    # platform.
-    pass
-else:
-    try:
-        # that "as -v" step creates an empty a.out, so clean it up. Modern GNU
-        # "as" has --version, which emits the version number without actually
-        # assembling anything, but older versions only have -v, which emits a
-        # version number and *then* assembles from stdin.
-        os.unlink("a.out")
-    except EnvironmentError:
-        pass
 
 trove_classifiers=[
     "Environment :: Console",
@@ -189,8 +160,6 @@ srcs = ['src/pycryptopp/_pycryptoppmodule.cpp',
         'src/pycryptopp/cipher/aesmodule.cpp',
         'src/pycryptopp/cipher/xsalsa20module.cpp',
         ]
-if ECDSA:
-    srcs.append('src/pycryptopp/publickey/ecdsamodule.cpp')
 if BUILD_DOUBLE_LOAD_TESTER:
     srcs.append('_doubleloadtester.cpp', )
 
@@ -225,7 +194,7 @@ if 'flakes' in sys.argv[1:]:
     setup_requires.append('setuptools_pyflakes >= 1.0.0')
 
 # stdeb is required to produce Debian files with "sdist_dsc".
-# http://github.com/astraw/stdeb/tree/master
+# https://github.com/astraw/stdeb/tree/master
 if "sdist_dsc" in sys.argv:
     setup_requires.append('stdeb')
 
@@ -433,7 +402,7 @@ def _setup(longdescription):
           description='Python wrappers for a few algorithms from the Crypto++ library',
           long_description=longdescription,
           author='Zooko Wilcox-O\'Hearn',
-          author_email='zooko@zooko.com',
+          author_email='zookog@gmail.com',
           url='https://tahoe-lafs.org/trac/' + PKG,
           license='GNU GPL', # see README.rst for details -- there is also an alternative licence
           packages=["pycryptopp",

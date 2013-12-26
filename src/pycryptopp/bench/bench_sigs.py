@@ -1,20 +1,20 @@
-from pycryptopp.publickey import ecdsa, ed25519, rsa
+from pycryptopp.publickey import ed25519, rsa
 
 from common import insecurerandstr, rep_bench
 
 msg = 'crypto libraries should come with benchmarks'
 
-class ECDSA256(object):
+class Ed25519(object):
     def __init__(self):
         self.seed = insecurerandstr(32)
         self.signer = None
 
     def gen(self, N):
         for i in xrange(N):
-             ecdsa.SigningKey(self.seed)
+             ed25519.SigningKey(self.seed)
         
     def sign_init(self, N):
-        self.signer = ecdsa.SigningKey(self.seed)
+        self.signer = ed25519.SigningKey(self.seed)
         
     def sign(self, N):
         signer = self.signer
@@ -22,9 +22,9 @@ class ECDSA256(object):
             signer.sign(msg)
         
     def ver_init(self, N):
-        signer = ecdsa.SigningKey(self.seed)
+        signer = ed25519.SigningKey(self.seed)
         self.sig = signer.sign(msg)
-        self.verifier = signer.get_verifying_key()
+        self.verifier = ed25519.VerifyingKey(signer.get_verifying_key_bytes())
         
     def ver(self, N):
         sig = self.sig
@@ -119,7 +119,7 @@ class RSA3248(object):
             verifier.verify(msg, sig)
         
 def bench_sigs(MAXTIME):
-    for klass in [ECDSA256, Ed25519,]:
+    for klass in [Ed25519,]:
         print klass
         ob = klass()
         print "generate key"

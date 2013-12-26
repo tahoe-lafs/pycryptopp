@@ -127,6 +127,21 @@ def print_py_pkg_ver(pkgname, modulename=None):
         except AttributeError:
             pass
 
+def print_cache_line_size():
+    label = "cache line size"
+    try:
+        result = open('/sys/devices/system/cpu/cpu0/cache/index0/coherency_line_size', 'rU').read().strip()
+    except EnvironmentError, e:
+        if isinstance(e, OSError) and e.errno == 2:
+            print label + ': no such file or directory'
+            return
+        sys.stderr.write("\nGot exception trying to read cache line sizes out of /sys/. Exception follows.\n")
+        traceback.print_exc(file=sys.stderr)
+        sys.stderr.flush()
+        pass
+    else:
+        print label + ': ' + result
+
 print_platform()
 print
 print_python_ver()
@@ -157,3 +172,5 @@ print_py_pkg_ver('TwistedCore', 'twisted.python')
 print_py_pkg_ver('pyOpenSSL', 'OpenSSL')
 print_py_pkg_ver('pycryptopp')
 print_py_pkg_ver('crpyto')
+
+print_cache_line_size()
