@@ -382,7 +382,7 @@ class Bench(Command):
     def run(self):
         self.setup_path()
         from pycryptopp.bench import bench_algs
-        bench_algs.bench(MAXTIME=1.0)
+        bench_algs.bench(MAXTIME=1.0) # Requires pyutil ≤ 1.9.7
 commands["bench"] = Bench
 
 def _setup(longdescription):
