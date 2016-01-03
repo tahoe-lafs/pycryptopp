@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-# Copyright © 2009-2012 Zooko Wilcox-O'Hearn
+# Copyright © 2009-2013 Zooko Wilcox-O'Hearn
 # Author: Zooko Wilcox-O'Hearn
 #
 # See README.rst for licensing information.
 
-import os, platform, re, subprocess, sys
+import os, platform, re, sys
 
 from setuptools import Extension, setup
 from setuptools import Command
@@ -106,28 +106,14 @@ if DISABLE_EMBEDDED_CRYPTOPP:
 else:
     # Build the bundled Crypto++ library which is included by source
     # code in the pycryptopp tree and link against it.
+    define_macros.append(('CRYPTOPP_DISABLE_ASM', 1))
+
     include_dirs.append(".")
 
     if 'sunos' in platform.system().lower():
         extra_compile_args.append('-Wa,--divide') # allow use of "/" operator
 
-    if 'win32' in sys.platform.lower():
-        try:
-            res = subprocess.Popen(['cl'], stdin=open(os.devnull), stdout=subprocess.PIPE).communicate()
-        except EnvironmentError, le:
-            # Okay I guess we're not using the "cl.exe" compiler.
-            using_msvc = False
-        else:
-            using_msvc = True
-    else:
-        using_msvc = False
-
-    if using_msvc:
-        # We can handle out-of-line assembly.
-        cryptopp_src = [ os.path.join(EMBEDDED_CRYPTOPP_DIR, x) for x in os.listdir(EMBEDDED_CRYPTOPP_DIR) if x.endswith(('.cpp', '.asm')) ]
-    else:
-        # We can't handle out-of-line assembly.
-        cryptopp_src = [ os.path.join(EMBEDDED_CRYPTOPP_DIR, x) for x in os.listdir(EMBEDDED_CRYPTOPP_DIR) if x.endswith('.cpp') ]
+    cryptopp_src = [ os.path.join(EMBEDDED_CRYPTOPP_DIR, x) for x in os.listdir(EMBEDDED_CRYPTOPP_DIR) if x.endswith('.cpp') ]
 
     # Mac OS X extended attribute files when written to a non-Mac-OS-X
     # filesystem come out as "._$FNAME", for example "._rdtables.cpp",
@@ -136,34 +122,6 @@ else:
     cryptopp_src = [ c for c in cryptopp_src if not os.path.basename(c).startswith('._') ]
 
     extra_srcs.extend(cryptopp_src)
-
-# In either case, we must provide a value for CRYPTOPP_DISABLE_ASM that
-# matches the one used when Crypto++ was originally compiled. The Crypto++
-# GNUmakefile tests the assembler version and only enables assembly for
-# recent versions of the GNU assembler (2.10 or later). The /usr/bin/as on
-# Mac OS-X 10.6 is too old.
-
-try:
-    sp = subprocess.Popen(['as', '-v'], stdin=subprocess.PIPE,
-                          stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                          universal_newlines=True)
-    sp.stdin.close()
-    sp.wait()
-    if re.search("GNU assembler version (0|1|2.0)", sp.stderr.read()):
-        define_macros.append(('CRYPTOPP_DISABLE_ASM', 1))
-except EnvironmentError:
-    # Okay, nevermind. Maybe there isn't even an 'as' executable on this
-    # platform.
-    pass
-else:
-    try:
-        # that "as -v" step creates an empty a.out, so clean it up. Modern GNU
-        # "as" has --version, which emits the version number without actually
-        # assembling anything, but older versions only have -v, which emits a
-        # version number and *then* assembles from stdin.
-        os.unlink("a.out")
-    except EnvironmentError:
-        pass
 
 trove_classifiers=[
     "Environment :: Console",
