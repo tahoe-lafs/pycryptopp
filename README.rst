@@ -25,8 +25,6 @@ supporting them.
 
 • RSA from the Crypto++ library ; see pycryptopp.publickey.rsa ; deprecated
   in favor of Ed25519
-• Ecdsa from the Crypto++ library ; see pycryptopp.publickey.ecdsa ;
-  deprecated in favor of Ed25519
 • SHA-256 from the Crypto++ library ; see pycryptopp.hash.sha256 ; deprecated
   in favor of the Python Standard Library's hashlib module
 

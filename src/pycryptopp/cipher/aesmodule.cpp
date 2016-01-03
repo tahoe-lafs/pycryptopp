@@ -12,7 +12,7 @@ typedef int Py_ssize_t;
 
 
 /* from Crypto++ */
-#ifdef DISABLE_EMBEDDED_CRYPTOPP
+#ifdef PYCRYPTOPP_USE_SYSTEM_CRYPTOPP
 #include <cryptopp/modes.h>
 #include <cryptopp/aes.h>
 #else

@@ -18,25 +18,30 @@ VERSION_PY_FNAME = os.path.join('src', PKG, '_version.py')
 
 import versioneer
 
-# ECDSA=False
-ECDSA=True
-
 DEBUG=False
 if "--debug" in sys.argv:
     DEBUG=True
     sys.argv.remove("--debug")
 
-DISABLE_EMBEDDED_CRYPTOPP=False
 if "--disable-embedded-cryptopp" in sys.argv:
-    DISABLE_EMBEDDED_CRYPTOPP=True
-    sys.argv.remove("--disable-embedded-cryptopp")
+    print "The --disable-embedded-cryptopp option has been removed. Use either --use-system-cryptopp-with-asm or --use-system-cryptopp-without-asm."
+    sys.exit(1)
 
 # Unfortunately stdeb v0.3 doesn't seem to offer a way to pass command-line
 # arguments to setup.py when building for Debian, but it does offer a way to
 # pass environment variables, so we here check for that in addition to the
 # command-line argument check above.
 if os.environ.get('PYCRYPTOPP_DISABLE_EMBEDDED_CRYPTOPP') == "1":
-    DISABLE_EMBEDDED_CRYPTOPP=True
+    print "The PYCRYPTOPP_DISABLE_EMBEDDED_CRYPTOPP environment variable is not supported. Use either PYCRYPTOPP_USE_SYSTEM_CRYPTOPP_WITH_ASM or PYCRYPTOPP_USE_SYSTEM_CRYPTOPP_WITHOUT_ASM."
+    sys.exit(1)
+
+USE_SYSTEM_CRYPTOPP=False # False, "with asm", or "without asm"
+if "--use-system-cryptopp-with-asm" in sys.argv:
+    USE_SYSTEM_CRYPTOPP='with asm'
+    sys.argv.remove("--use-system-cryptopp-with-asm")
+elif "--use-system-cryptopp-without-asm" in sys.argv:
+    USE_SYSTEM_CRYPTOPP='without asm'
+    sys.argv.remove("--use-system-cryptopp-without-asm")
 
 EMBEDDED_CRYPTOPP_DIR='src-cryptopp'
 
@@ -76,8 +81,11 @@ if DEBUG:
 else:
     extra_compile_args.append("-w")
 
-if DISABLE_EMBEDDED_CRYPTOPP:
-    define_macros.append(('DISABLE_EMBEDDED_CRYPTOPP', 1))
+if USE_SYSTEM_CRYPTOPP:
+    define_macros.append(('PYCRYPTOPP_USE_SYSTEM_CRYPTOPP', 1))
+
+    if USE_SYSTEM_CRYPTOPP == "without asm":
+        define_macros.append(('CRYPTOPP_DISABLE_ASM', 1))
 
     # Link with a Crypto++ library that is already installed on the system.
 
@@ -147,8 +155,6 @@ srcs = ['src/pycryptopp/_pycryptoppmodule.cpp',
         'src/pycryptopp/cipher/aesmodule.cpp',
         'src/pycryptopp/cipher/xsalsa20module.cpp',
         ]
-if ECDSA:
-    srcs.append('src/pycryptopp/publickey/ecdsamodule.cpp')
 if BUILD_DOUBLE_LOAD_TESTER:
     srcs.append('_doubleloadtester.cpp', )
 
@@ -183,7 +189,7 @@ if 'flakes' in sys.argv[1:]:
     setup_requires.append('setuptools_pyflakes >= 1.0.0')
 
 # stdeb is required to produce Debian files with "sdist_dsc".
-# http://github.com/astraw/stdeb/tree/master
+# https://github.com/astraw/stdeb/tree/master
 if "sdist_dsc" in sys.argv:
     setup_requires.append('stdeb')
 
@@ -391,7 +397,7 @@ def _setup(longdescription):
           description='Python wrappers for a few algorithms from the Crypto++ library',
           long_description=longdescription,
           author='Zooko Wilcox-O\'Hearn',
-          author_email='zooko@zooko.com',
+          author_email='zookog@gmail.com',
           url='https://tahoe-lafs.org/trac/' + PKG,
           license='GNU GPL', # see README.rst for details -- there is also an alternative licence
           packages=["pycryptopp",
