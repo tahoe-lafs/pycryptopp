@@ -1,4 +1,10 @@
-﻿2012-03-13  Zooko Wilcox-O'Hearn  <zooko@zooko.com>
+﻿2016-01-03  Zooko Wilcox  <zookog@gmail.com>
+
+	• release pycryptopp-0.7.0
+	• disable optimized assembly implementations by default (#85)
+	• tweaks to the benchmarking scripts
+
+2012-03-13  Zooko Wilcox-O'Hearn  <zooko@zooko.com>
 
 	• src/pycryptopp/_version.py: release pycryptopp-0.6.0
 	• add Ed25519 signatures (#75)

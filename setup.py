@@ -390,8 +390,8 @@ def _setup(longdescription):
           version=version,
           description='Python wrappers for a few algorithms from the Crypto++ library',
           long_description=longdescription,
-          author='Zooko Wilcox-O\'Hearn',
-          author_email='zooko@zooko.com',
+          author='Zooko Wilcox',
+          author_email='zookog@gmail.com',
           url='https://tahoe-lafs.org/trac/' + PKG,
           license='GNU GPL', # see README.rst for details -- there is also an alternative licence
           packages=["pycryptopp",
