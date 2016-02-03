@@ -1,6 +1,6 @@
-﻿2016-01-03  Zooko Wilcox  <zookog@gmail.com>
+﻿2016-02-03  Zooko Wilcox  <zookog@gmail.com>
 
-	• release pycryptopp-0.7.0
+	• release pycryptopp-0.7.1
 	• disable optimized assembly implementations by default (#85)
 	• tweaks to the benchmarking scripts
 
