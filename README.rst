@@ -12,7 +12,6 @@ algorithms. It lives at https://tahoe-lafs.org/trac/pycryptopp
 
 RECOMMENDED algorithms:
 
-• AES-CTR ; from the Crypto++ library ; see pycryptopp.cipher.aes
 • XSalsa20 ; from the Crypto++ library ; see pycryptopp.cipher.xsalsa20
 • Ed25519 ; from the supercop library ; see pycryptopp.publickey.ed25519
 
@@ -91,18 +90,20 @@ and will increase your understanding greatly.
 ACKNOWLEDGEMENTS
 ----------------
 
-Thanks to Wei Dai and the contributors to Crypto++, Andrew M. Kuchling for
-his "pycrypto" library which inspired this one, Brian Warner for help on
-Python packaging questions, python-Ed25519, inspiration, and a million other
-things besides, Greg Hazel and Samuel Neves for Windows porting and fixing
-bugs, and Daniel J. Bernstein for Ed25519.
+Thanks to Wei Dai, Jeffrey Walton, and the other contributors to
+Crypto++, Andrew M. Kuchling for his "pycrypto" library which inspired
+this one, Brian Warner for help on Python packaging questions,
+python-Ed25519, inspiration, and a million other things besides, Greg
+Hazel and Samuel Neves for Windows porting and fixing bugs, Daira
+Hopwood for helping maintain pycryptopp, and Daniel J. Bernstein for
+Ed25519.
 
 
-Zooko Wilcox-O'Hearn
+Zooko Wilcox
 
-Boulder, Colorado, USA
+Berlin, Germany
 
-2012-03-18
+2016-01-03
 
 
 .. _¹: https://github.com/warner/python-ed25519
