@@ -76,6 +76,7 @@ if DEBUG:
 else:
     extra_compile_args.append("-w")
 
+
 if DISABLE_EMBEDDED_CRYPTOPP:
     define_macros.append(('DISABLE_EMBEDDED_CRYPTOPP', 1))
 

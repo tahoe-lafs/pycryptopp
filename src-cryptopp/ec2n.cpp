@@ -6,7 +6,8 @@
 
 #include "ec2n.h"
 #include "asn.h"
-
+#include "integer.h"
+#include "filters.h"
 #include "algebra.cpp"
 #include "eprecomp.cpp"
 
@@ -20,7 +21,11 @@ EC2N::EC2N(BufferedTransformation &bt)
 	m_field->BERDecodeElement(seq, m_b);
 	// skip optional seed
 	if (!seq.EndReached())
-		BERDecodeOctetString(seq, TheBitBucket());
+	{
+		SecByteBlock seed;
+		unsigned int unused;
+		BERDecodeBitString(seq, seed, unused);
+	}
 	seq.MessageEnd();
 }
 
@@ -136,6 +141,7 @@ void EC2N::DEREncodePoint(BufferedTransformation &bt, const Point &P, bool compr
 
 bool EC2N::ValidateParameters(RandomNumberGenerator &rng, unsigned int level) const
 {
+	CRYPTOPP_UNUSED(rng);
 	bool pass = !!m_b;
 	pass = pass && m_a.CoefficientCount() <= m_field->MaxElementBitLength();
 	pass = pass && m_b.CoefficientCount() <= m_field->MaxElementBitLength();
