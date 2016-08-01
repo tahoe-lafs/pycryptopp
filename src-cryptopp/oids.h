@@ -1,3 +1,9 @@
+// oids.h - written and placed in the public domain by Wei Dai
+
+//! \file
+//! \headerfile oids.h
+//! \brief Object identifiers for algorthms and schemes
+
 #ifndef CRYPTOPP_OIDS_H
 #define CRYPTOPP_OIDS_H
 
@@ -39,7 +45,7 @@ DEFINE_OID(1, iso)
 					DEFINE_OID(rsadsi_digestAlgorithm()+5, id_md5)
 	DEFINE_OID(iso()+3, identified_organization);
 		DEFINE_OID(identified_organization()+14, oiw);
-			DEFINE_OID(oiw()+14, oiw_secsig);
+			DEFINE_OID(oiw()+3, oiw_secsig);
 				DEFINE_OID(oiw_secsig()+2, oiw_secsig_algorithms);
 					DEFINE_OID(oiw_secsig_algorithms()+26, id_sha1);
 

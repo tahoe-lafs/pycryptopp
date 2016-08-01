@@ -5,7 +5,6 @@
 	Name="cryptest"
 	ProjectGUID="{9EAFA456-89B4-4879-AD4F-C2C341184CF5}"
 	RootNamespace="cryptest"
-	SccLocalPath="."
 	>
 	<Platforms>
 		<Platform
@@ -23,7 +22,6 @@
 			OutputDirectory="$(PlatformName)\Output\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -36,19 +34,7 @@
 				Name="VCCustomBuildTool"
 			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TypeLibraryName=".\CTRelease/cryptest.tlb"
-				HeaderFileName=""
-			/>
-			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zm400 "
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
@@ -75,8 +61,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib Ws2_32.lib"
+				AdditionalDependencies="cryptlib.lib Ws2_32.lib $(NOINHERIT)"
 				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="$(PlatformName)\Output\$(ConfigurationName)"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -89,9 +76,6 @@
 				Name="VCManifestTool"
 			/>
 			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
 				Name="VCBscMakeTool"
 			/>
 			<Tool
@@ -99,9 +83,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -112,7 +93,6 @@
 			OutputDirectory="$(PlatformName)\Output\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -125,20 +105,7 @@
 				Name="VCCustomBuildTool"
 			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="3"
-				TypeLibraryName=".\CTRelease/cryptest.tlb"
-				HeaderFileName=""
-			/>
-			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zm400 "
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
@@ -166,8 +133,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib Ws2_32.lib"
+				AdditionalDependencies="cryptlib.lib Ws2_32.lib $(NOINHERIT)"
 				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="$(PlatformName)\Output\$(ConfigurationName)"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -181,9 +149,6 @@
 				Name="VCManifestTool"
 			/>
 			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
 				Name="VCBscMakeTool"
 			/>
 			<Tool
@@ -191,9 +156,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -204,7 +166,6 @@
 			OutputDirectory="$(PlatformName)\DLL_Output\Release"
 			IntermediateDirectory="$(PlatformName)\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -217,24 +178,11 @@
 				Name="VCCustomBuildTool"
 			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TypeLibraryName=".\CT_DLL_Import_Release/cryptest.tlb"
-				HeaderFileName=""
-			/>
-			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zm400 "
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				OmitFramePointers="true"
-				WholeProgramOptimization="true"
 				PreprocessorDefinitions="NDEBUG;CRYPTOPP_IMPORTS;WIN32;_CONSOLE"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -258,9 +206,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Ws2_32.lib"
+				AdditionalDependencies="cryptlib.lib Ws2_32.lib $(NOINHERIT)"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(OutDir)"
+				AdditionalLibraryDirectories="$(PlatformName)\DLL_Output\Release"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -273,9 +221,6 @@
 				Name="VCManifestTool"
 			/>
 			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
 				Name="VCBscMakeTool"
 			/>
 			<Tool
@@ -283,9 +228,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -296,7 +238,6 @@
 			OutputDirectory="$(PlatformName)\DLL_Output\Release"
 			IntermediateDirectory="$(PlatformName)\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -309,25 +250,11 @@
 				Name="VCCustomBuildTool"
 			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="3"
-				TypeLibraryName=".\CT_DLL_Import_Release/cryptest.tlb"
-				HeaderFileName=""
-			/>
-			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zm400 "
 				Optimization="2"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				OmitFramePointers="true"
-				WholeProgramOptimization="true"
 				PreprocessorDefinitions="NDEBUG;CRYPTOPP_IMPORTS;WIN32;_CONSOLE"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -351,9 +278,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Ws2_32.lib"
+				AdditionalDependencies="cryptlib.lib Ws2_32.lib $(NOINHERIT)"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(OutDir)"
+				AdditionalLibraryDirectories="$(PlatformName)\DLL_Output\Release"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -367,9 +294,6 @@
 				Name="VCManifestTool"
 			/>
 			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
 				Name="VCBscMakeTool"
 			/>
 			<Tool
@@ -377,9 +301,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -390,10 +311,10 @@
 			OutputDirectory="$(PlatformName)\DLL_Output\Debug"
 			IntermediateDirectory="$(PlatformName)\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -402,19 +323,7 @@
 				Name="VCCustomBuildTool"
 			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TypeLibraryName=".\CT_DLL_Import_Debug/cryptest.tlb"
-				HeaderFileName=""
-			/>
-			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zm400 "
 				Optimization="0"
 				InlineFunctionExpansion="0"
 				EnableIntrinsicFunctions="true"
@@ -423,7 +332,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -439,9 +348,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Ws2_32.lib"
+				AdditionalDependencies="cryptlib.lib Ws2_32.lib $(NOINHERIT)"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(OutDir)"
+				AdditionalLibraryDirectories="$(PlatformName)\DLL_Output\Debug"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 			/>
@@ -452,9 +361,6 @@
 				Name="VCManifestTool"
 			/>
 			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
 				Name="VCBscMakeTool"
 			/>
 			<Tool
@@ -462,9 +368,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -475,10 +378,10 @@
 			OutputDirectory="$(PlatformName)\DLL_Output\Debug"
 			IntermediateDirectory="$(PlatformName)\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -487,20 +390,7 @@
 				Name="VCCustomBuildTool"
 			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="3"
-				TypeLibraryName=".\CT_DLL_Import_Debug/cryptest.tlb"
-				HeaderFileName=""
-			/>
-			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zm400 "
 				Optimization="0"
 				InlineFunctionExpansion="0"
 				EnableIntrinsicFunctions="true"
@@ -525,9 +415,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="Ws2_32.lib"
+				AdditionalDependencies="cryptlib.lib Ws2_32.lib $(NOINHERIT)"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="$(OutDir)"
+				AdditionalLibraryDirectories="$(PlatformName)\DLL_Output\Debug"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="17"
@@ -539,9 +429,6 @@
 				Name="VCManifestTool"
 			/>
 			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
 				Name="VCBscMakeTool"
 			/>
 			<Tool
@@ -549,9 +436,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -562,10 +446,10 @@
 			OutputDirectory="$(PlatformName)\Output\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -574,19 +458,7 @@
 				Name="VCCustomBuildTool"
 			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TypeLibraryName=".\CTDebug/cryptest.tlb"
-				HeaderFileName=""
-			/>
-			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zm400 "
 				Optimization="0"
 				EnableIntrinsicFunctions="true"
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;WIN32"
@@ -595,7 +467,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -610,8 +482,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib Ws2_32.lib"
+				AdditionalDependencies="cryptlib.lib Ws2_32.lib $(NOINHERIT)"
 				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="$(PlatformName)\Output\$(ConfigurationName)"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 			/>
@@ -620,9 +493,6 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
 			/>
 			<Tool
 				Name="VCBscMakeTool"
@@ -634,9 +504,6 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
-				Name="VCWebDeploymentTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -645,10 +512,10 @@
 			OutputDirectory="$(PlatformName)\Output\$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)\$(ProjectName)\$(ConfigurationName)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -657,20 +524,7 @@
 				Name="VCCustomBuildTool"
 			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				TargetEnvironment="3"
-				TypeLibraryName=".\CTDebug/cryptest.tlb"
-				HeaderFileName=""
-			/>
-			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zm400 "
 				Optimization="0"
 				EnableIntrinsicFunctions="true"
 				PreprocessorDefinitions="_DEBUG;_CONSOLE;WIN32"
@@ -693,8 +547,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib Ws2_32.lib"
+				AdditionalDependencies="cryptlib.lib Ws2_32.lib $(NOINHERIT)"
 				SuppressStartupBanner="true"
+				AdditionalLibraryDirectories="$(PlatformName)\Output\$(ConfigurationName)"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="17"
@@ -706,9 +561,6 @@
 				Name="VCManifestTool"
 			/>
 			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
 				Name="VCBscMakeTool"
 			/>
 			<Tool
@@ -716,9 +568,6 @@
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -781,6 +630,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\TestVectors\mars.txt"
+				>
+			</File>
+			<File
 				RelativePath=".\TestVectors\nr.txt"
 				>
 			</File>
@@ -825,6 +678,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\TestVectors\sha3.txt"
+				>
+			</File>
+			<File
 				RelativePath=".\TestVectors\shacal2.txt"
 				>
 			</File>
@@ -842,6 +699,10 @@
 			</File>
 			<File
 				RelativePath=".\TestVectors\vmac.txt"
+				>
+			</File>
+			<File
+				RelativePath=".\TestVectors\wake.txt"
 				>
 			</File>
 			<File
