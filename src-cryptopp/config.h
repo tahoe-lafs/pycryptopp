@@ -6,6 +6,8 @@
 #ifndef CRYPTOPP_CONFIG_H
 #define CRYPTOPP_CONFIG_H
 
+extern const char* cryptopp_extra_version;
+
 // ***************** Important Settings ********************
 
 // define this if running on a big-endian CPU

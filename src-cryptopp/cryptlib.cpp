@@ -27,6 +27,9 @@
 #include "secblock.h"
 #include "smartptr.h"
 
+#include "extraversion.h"
+const char *cryptopp_extra_version = CRYPTOPP_EXTRA_VERSION;
+
 // http://www.cygwin.com/faq.html#faq.api.winsock
 #if (defined(__CYGWIN__) || defined(__CYGWIN32__)) && defined(PREFER_WINDOWS_STYLE_SOCKETS)
 # error Cygwin does not support Windows style sockets. See http://www.cygwin.com/faq.html#faq.api.winsock
