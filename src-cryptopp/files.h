@@ -4,6 +4,7 @@
 #include "cryptlib.h"
 #include "filters.h"
 #include "argnames.h"
+#include "smartptr.h"
 
 #include <iostream>
 #include <fstream>
@@ -22,11 +23,16 @@ public:
 	class OpenErr : public Err {public: OpenErr(const std::string &filename) : Err("FileStore: error opening file for reading: " + filename) {}};
 	class ReadErr : public Err {public: ReadErr() : Err("FileStore: error reading file") {}};
 
-	FileStore() : m_stream(NULL) {}
-	FileStore(std::istream &in)
+	FileStore() : m_stream(NULL), m_space(NULL), m_len(0), m_waiting(0) {}
+	FileStore(std::istream &in) : m_stream(NULL), m_space(NULL), m_len(0), m_waiting(0)
 		{StoreInitialize(MakeParameters(Name::InputStreamPointer(), &in));}
-	FileStore(const char *filename)
-		{StoreInitialize(MakeParameters(Name::InputFileName(), filename));}
+	FileStore(const char *filename) : m_stream(NULL), m_space(NULL), m_len(0), m_waiting(0)
+		{StoreInitialize(MakeParameters(Name::InputFileName(), filename ? filename : ""));}
+#if defined(CRYPTOPP_UNIX_AVAILABLE) || _MSC_VER >= 1400
+	//! specify file with Unicode name. On non-Windows OS, this function assumes that setlocale() has been called.
+	FileStore(const wchar_t *filename)
+		{StoreInitialize(MakeParameters(Name::InputFileNameWide(), filename));}
+#endif
 
 	std::istream* GetStream() {return m_stream;}
 
@@ -59,6 +65,11 @@ public:
 		: SourceTemplate<FileStore>(attachment) {SourceInitialize(pumpAll, MakeParameters(Name::InputStreamPointer(), &in));}
 	FileSource(const char *filename, bool pumpAll, BufferedTransformation *attachment = NULL, bool binary=true)
 		: SourceTemplate<FileStore>(attachment) {SourceInitialize(pumpAll, MakeParameters(Name::InputFileName(), filename)(Name::InputBinaryMode(), binary));}
+#if defined(CRYPTOPP_UNIX_AVAILABLE) || _MSC_VER >= 1400
+	//! specify file with Unicode name. On non-Windows OS, this function assumes that setlocale() has been called.
+	FileSource(const wchar_t *filename, bool pumpAll, BufferedTransformation *attachment = NULL, bool binary=true)
+		: SourceTemplate<FileStore>(attachment) {SourceInitialize(pumpAll, MakeParameters(Name::InputFileNameWide(), filename)(Name::InputBinaryMode(), binary));}
+#endif
 
 	std::istream* GetStream() {return m_store.GetStream();}
 };
@@ -79,7 +90,12 @@ public:
 	FileSink(std::ostream &out)
 		{IsolatedInitialize(MakeParameters(Name::OutputStreamPointer(), &out));}
 	FileSink(const char *filename, bool binary=true)
-		{IsolatedInitialize(MakeParameters(Name::OutputFileName(), filename)("OutputBinaryMode", binary));}
+		{IsolatedInitialize(MakeParameters(Name::OutputFileName(), filename)(Name::OutputBinaryMode(), binary));}
+#if defined(CRYPTOPP_UNIX_AVAILABLE) || _MSC_VER >= 1400
+	//! specify file with Unicode name. On non-Windows OS, this function assumes that setlocale() has been called.
+	FileSink(const wchar_t *filename, bool binary=true)
+		{IsolatedInitialize(MakeParameters(Name::OutputFileNameWide(), filename)(Name::OutputBinaryMode(), binary));}
+#endif
 
 	std::ostream* GetStream() {return m_stream;}
 
