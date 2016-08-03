@@ -1,5 +1,5 @@
 Crypto++: a C++ Class Library of Cryptographic Schemes
-Version 5.6.0 (3/15/2009)
+Version 5.6.3 - NOV/20/2015
 
 Crypto++ Library is a free C++ class library of cryptographic schemes.
 Currently the library contains the following algorithms:
@@ -20,15 +20,15 @@ Currently the library contains the following algorithms:
   block cipher modes of operation  ECB, CBC, CBC ciphertext stealing (CTS),
                                    CFB, OFB, counter mode (CTR)
 
-     message authentication codes  VMAC, HMAC, CMAC, CBC-MAC, DMAC, 
+     message authentication codes  VMAC, HMAC, GMAC, CMAC, CBC-MAC, DMAC, 
                                    Two-Track-MAC
 
                                    SHA-1, SHA-2 (SHA-224, SHA-256, SHA-384, and
-                   hash functions  SHA-512), Tiger, WHIRLPOOL, RIPEMD-128,
+                   hash functions  SHA-512), SHA-3, Tiger, WHIRLPOOL, RIPEMD-128,
                                    RIPEMD-256, RIPEMD-160, RIPEMD-320
 
                                    RSA, DSA, ElGamal, Nyberg-Rueppel (NR),
-          public-key cryptography  Rabin, Rabin-Williams (RW), LUC, LUCELG,
+          public-key cryptography  Rabin-Williams (RW), LUC, LUCELG,
                                    DLIES (variants of DHAES), ESIGN
 
    padding schemes for public-key  PKCS#1 v2.0, OAEP, PSS, PSSR, IEEE P1363
@@ -41,7 +41,7 @@ Currently the library contains the following algorithms:
       elliptic curve cryptography  ECDSA, ECNR, ECIES, ECDH, ECMQV
 
           insecure or obsolescent  MD2, MD4, MD5, Panama Hash, DES, ARC4, SEAL
-algorithms retained for backwards  3.0, WAKE, WAKE-OFB, DESX (DES-XEX3), RC2,
+algorithms retained for backwards  3.0, WAKE-OFB, DESX (DES-XEX3), RC2,
      compatibility and historical  SAFER, 3-WAY, GOST, SHARK, CAST-128, Square
                             value
 
@@ -79,11 +79,11 @@ License.txt for the fine print.
 The following compilers are supported for this release. Please visit
 http://www.cryptopp.com the most up to date build instructions and porting notes.
 
-  * MSVC 6.0 - 2008
-  * GCC 3.3 - 4.3
-  * C++Builder 2009
-  * Intel C++ Compiler 9 - 11
-  * Sun Studio 12 (CC 5.9)
+  * MSVC 6.0 - 2015
+  * GCC 3.3 - 5.2
+  * C++Builder 2010
+  * Intel C++ Compiler 9 - 16.0
+  * Sun Studio 12u1, Express 11/08, Express 06/10
 
 *** Important Usage Notes ***
 
@@ -109,10 +109,10 @@ all three forms, and sample applications using each of the three forms
 are also included.
 
 To compile Crypto++ with MSVC, open the "cryptest.dsw" (for MSVC 6 and MSVC .NET 
-2003) or "cryptest.sln" (for MSVC .NET 2005) workspace file and build one or 
+2003) or "cryptest.sln" (for MSVC 2005 - 2010) workspace file and build one or 
 more of the following projects:
 
-cryptdll - This builds the DLL. Please note that if you wish to use Crypto++
+cryptopp - This builds the DLL. Please note that if you wish to use Crypto++
   as a FIPS validated module, you must use a pre-built DLL that has undergone
   the FIPS validation process instead of building your own.
 dlltest - This builds a sample application that only uses the DLL.
@@ -126,7 +126,8 @@ To use the Crypto++ DLL in your application, #include "dll.h" before including
 any other Crypto++ header files, and place the DLL in the same directory as
 your .exe file. dll.h includes the line #pragma comment(lib, "cryptopp")
 so you don't have to explicitly list the import library in your project
-settings. To use a static library form of Crypto++, specify it as
+settings. To use a static library form of Crypto++, make the "cryptlib"
+project a dependency of your application project, or specify it as
 an additional library to link with in your project settings.
 In either case you should check the compiler options to
 make sure that the library and your application are using the same C++
@@ -414,16 +415,85 @@ the mailing list.
       - ported to MSVC 2008, GCC 4.2, Sun CC 5.9, Intel C++ Compiler 10.0, 
         and Borland C++Builder 2007
 
-5.6 - added AuthenticatedSymmetricCipher interface class and Filter wrappers
-    - added CCM, GCM (with SSE2 assembly), EAX, CMAC, XSalsa20, and SEED
-    - added support for variable length IVs
-    - improved AES and SHA-256 speed on x86 and x64
-    - fixed incorrect VMAC computation on message lengths 
-      that are >64 mod 128 (x86 assembly version is not affected)
-    - fixed compiler error in vmac.cpp on x86 with GCC -fPIC
-    - fixed run-time validation error on x86-64 with GCC 4.3.2 -O2
-    - fixed HashFilter bug when putMessage=true
-    - removed WORD64_AVAILABLE; compiler support for 64-bit int is now required
-    - ported to GCC 4.3, C++Builder 2009, Sun CC 5.10, Intel C++ Compiler 11
+5.6.0 - added AuthenticatedSymmetricCipher interface class and Filter wrappers
+      - added CCM, GCM (with SSE2 assembly), EAX, CMAC, XSalsa20, and SEED
+      - added support for variable length IVs
+      - added OIDs for Brainpool elliptic curve parameters
+      - improved AES and SHA-256 speed on x86 and x64
+      - changed BlockTransformation interface to no longer assume data alignment
+      - fixed incorrect VMAC computation on message lengths 
+        that are >64 mod 128 (x86 assembly version is not affected)
+      - fixed compiler error in vmac.cpp on x86 with GCC -fPIC
+      - fixed run-time validation error on x86-64 with GCC 4.3.2 -O2
+      - fixed HashFilter bug when putMessage=true
+      - fixed AES-CTR data alignment bug that causes incorrect encryption on ARM
+      - removed WORD64_AVAILABLE; compiler support for 64-bit int is now required
+      - ported to GCC 4.3, C++Builder 2009, Sun CC 5.10, Intel C++ Compiler 11
 
-Written by Wei Dai
+5.6.1 - added support for AES-NI and CLMUL instruction sets in AES and GMAC/GCM
+      - removed WAKE-CFB
+      - fixed several bugs in the SHA-256 x86/x64 assembly code:
+          * incorrect hash on non-SSE2 x86 machines on non-aligned input
+          * incorrect hash on x86 machines when input crosses 0x80000000
+          * incorrect hash on x64 when compiled with GCC with optimizations enabled
+      - fixed bugs in AES x86 and x64 assembly causing crashes in some MSVC build configurations
+      - switched to a public domain implementation of MARS
+      - ported to MSVC 2010, GCC 4.5.1, Sun Studio 12u1, C++Builder 2010, Intel C++ Compiler 11.1
+      - renamed the MSVC DLL project to "cryptopp" for compatibility with MSVC 2010
+
+5.6.2 - changed license to Boost Software License 1.0
+      - added SHA-3 (Keccak)
+      - updated DSA to FIPS 186-3 (see DSA2 class)
+      - fixed Blowfish minimum keylength to be 4 bytes (32 bits)
+      - fixed Salsa validation failure when compiling with GCC 4.6
+      - fixed infinite recursion when on x64, assembly disabled, and no AESNI
+      - ported to MSVC 2012, GCC 4.7, Clang 3.2, Solaris Studio 12.3, Intel C++ Compiler 13.0
+
+5.6.3 - maintenance release, honored API/ABI/Versioning requirements
+      - expanded processes to include community and its input
+      - fixed CVE-2015-2141
+      - cleared most Undefined Behavior Sanitizer (UBsan) findings
+      - cleared all Address Sanitizer (Asan) findings
+      - cleared all Valgrind findings
+      - cleared all Coverity findings
+      - cleared all Enterprise Analysis (/analyze) findings
+      - cleared most GCC warnings with -Wall
+      - cleared most Clang warnings with -Wall
+      - cleared most MSVC warnings with /W4
+      - added -fPIC 64-bit builds. Off by default for i386
+      - added HKDF class from RFC 5868
+      - switched to member_ptr due to C++ 11 warnings for auto_ptr
+      - initialization of C++ static objects, off by default
+          * GCC and init_priotirty/constructor attributes
+          * MSVC and init_seg(lib)
+          * CRYPTOPP_INIT_PRIORITY disabled by default, but available
+      - improved OS X support
+      - improved GNUmakefile support for Testing and QA
+      - added self tests for additional Testing and QA
+      - added cryptest.sh for systematic Testing and QA
+      - added GNU Gold linker support
+      - added Visual Studio 2010 solution and project files in vs2010.zip
+      - added Clang integrated assembler support
+      - unconditionally define CRYPTOPP_NO_UNALIGNED_DATA_ACCESS for Makefile
+        target 'ubsan' and at -O3 due to GCC vectorization on x86 and x86_64
+      - workaround ARMEL/GCC 5.2 bug and failed self test
+      - fixed crash in MQV due to GCC 4.9+ and inlining
+      - fixed hang in SHA due to GCC 4.9+ and inlining
+      - fixed missing rdtables::Te under VS with ALIGNED_DATA_ACCESS
+      - fixed S/390 and big endian feature detection
+      - fixed S/390 and int128_t/uint128_t detection
+      - fixed X32 (ILP32) feature detection
+      - removed  _CRT_SECURE_NO_DEPRECATE for Microsoft platforms
+      - utilized bound checking interfaces from ISO/IEC TR 24772 when available
+      - improved ARM, ARM64, MIPS, MIPS64, S/390 and X32 (ILP32) support
+      - introduced CRYPTOPP_MAINTAIN_BACKWARDS_COMPATIBILITY_562
+      - added additional Doxygen-based documentation
+      - ported to MSVC 2015, Xcode 7.2, GCC 5.2, Clang 3.7, Intel C++ 16.00
+
+5.7  - nearly identical to 5.6.3
+     - minor breaks to the ABI and API
+     - cleared remaining Undefined Behavior Sanitizer (UBsan) findings
+     - cleared remaining GCC and Visual Studio warnings
+     - removed CRYPTOPP_MAINTAIN_BACKWARDS_COMPATIBILITY_562
+
+Written by Wei Dai and the Crypto++ Project
