@@ -31,7 +31,7 @@ class ChaCha20Test(unittest.TestCase):
         # there is: Source: created by Wei Dai using naclcrypto-20090308 .
         # naclcrypto being DJB's crypto library and of course DJB designed
         # ChaCha20
-        s = resource_string("pycryptopp", "testvectors/chacha20.txt")
+        s = resource_string("pycryptopp", "testvectors/chacha.txt")
         return self._test_ChaCha20(s)
 
     def _test_ChaCha20(self, vects_str):
