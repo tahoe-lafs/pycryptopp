@@ -9,7 +9,7 @@ TEST_XSALSA_RE=re.compile("\nCOUNT=([0-9]+)\nKEY=([0-9a-f]+)\nIV=([0-9a-f]+)\nPL
 
 class ChaCha20Test(unittest.TestCase):
 
-    enc0="eea6a7251c1e72916d11c2cb214d3c252539121d8e234e652d651fa4c8cff880309e645a74e9e0a60d8243acd9177ab51a1beb8d5a2f5d700c093c5e5585579625337bd3ab619d615760d8c5b224a85b1d0efe0eb8a7ee163abb0376529fcc09bab506c618e13ce777d82c3ae9d1a6f972d4160287cbfe60bf2130fc0a6ff6049d0a5c8a82f429231f0080"
+    enc0="20b800ca9a9247bcc09a6816b123be47ac0681e23749d35fea22c04e1b1b9bb19782ab297a65c80ab1bac2ff2c4beba4c807bf832fdb57e648b3b677d87f8758123fb0f9d39efa95d7dd3f72fb0abe9b96e68514e758e9de31ae1d694c462de537f7e45188f2dcb912c6a0ed1aee5f6b4d2be8c3a1126e928b6fea91d643f9bbe808d984c2517bcb928161"
 
     def test_zero_ChaCha20(self):
         key="1b27556473e985d462cd51197a9a46c76009549eac6474f206c4ee0844f68389"
@@ -122,12 +122,9 @@ class ChaCha20Test(unittest.TestCase):
             s += ciphertext
             s = s[-K-N-B:]
         output = b2a_hex(s[-B:])
-        # I've compared this output against pynacl -warner
-        self.failUnlessEqual(output,
-                             "77f8e2792dd4f2d44edf469c3a7ad5f7"
-                             "5cb373fe0c3d9c8ee570dc91e00f1caa"
-                             "25f725c202f3781869a40b8a2c856b55"
-                             "8178b6af9576a15799c445c30aeced66")
+        # XXX TODO compare this output against pynacl
+        self.failUnlessEqual(output, "2a84ffcd163b683daafd51b2d10af7338ac5fb25716d5f7b6e6af9cdbe6abd6e63c00d4e8eff8c306b17d71691b6ce1e6e0577c0e8e719abb3dfa7f7b21d955e")
+
 
 
 if __name__ == "__main__":
