@@ -123,7 +123,7 @@ static int ChaCha20_init(PyObject* self, PyObject *args, PyObject *kwdict) {
 static PyTypeObject ChaCha20_type = {
 	PyObject_HEAD_INIT(NULL)
 	0,                       /*ob_size*/
-	"_xsalsa.ChaCha20",        /*tp_name*/
+	"_chacha20.ChaCha20",        /*tp_name*/
 	sizeof(ChaCha20),	 /*tp_basicsize*/
 	0,                       /*tp_itemsize*/
 	ChaCha20_dealloc,          /*tp_dealloc*/
