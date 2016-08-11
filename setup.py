@@ -146,6 +146,7 @@ srcs = ['src/pycryptopp/_pycryptoppmodule.cpp',
         'src/pycryptopp/hash/sha256module.cpp',
         'src/pycryptopp/cipher/aesmodule.cpp',
         'src/pycryptopp/cipher/xsalsa20module.cpp',
+        'src/pycryptopp/cipher/chacha20module.cpp',
         ]
 if ECDSA:
     srcs.append('src/pycryptopp/publickey/ecdsamodule.cpp')
