@@ -123,7 +123,7 @@ class ChaCha20Test(unittest.TestCase):
             s += ciphertext
             s = s[-K-N-B:]
         output = b2a_hex(s[-B:])
-        # XXX TODO compare this output against pynacl
+        # I compared test output against pysodium - David
         self.failUnlessEqual(output, "2a84ffcd163b683daafd51b2d10af7338ac5fb25716d5f7b6e6af9cdbe6abd6e63c00d4e8eff8c306b17d71691b6ce1e6e0577c0e8e719abb3dfa7f7b21d955e")
 
 
