@@ -96,6 +96,10 @@ static int ChaCha20_init(PyObject* self, PyObject *args, PyObject *kwdict) {
 	assert (keysize >= 0);
 	assert (ivsize >= 0);
 
+	if (keysize != 32 && keysize != 16 ) {
+            PyErr_Format(chacha20_error, "Precondition violation: key must be exactly 32 or 16 bytes, not %d", keysize);
+            return -1;
+	}
 	if (!iv)
 		iv = defaultiv;
         else if (ivsize != 24) {

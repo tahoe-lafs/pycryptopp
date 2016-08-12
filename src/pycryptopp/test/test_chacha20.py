@@ -76,11 +76,12 @@ class ChaCha20Test(unittest.TestCase):
 
 
     def test_types_and_lengths(self):
+
         # the key= argument must be a bytestring exactly 32 bytes long
         self.failUnlessRaises(TypeError, chacha20.ChaCha20, None)
         for i in range(70):
             key = "a"*i
-            if i != 32:
+            if i != 32 and i != 16:
                 self.failUnlessRaises(chacha20.Error, chacha20.ChaCha20, key)
             else:
                 self.failUnless(chacha20.ChaCha20(key))

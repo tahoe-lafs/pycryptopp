@@ -31,7 +31,7 @@ template <unsigned int R>
 void ChaCha_Policy<R>::CipherSetKey(const NameValuePairs &params, const byte *key, size_t length)
 {
 	CRYPTOPP_UNUSED(params);
-	assert(length == 16 || length == 32);
+	//assert(length == 16 || length == 32);
 
 	// "expand 16-byte k" or "expand 32-byte k"
 	m_state[0] = 0x61707865;
