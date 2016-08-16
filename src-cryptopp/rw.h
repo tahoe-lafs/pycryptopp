@@ -1,12 +1,16 @@
+// rw.h - written and placed in the public domain by Wei Dai
+
+//! \file rw.h
+//! \brief Classes for Rabin-Williams signature schemes
+//! \details Rabin-Williams signature schemes as defined in IEEE P1363.
+
 #ifndef CRYPTOPP_RW_H
 #define CRYPTOPP_RW_H
 
-/** \file
-	This file contains classes that implement the
-	Rabin-Williams signature schemes as defined in IEEE P1363.
-*/
 
+#include "cryptlib.h"
 #include "pubkey.h"
+#include "integer.h"
 
 NAMESPACE_BEGIN(CryptoPP)
 
@@ -21,6 +25,11 @@ public:
 
 	void BERDecode(BufferedTransformation &bt);
 	void DEREncode(BufferedTransformation &bt) const;
+
+	void Save(BufferedTransformation &bt) const
+		{DEREncode(bt);}
+	void Load(BufferedTransformation &bt)
+		{BERDecode(bt);}
 
 	Integer ApplyFunction(const Integer &x) const;
 	Integer PreimageBound() const {return ++(m_n>>1);}
@@ -51,6 +60,11 @@ public:
 
 	void BERDecode(BufferedTransformation &bt);
 	void DEREncode(BufferedTransformation &bt) const;
+
+	void Save(BufferedTransformation &bt) const
+		{DEREncode(bt);}
+	void Load(BufferedTransformation &bt)
+		{BERDecode(bt);}
 
 	Integer CalculateInverse(RandomNumberGenerator &rng, const Integer &x) const;
 

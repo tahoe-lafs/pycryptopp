@@ -5,6 +5,7 @@
 #include "hash/sha256module.hpp"
 #include "cipher/aesmodule.hpp"
 #include "cipher/xsalsa20module.hpp"
+#include "cipher/chacha20module.hpp"
 
 /* from Crypto++ */
 #ifdef DISABLE_EMBEDDED_CRYPTOPP
@@ -22,6 +23,7 @@ from pycryptopp.publickey import rsa\n\
 from pycryptopp import cipher\n\
 from pycryptopp.cipher import aes\n\
 from pycryptopp.cipher import xsalsa20\n\
+from pycryptopp.cipher import chacha20\n\
 from pycryptopp import hash\n\
 from pycryptopp.hash import sha256");
 
@@ -69,4 +71,5 @@ init_pycryptopp(void) {
     init_sha256(module);
     init_aes(module);
     init_xsalsa20(module);
+    init_chacha20(module);
 }
