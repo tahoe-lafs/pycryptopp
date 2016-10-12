@@ -1,7 +1,6 @@
 // cryptlib.cpp - written and placed in the public domain by Wei Dai
 
 #include "pch.h"
-#include "config.h"
 
 #if CRYPTOPP_MSC_VERSION
 # pragma warning(disable: 4127 4189 4459)
@@ -14,6 +13,11 @@
 #endif
 
 #ifndef CRYPTOPP_IMPORTS
+
+#include "config.h"
+
+#include "extraversion.h"
+const char *cryptopp_extra_version = CRYPTOPP_EXTRA_VERSION;
 
 #include "cryptlib.h"
 #include "misc.h"
