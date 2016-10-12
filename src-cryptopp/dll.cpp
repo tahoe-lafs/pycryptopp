@@ -4,7 +4,16 @@
 #define CRYPTOPP_DEFAULT_NO_DLL
 
 #include "dll.h"
-#pragma warning(default: 4660)
+#include "config.h"
+
+// TODO: fix the C4589 warnings
+#if CRYPTOPP_MSC_VERSION
+# pragma warning(disable: 4589)
+#endif
+
+#if CRYPTOPP_MSC_VERSION
+# pragma warning(default: 4660)
+#endif
 
 #if defined(CRYPTOPP_EXPORTS) && defined(CRYPTOPP_WIN32_AVAILABLE)
 #include <windows.h>
@@ -14,6 +23,8 @@
 
 NAMESPACE_BEGIN(CryptoPP)
 
+// Guarding based on DLL due to Clang, http://github.com/weidai11/cryptopp/issues/300
+#if defined(CRYPTOPP_IS_DLL)
 template<> const byte PKCS_DigestDecoration<SHA1>::decoration[] = {0x30,0x21,0x30,0x09,0x06,0x05,0x2B,0x0E,0x03,0x02,0x1A,0x05,0x00,0x04,0x14};
 template<> const unsigned int PKCS_DigestDecoration<SHA1>::length = sizeof(PKCS_DigestDecoration<SHA1>::decoration);
 
@@ -29,11 +40,13 @@ template<> const unsigned int PKCS_DigestDecoration<SHA384>::length = sizeof(PKC
 template<> const byte PKCS_DigestDecoration<SHA512>::decoration[] = {0x30,0x51,0x30,0x0d,0x06,0x09,0x60,0x86,0x48,0x01,0x65,0x03,0x04,0x02,0x03,0x05,0x00,0x04,0x40};
 template<> const unsigned int PKCS_DigestDecoration<SHA512>::length = sizeof(PKCS_DigestDecoration<SHA512>::decoration);
 
-template<> const byte EMSA2HashId<SHA>::id = 0x33;
+template<> const byte EMSA2HashId<SHA1>::id = 0x33;
 template<> const byte EMSA2HashId<SHA224>::id = 0x38;
 template<> const byte EMSA2HashId<SHA256>::id = 0x34;
 template<> const byte EMSA2HashId<SHA384>::id = 0x36;
 template<> const byte EMSA2HashId<SHA512>::id = 0x35;
+
+#endif	// CRYPTOPP_IS_DLL
 
 NAMESPACE_END
 
@@ -53,11 +66,14 @@ static PDelete s_pDelete = NULL;
 static void * New (size_t size)
 {
 	void *p;
-	while (!(p = malloc(size)))
+	while ((p = malloc(size)) == NULL)
 		CallNewHandler();
 
 	return p;
 }
+
+// Cast from FARPROC to funcptr with args, http://stackoverflow.com/q/4192058/608639
+#pragma warning(disable: 4191)
 
 static void SetNewAndDeleteFunctionPointers()
 {
@@ -78,7 +94,6 @@ static void SetNewAndDeleteFunctionPointers()
 			continue;
 
 		hModule = HMODULE(mbi.AllocationBase);
-
 		PGetNewAndDelete pGetNewAndDelete = (PGetNewAndDelete)GetProcAddress(hModule, "GetNewAndDeleteForCryptoPP");
 		if (pGetNewAndDelete)
 		{
@@ -116,9 +131,12 @@ static void SetNewAndDeleteFunctionPointers()
 			return;
 	}
 
-	OutputDebugString("Crypto++ was not able to obtain new and delete function pointers.\n");
+	OutputDebugString("Crypto++ DLL was not able to obtain new and delete function pointers.\n");
 	throw 0;
 }
+
+// Cast from FARPROC to funcptr with args
+#pragma warning(default: 4191)
 
 void * operator new (size_t size)
 {
