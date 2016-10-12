@@ -15,6 +15,9 @@
 
 #ifndef CRYPTOPP_IMPORTS
 
+#include "extraversion.h"
+const char *cryptopp_extra_version = CRYPTOPP_EXTRA_VERSION;
+
 #include "cryptlib.h"
 #include "misc.h"
 #include "filters.h"
