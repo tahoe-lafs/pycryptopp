@@ -37,8 +37,8 @@ class KnownAnswerTests(unittest.TestCase):
             vk2 = ed25519.VerifyingKey(vk_s)
             self.failUnlessEqual(vk2, vk) # objects should compare equal
             newsig = sk.sign(msg)
-            sig_R,sig_S = sig[:32],sig[32:]
-            newsig_R,newsig_S = newsig[:32],newsig[32:]
+            #sig_R,sig_S = sig[:32],sig[32:]
+            #newsig_R,newsig_S = newsig[:32],newsig[32:]
             self.failUnlessEqual(hexlify(newsig), hexlify(sig)) # deterministic sigs
             self.failUnlessEqual(vk.verify(sig, msg), None) # no exception
 

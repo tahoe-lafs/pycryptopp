@@ -54,14 +54,14 @@ def insecurerandstr(n):
     return ''.join(map(chr, map(insecurerandom.randrange, [0]*n, [256]*n)))
 
 def calib_clock():
-    interval = 1.0
+    #interval = 1.0
     
     import time
-    tc = time.clock
-    tt = time.time
+    #tc = time.clock
+    #tt = time.time
 
     def measure_sleep(x, clock):
-        st = clock()
+        #st = clock()
         time.sleep(x)
         
     
