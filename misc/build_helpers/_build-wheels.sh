@@ -5,7 +5,7 @@
 set -e -x
 
 # Compile wheels
-for PYBIN in /opt/python/*/bin; do
+for PYBIN in /opt/python/cp2*/bin; do
     "${PYBIN}/pip" wheel /io/ -w wheelhouse/
 done
 
