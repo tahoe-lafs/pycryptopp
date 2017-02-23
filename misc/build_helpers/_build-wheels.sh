@@ -11,6 +11,6 @@ done
 
 # Bundle external shared libraries into the wheels and write them to their
 # final location.
-for whl in /wheelhouse/pycrypto-*.whl; do
+for whl in /wheelhouse/pycryptopp-*.whl; do
     auditwheel repair "$whl" -w /io/wheelhouse/
 done
