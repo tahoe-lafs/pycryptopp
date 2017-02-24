@@ -237,7 +237,6 @@ def get_normalized_version(versions):
         nextpiece = pieces.pop(0)
         if re.match('\d+$', nextpiece):
             postrelease = nextpiece
-            normalized_version.append('.'+postrelease)
         elif nextpiece.startswith('g'):
             continue
             # Use the full version instead ,below
