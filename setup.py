@@ -243,10 +243,6 @@ def get_normalized_version(versions):
         elif nextpiece == 'dirty':
             dirty = True
 
-    fullvhex = versions['full'].split('-')[0]
-    full = int(fullvhex, 16)
-    normalized_version.append('.'+str(full))
-
     dev = False
     if dirty:
         dev = True
