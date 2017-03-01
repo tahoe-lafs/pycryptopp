@@ -6,7 +6,7 @@ set -e -x
 
 # Compile wheels
 for PYBIN in /opt/python/cp2*/bin; do
-    "${PYBIN}/pip" wheel /io/ -w /wheelhouse/
+    "${PYBIN}/pip" wheel --no-index --find-links file:///io/wheelhouse/ /io/ -w /wheelhouse/
 done
 
 # Bundle external shared libraries into the wheels and write them to their
