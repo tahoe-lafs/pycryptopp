@@ -237,20 +237,24 @@ def get_normalized_version(versions):
         nextpiece = pieces.pop(0)
         if re.match('\d+$', nextpiece):
             postrelease = nextpiece
-            normalized_version.append('.'+postrelease)
         elif nextpiece.startswith('g'):
             continue
             # Use the full version instead ,below
         elif nextpiece == 'dirty':
             dirty = True
 
-    fullvhex = versions['full'].split('-')[0]
-    full = int(fullvhex, 16)
-    normalized_version.append('.'+str(full))
+    dev = False
+    if dirty:
+        dev = True
+        if postrelease is None:
+            postrelease = "0"
+        else:
+            postrelease = str(int(postrelease) + 1)
 
     if postrelease is not None:
         normalized_version.append('.post'+postrelease)
-    if dirty is True:
+
+    if dev:
         normalized_version.append('.dev0')
 
     return ''.join(normalized_version)
