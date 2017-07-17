@@ -20,6 +20,9 @@ typedef int Py_ssize_t;
 #include <src-cryptopp/aes.h>
 #endif
 
+// https://github.com/weidai11/cryptopp/issues/442
+typedef unsigned char byte;
+
 static const char*const aes___doc__ = "_aes counter mode cipher\n\
 You are advised to run aes.start_up_self_test() after importing this module.";
 

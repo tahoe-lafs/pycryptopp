@@ -21,6 +21,9 @@ typedef int Py_ssize_t;
 #include <src-cryptopp/filters.h>
 #endif
 
+// https://github.com/weidai11/cryptopp/issues/442
+typedef unsigned char byte;
+
 static const char*const sha256___doc__ = "_sha256 hash function";
 
 static PyObject *sha256_error;
