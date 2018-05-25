@@ -153,7 +153,7 @@ if BUILD_DOUBLE_LOAD_TESTER:
     srcs.append('_doubleloadtester.cpp', )
 
 ext_modules.append(
-    Extension('pycryptopp._pycryptopp', extra_srcs + srcs, include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
+    Extension('pycryptopp._pycryptopp', sorted(extra_srcs) + srcs, include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries, extra_link_args=extra_link_args, extra_compile_args=extra_compile_args, define_macros=define_macros, undef_macros=undef_macros)
     )
 
 # python-ed25519
@@ -163,7 +163,7 @@ sources.extend([os.path.join("src-ed25519","supercop-ref",s)
                 if s.endswith(".c") and s!="test.c"])
 m = Extension("pycryptopp.publickey.ed25519._ed25519",
               include_dirs=[os.path.join("src-ed25519","supercop-ref")],
-              sources=sources)
+              sources=sorted(sources))
 ext_modules.append(m)
 
 
