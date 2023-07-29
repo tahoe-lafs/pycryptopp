@@ -330,7 +330,7 @@ class UpdateVersion(object):
         f.close()
 
     def write_extraversion_h(self, pkgname, version, outfname, body):
-        f = open(outfname, "wb")
+        f = open(outfname, "wt")
         f.write(body % {"pkgname": pkgname, "pkgversion": version})
         f.close()
 
