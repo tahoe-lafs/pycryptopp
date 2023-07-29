@@ -1,0 +1,6 @@
+[submodule "src-cryptopp"]
+	path = src-cryptopp
+	url = https://github.com/weidai11/cryptopp
+[submodule "src-ed25519"]
+	path = src-ed25519
+	url = https://github.com/orlp/ed25519

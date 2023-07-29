@@ -1,6 +1,6 @@
 from pycryptopp.publickey import ecdsa, ed25519, rsa
 
-from common import insecurerandstr, rep_bench
+from .common import insecurerandstr, rep_bench
 
 msg = 'crypto libraries should come with benchmarks'
 
@@ -10,7 +10,7 @@ class ECDSA256(object):
         self.signer = None
 
     def gen(self, N):
-        for i in xrange(N):
+        for i in range(N):
              ecdsa.SigningKey(self.seed)
         
     def sign_init(self, N):
@@ -18,7 +18,7 @@ class ECDSA256(object):
         
     def sign(self, N):
         signer = self.signer
-        for i in xrange(N):
+        for i in range(N):
             signer.sign(msg)
         
     def ver_init(self, N):
@@ -29,7 +29,7 @@ class ECDSA256(object):
     def ver(self, N):
         sig = self.sig
         verifier = self.verifier
-        for i in xrange(N):
+        for i in range(N):
             verifier.verify(sig, msg)
         
 class Ed25519(object):
@@ -38,7 +38,7 @@ class Ed25519(object):
         self.signer = None
 
     def gen(self, N):
-        for i in xrange(N):
+        for i in range(N):
              ed25519.SigningKey(self.seed)
         
     def sign_init(self, N):
@@ -46,7 +46,7 @@ class Ed25519(object):
         
     def sign(self, N):
         signer = self.signer
-        for i in xrange(N):
+        for i in range(N):
             signer.sign(msg)
         
     def ver_init(self, N):
@@ -57,7 +57,7 @@ class Ed25519(object):
     def ver(self, N):
         sig = self.sig
         verifier = self.verifier
-        for i in xrange(N):
+        for i in range(N):
             verifier.verify(sig, msg)
         
 class RSA2048(object):
@@ -67,7 +67,7 @@ class RSA2048(object):
         self.signer = None
 
     def gen(self, N):
-        for i in xrange(N):
+        for i in range(N):
              rsa.generate(sizeinbits=self.SIZEINBITS)
         
     def sign_init(self, N):
@@ -75,7 +75,7 @@ class RSA2048(object):
         
     def sign(self, N):
         signer = self.signer
-        for i in xrange(N):
+        for i in range(N):
             signer.sign(msg)
         
     def ver_init(self, N):
@@ -86,7 +86,7 @@ class RSA2048(object):
     def ver(self, N):
         sig = self.sig
         verifier = self.verifier
-        for i in xrange(N):
+        for i in range(N):
             verifier.verify(msg, sig)
         
 class RSA3248(object):
@@ -96,7 +96,7 @@ class RSA3248(object):
         self.signer = None
 
     def gen(self, N):
-        for i in xrange(N):
+        for i in range(N):
              rsa.generate(sizeinbits=self.SIZEINBITS)
         
     def sign_init(self, N):
@@ -104,7 +104,7 @@ class RSA3248(object):
         
     def sign(self, N):
         signer = self.signer
-        for i in xrange(N):
+        for i in range(N):
             signer.sign(msg)
         
     def ver_init(self, N):
@@ -115,34 +115,34 @@ class RSA3248(object):
     def ver(self, N):
         sig = self.sig
         verifier = self.verifier
-        for i in xrange(N):
+        for i in range(N):
             verifier.verify(msg, sig)
         
 def bench_sigs(MAXTIME):
     for klass in [ECDSA256, Ed25519,]:
-        print klass
+        print(klass)
         ob = klass()
-        print "generate key"
+        print("generate key")
         rep_bench(ob.gen, 1000, UNITS_PER_SECOND=1000, MAXTIME=MAXTIME, MAXREPS=100)
-        print "sign"
+        print("sign")
         rep_bench(ob.sign, 1000, UNITS_PER_SECOND=1000, initfunc=ob.sign_init, MAXTIME=MAXTIME, MAXREPS=100)
-        print "verify"
+        print("verify")
         rep_bench(ob.ver, 1000, UNITS_PER_SECOND=1000, initfunc=ob.ver_init, MAXTIME=MAXTIME, MAXREPS=100)
-        print
+        print()
 
     for klass in [RSA2048, RSA3248]:
-        print klass
+        print(klass)
         ob = klass()
-        print "generate key"
+        print("generate key")
         rep_bench(ob.gen, 1, UNITS_PER_SECOND=1000, MAXTIME=MAXTIME, MAXREPS=100)
-        print "sign"
+        print("sign")
         rep_bench(ob.sign, 1000, UNITS_PER_SECOND=1000, initfunc=ob.sign_init, MAXTIME=MAXTIME, MAXREPS=100)
-        print "verify"
+        print("verify")
         rep_bench(ob.ver, 10000, UNITS_PER_SECOND=1000, initfunc=ob.ver_init, MAXTIME=MAXTIME, MAXREPS=100)
-        print
+        print()
 
-    print "milliseconds per operation"
-    print
+    print("milliseconds per operation")
+    print()
 
 def bench(MAXTIME=10.0):
     bench_sigs(MAXTIME)

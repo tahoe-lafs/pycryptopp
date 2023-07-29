@@ -32,7 +32,7 @@ import unittest
 from pycryptopp.publickey import ecdsa
 
 def randstr(n, rr=randrange):
-    return ''.join([chr(rr(0, 256)) for x in xrange(n)])
+    return ''.join([chr(rr(0, 256)) for x in range(n)])
 
 from base64 import b32encode
 def ab(x): # debuggery
@@ -72,57 +72,57 @@ class Signer(unittest.TestCase):
         seed = randstr(SEEDBYTES)
         signer = ecdsa.SigningKey(seed)
         sig = signer.sign("message")
-        self.failUnlessEqual(len(sig), SIGBYTES)
+        self.assertEqual(len(sig), SIGBYTES)
 
     def test_sign_and_verify(self):
         seed = randstr(SEEDBYTES)
         signer = ecdsa.SigningKey(seed)
         sig = signer.sign("message")
         v = signer.get_verifying_key()
-        self.failUnless(v.verify("message", sig))
+        self.assertTrue(v.verify("message", sig))
 
     def test_sign_and_verify_emptymsg(self):
         seed = randstr(SEEDBYTES)
         signer = ecdsa.SigningKey(seed)
         sig = signer.sign("")
         v = signer.get_verifying_key()
-        self.failUnless(v.verify("", sig))
+        self.assertTrue(v.verify("", sig))
 
     def test_construct_from_same_seed_is_reproducible(self):
         seed = randstr(SEEDBYTES)
         signer1 = ecdsa.SigningKey(seed)
         signer2 = ecdsa.SigningKey(seed)
-        self.failUnlessEqual(signer1.get_verifying_key().serialize(), signer2.get_verifying_key().serialize())
+        self.assertEqual(signer1.get_verifying_key().serialize(), signer2.get_verifying_key().serialize())
 
         # ... and using different seeds constructs a different private key.
         seed3 = randstr(SEEDBYTES)
         assert seed3 != seed, "Internal error in Python random module's PRNG (or in pycryptopp's hacks to it to facilitate testing) -- got two identical strings from randstr(%s)" % SEEDBYTES
         signer3 = ecdsa.SigningKey(seed3)
-        self.failIfEqual(signer1.get_verifying_key().serialize(), signer3.get_verifying_key().serialize())
+        self.assertNotEqual(signer1.get_verifying_key().serialize(), signer3.get_verifying_key().serialize())
 
         # Also try the all-zeroes string just because bugs sometimes are
         # data-dependent on zero or cause bogus zeroes.
         seed4 = '\x00'*SEEDBYTES
         assert seed4 != seed, "Internal error in Python random module's PRNG (or in pycryptopp's hacks to it to facilitate testing) -- got the all-zeroes string from randstr(%s)" % SEEDBYTES
         signer4 = ecdsa.SigningKey(seed4)
-        self.failIfEqual(signer4.get_verifying_key().serialize(), signer1.get_verifying_key().serialize())
+        self.assertNotEqual(signer4.get_verifying_key().serialize(), signer1.get_verifying_key().serialize())
 
         signer5 = ecdsa.SigningKey(seed4)
-        self.failUnlessEqual(signer5.get_verifying_key().serialize(), signer4.get_verifying_key().serialize())
+        self.assertEqual(signer5.get_verifying_key().serialize(), signer4.get_verifying_key().serialize())
 
     def test_construct_short_seed(self):
         try:
             ecdsa.SigningKey("\x00\x00\x00")
-        except ecdsa.Error, le:
-            self.failUnless("seed is required to be of length " in str(le), le)
+        except ecdsa.Error as le:
+            self.assertTrue("seed is required to be of length " in str(le), le)
         else:
            self.fail("Should have raised error from seed being too short.")
 
     def test_construct_bad_arg_type(self):
         try:
             ecdsa.SigningKey(1)
-        except TypeError, le:
-            self.failUnless("must be string" in str(le), le)
+        except TypeError as le:
+            self.assertTrue("must be string" in str(le), le)
         else:
            self.fail("Should have raised error from seed being of the wrong type.")
 
@@ -133,10 +133,10 @@ class Verifier(unittest.TestCase):
 
         verifier = signer.get_verifying_key()
         s1 = verifier.serialize()
-        self.failUnlessEqual(len(s1), PUBKEYBYTES)
+        self.assertEqual(len(s1), PUBKEYBYTES)
         ecdsa.VerifyingKey(s1)
         s2 = verifier.serialize()
-        self.failUnlessEqual(s1, s2)
+        self.assertEqual(s1, s2)
 
 def flip_one_bit(s):
     assert s
@@ -156,26 +156,26 @@ class SignAndVerify(unittest.TestCase):
         msg = randmsg()
 
         sig = signer.sign(msg)
-        self.failUnlessEqual(len(sig), SIGBYTES)
-        self.failUnless(verifier.verify(msg, sig))
+        self.assertEqual(len(sig), SIGBYTES)
+        self.assertTrue(verifier.verify(msg, sig))
 
         # Now flip one bit of the signature and make sure that the signature doesn't check.
         badsig = flip_one_bit(sig)
-        self.failIf(verifier.verify(msg, badsig))
+        self.assertFalse(verifier.verify(msg, badsig))
 
         # Now generate a random signature and make sure that the signature doesn't check.
         badsig = randstr(len(sig))
         assert badsig != sig, "Internal error -- randstr() produced the same string twice: %s == %s" % (badsig, sig)
-        self.failIf(verifier.verify(msg, badsig))
+        self.assertFalse(verifier.verify(msg, badsig))
 
         # Now flip one bit of the message and make sure that the original signature doesn't check.
         badmsg = flip_one_bit(msg)
-        self.failIf(verifier.verify(badmsg, sig))
+        self.assertFalse(verifier.verify(badmsg, sig))
 
         # Now generate a random message and make sure that the original signature doesn't check.
         badmsg = randstr(len(msg))
         assert badmsg != msg, "Internal error -- randstr() produced the same string twice: %s == %s" % (badmsg, msg)
-        self.failIf(verifier.verify(badmsg, sig))
+        self.assertFalse(verifier.verify(badmsg, sig))
 
     def _help_test_sign_and_check_bad_keys(self, signer, verifier):
         """
@@ -184,8 +184,8 @@ class SignAndVerify(unittest.TestCase):
         msg = randmsg()
 
         sig = signer.sign(msg)
-        self.failUnlessEqual(len(sig), SIGBYTES)
-        self.failIf(verifier.verify(msg, sig))
+        self.assertEqual(len(sig), SIGBYTES)
+        self.assertFalse(verifier.verify(msg, sig))
 
     def test(self):
         seed = randstr(SEEDBYTES)
@@ -194,7 +194,7 @@ class SignAndVerify(unittest.TestCase):
         self._help_test_sign_and_check_good_keys(signer, verifier)
 
         vstr = verifier.serialize()
-        self.failUnlessEqual(len(vstr), PUBKEYBYTES)
+        self.assertEqual(len(vstr), PUBKEYBYTES)
         verifier2 = ecdsa.VerifyingKey(vstr)
         self._help_test_sign_and_check_good_keys(signer, verifier2)
 
@@ -247,12 +247,12 @@ class Compatibility(unittest.TestCase):
         v1 = signer.get_verifying_key()
         vs = v1.serialize()
         vs32 = base64.b32encode(vs)
-        self.failUnlessEqual(vs32, "AIWKEM44YHQCR3VI7SF7IJI7SSW6YNLMGMWBIXQWXC5522H2KXXHO===")
+        self.assertEqual(vs32, "AIWKEM44YHQCR3VI7SF7IJI7SSW6YNLMGMWBIXQWXC5522H2KXXHO===")
         v2 = ecdsa.VerifyingKey(vs)
         # print signer.sign("message").encode('hex')
         sig = 'a914953c6e6cecaf97d3d7f142ed1da88014752c3e1cd43b38f3327a73be67075bda7ec4a2ead5bb8a3471271a44ffbbd456b4d3ca470584c05703fdbe7b5bc0'.decode('hex')
-        self.failUnless(v1.verify("message", sig))
-        self.failUnless(v2.verify("message", sig))
+        self.assertTrue(v1.verify("message", sig))
+        self.assertTrue(v2.verify("message", sig))
 
 if __name__ == "__main__":
     unittest.main()

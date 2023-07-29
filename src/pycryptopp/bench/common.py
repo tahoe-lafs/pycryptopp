@@ -30,7 +30,7 @@ except (ImportError, AttributeError):
 
             deltac = stopc - startc
             if deltac <= 0:
-                print "clock jump backward or wrapped -- ignoring this sample. startc: %s, stopc: %s, deltac: %s" % (startc, stopc, deltac,)
+                print("clock jump backward or wrapped -- ignoring this sample. startc: %s, stopc: %s, deltac: %s" % (startc, stopc, deltac,))
             else:
                 meanc += deltac
 
@@ -46,12 +46,12 @@ except (ImportError, AttributeError):
             'meanc': meanc,
             'num': num
             }
-        print "mean: %(meanc)#8.03e (of %(num)6d)" % res
+        print("mean: %(meanc)#8.03e (of %(num)6d)" % res)
     rep_bench = this_rep_bench
 
 import random as insecurerandom
 def insecurerandstr(n):
-    return ''.join(map(chr, map(insecurerandom.randrange, [0]*n, [256]*n)))
+    return ''.join(map(chr, list(map(insecurerandom.randrange, [0]*n, [256]*n))))
 
 def calib_clock():
     interval = 1.0

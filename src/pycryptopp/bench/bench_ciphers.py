@@ -1,6 +1,6 @@
 from pycryptopp.cipher import aes, xsalsa20
 
-from common import insecurerandstr, rep_bench
+from .common import insecurerandstr, rep_bench
 
 UNITS_PER_SECOND = 10**9
 
@@ -27,16 +27,16 @@ def bench_ciphers(MAXTIME):
         (xsalsa20.XSalsa20, 32),
         ]:
         ob = BenchCrypt(klass, keysize)
-        print ob
+        print(ob)
         for (legend, size) in [
             ("large (%d B)",  10**7),
             ]:
-            print legend % size
+            print(legend % size)
             rep_bench(ob.crypt, size, UNITS_PER_SECOND=UNITS_PER_SECOND, MAXTIME=MAXTIME, MAXREPS=100, initfunc=ob.crypt_init)
-            print
+            print()
 
-    print "nanoseconds per byte crypted"
-    print
+    print("nanoseconds per byte crypted")
+    print()
 
 def bench(MAXTIME=10.0):
     bench_ciphers(MAXTIME)

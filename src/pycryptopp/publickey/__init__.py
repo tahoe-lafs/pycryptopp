@@ -1,3 +1,3 @@
-import ecdsa, rsa, ed25519
+from . import ecdsa, rsa, ed25519
 
 quiet_pyflakes=[ecdsa, rsa, ed25519]

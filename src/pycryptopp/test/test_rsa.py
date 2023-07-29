@@ -19,7 +19,7 @@ def ab(x): # debuggery
         return "%s:%s" % (len(x), "--empty--",)
 
 def randstr(n):
-    return ''.join(map(chr, map(random.randrange, [0]*n, [256]*n)))
+    return ''.join(map(chr, list(map(random.randrange, [0]*n, [256]*n))))
 
 KEYSIZE=522 # 522 bits is far too few for actual security -- it is used only for faster unit tests
 
@@ -27,14 +27,14 @@ class Signer(unittest.TestCase):
     def test_generate_bad_size(self):
         try:
             rsa.generate(KEYSIZE-1)
-        except rsa.Error, le:
-            self.failUnless("size in bits is required to be >=" in str(le), le)
+        except rsa.Error as le:
+            self.assertTrue("size in bits is required to be >=" in str(le), le)
         else:
             self.fail("Should have raised error from size being too small.")
         try:
             rsa.generate(sizeinbits=KEYSIZE-1)
-        except rsa.Error, le:
-            self.failUnless("size in bits is required to be >=" in str(le), le)
+        except rsa.Error as le:
+            self.assertTrue("size in bits is required to be >=" in str(le), le)
         else:
             self.fail("Should have raised error from size being too small.")
 
@@ -47,29 +47,29 @@ class Signer(unittest.TestCase):
     def test_sign(self):
         signer = rsa.generate(KEYSIZE)
         result = signer.sign("abc")
-        self.failUnlessEqual(len(result), ((KEYSIZE+7)/8))
+        self.assertEqual(len(result), ((KEYSIZE+7)/8))
         # TODO: test against RSAInc. test vectors.
 
     def test_create_from_string_invalid(self):
         try:
             rsa.create_signing_key_from_string("invalid string")
-        except rsa.Error, le:
-            self.failUnless("decode error" in str(le), le)
+        except rsa.Error as le:
+            self.assertTrue("decode error" in str(le), le)
         else:
             self.fail("Should have raised error from invalid string")
 
         try:
             rsa.create_verifying_key_from_string("invalid string")
-        except rsa.Error, le:
-            self.failUnless("decode error" in str(le), le)
+        except rsa.Error as le:
+            self.assertTrue("decode error" in str(le), le)
         else:
             self.fail("Should have raised error from invalid string")
 
 class SignAndVerify(unittest.TestCase):
     def _help_test_sign_and_check(self, signer, verifier, msg):
         sig = signer.sign(msg)
-        self.failUnlessEqual(len(sig), ((KEYSIZE+7)/8))
-        self.failUnless(verifier.verify(msg, sig))
+        self.assertEqual(len(sig), ((KEYSIZE+7)/8))
+        self.assertTrue(verifier.verify(msg, sig))
 
     def test_sign_and_check_a(self):
         signer = rsa.generate(KEYSIZE)
@@ -90,7 +90,7 @@ class SignAndVerify(unittest.TestCase):
     def _help_test_sign_and_failcheck(self, signer, verifier, msg):
         sig = signer.sign("a")
         sig = sig[:-1] + chr(ord(sig[-1])^0x01)
-        self.failUnless(not verifier.verify(msg, sig))
+        self.assertTrue(not verifier.verify(msg, sig))
 
     def test_sign_and_failcheck_a(self):
         signer = rsa.generate(KEYSIZE)

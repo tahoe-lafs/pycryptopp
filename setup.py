@@ -81,6 +81,7 @@ if DISABLE_EMBEDDED_CRYPTOPP:
 
     # Link with a Crypto++ library that is already installed on the system.
 
+    # TODO use pkg-config to find incldir and libdir of cryptopp
     for inclpath in ["/usr/local/include/cryptopp", "/usr/include/cryptopp"]:
         if os.path.exists(inclpath):
             libraries.append("cryptopp")
@@ -91,9 +92,9 @@ if DISABLE_EMBEDDED_CRYPTOPP:
             break
 
     if not libraries:
-        print "Did not locate libcryptopp in the usual places."
-        print "Adding /usr/local/{include,lib} and -lcryptopp in the hopes"
-        print "that they will work."
+        print("Did not locate libcryptopp in the usual places.")
+        print("Adding /usr/local/{include,lib} and -lcryptopp in the hopes")
+        print("that they will work.")
 
         # Note that when using cygwin build tools (including gcc) to build
         # Windows-native binaries, the os.path.exists() will not see the
@@ -159,10 +160,10 @@ ext_modules.append(
 # python-ed25519
 sources = [os.path.join("src-ed25519","glue","ed25519module.c")]
 sources.extend([os.path.join("src-ed25519","supercop-ref",s)
-                for s in os.listdir(os.path.join("src-ed25519","supercop-ref"))
+                for s in os.listdir(os.path.join("src-ed25519","src"))
                 if s.endswith(".c") and s!="test.c"])
 m = Extension("pycryptopp.publickey.ed25519._ed25519",
-              include_dirs=[os.path.join("src-ed25519","supercop-ref")],
+              include_dirs=[os.path.join("src-ed25519","src")],
               sources=sources)
 ext_modules.append(m)
 
@@ -189,7 +190,7 @@ if "sdist_dsc" in sys.argv:
 
 data_fnames=['COPYING.GPL', 'COPYING.TGPPL.rst', 'COPYING.MIT.txt', 'COPYING.SPL.txt', 'README.rst']
 
-readmetext = open('README.rst').read()
+readmetext = open('README.rst', 'rb').read()
 if readmetext[:3] == '\xef\xbb\xbf':
     # utf-8 "BOM" 
     readmetext = readmetext[3:]
@@ -330,7 +331,7 @@ class UpdateVersion(object):
         f.close()
 
     def write_extraversion_h(self, pkgname, version, outfname, body):
-        f = open(outfname, "wb")
+        f = open(outfname, "wt")
         f.write(body % {"pkgname": pkgname, "pkgversion": version})
         f.close()
 
