@@ -26,7 +26,7 @@ def ab(x): # debuggery
         return "%s:%s" % (len(x), "--empty--",)
 
 def randstr(n):
-    return ''.join(map(chr, map(random.randrange, [0]*n, [256]*n)))
+    return ''.join(map(chr, list(map(random.randrange, [0]*n, [256]*n))))
 
 h0 = a2b_hex("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
 h_bd = a2b_hex("68325720aabd7c82f30f554b313d0570c95accbb7dc4b5aae11204c08ffe732b")
@@ -35,52 +35,52 @@ h_5fd4 = a2b_hex("7c4fbf484498d21b487b9d61de8914b2eadaf2698712936d47c3ada2558f67
 class SHA256(unittest.TestCase):
     def test_digest(self):
         empty_digest = sha256.SHA256().digest()
-        self.failUnless(isinstance(empty_digest, str))
-        self.failUnlessEqual(len(empty_digest), 32)
-        self.failUnlessEqual(empty_digest, h0)
+        self.assertTrue(isinstance(empty_digest, str))
+        self.assertEqual(len(empty_digest), 32)
+        self.assertEqual(empty_digest, h0)
 
     def test_hexdigest(self):
         empty_hexdigest = sha256.SHA256().hexdigest()
-        self.failUnlessEqual(a2b_hex(empty_hexdigest), h0)
+        self.assertEqual(a2b_hex(empty_hexdigest), h0)
     test_hexdigest.todo = "Not yet implemented: SHA256.hexdigest()."
 
     def test_onebyte_1(self):
         d = sha256.SHA256("\xbd").digest()
-        self.failUnlessEqual(d, h_bd)
+        self.assertEqual(d, h_bd)
 
     def test_onebyte_2(self):
         s = sha256.SHA256()
         s.update("\xbd")
         d = s.digest()
-        self.failUnlessEqual(d, h_bd)
+        self.assertEqual(d, h_bd)
 
     def test_update(self):
         s = sha256.SHA256("\x5f")
         s.update("\xd4")
         d = s.digest()
-        self.failUnlessEqual(d, h_5fd4)
+        self.assertEqual(d, h_5fd4)
 
     def test_constructor_type_check(self):
-        self.failUnlessRaises(TypeError, sha256.SHA256, None)
+        self.assertRaises(TypeError, sha256.SHA256, None)
 
     def test_update_type_check(self):
         h = sha256.SHA256()
-        self.failUnlessRaises(TypeError, h.update, None)
+        self.assertRaises(TypeError, h.update, None)
 
     def test_digest_twice(self):
         h = sha256.SHA256()
         d1 = h.digest()
-        self.failUnless(isinstance(d1, str))
+        self.assertTrue(isinstance(d1, str))
         d2 = h.digest()
-        self.failUnlessEqual(d1, d2)
+        self.assertEqual(d1, d2)
 
     def test_digest_then_update_fail(self):
         h = sha256.SHA256()
         h.digest()
         try:
             h.update("oops")
-        except sha256.Error, le:
-            self.failUnless("digest() has been called" in str(le), le)
+        except sha256.Error as le:
+            self.assertTrue("digest() has been called" in str(le), le)
 
     def test_chunksize(self):
         # hashes can be computed on arbitrarily-sized chunks
@@ -95,8 +95,8 @@ class SHA256(unittest.TestCase):
                 got = h.hexdigest()
                 if got != expected:
                     problems = True
-                    print len(s[:a]), len(s[a:]), len(s), got, expected
-        self.failIf(problems)
+                    print(len(s[:a]), len(s[a:]), len(s), got, expected)
+        self.assertFalse(problems)
 
     def test_recursive_different_chunksizes(self):
         """
@@ -115,7 +115,7 @@ class SHA256(unittest.TestCase):
         for i in range(0, 65):
             hx.update(chr(0xFE))
             hx.update(s[:64])
-        self.failUnlessEqual(hx.hexdigest().lower(), '5191c7841dd4e16aa454d40af924585dffc67157ffdbfd0236acddd07901629d')
+        self.assertEqual(hx.hexdigest().lower(), '5191c7841dd4e16aa454d40af924585dffc67157ffdbfd0236acddd07901629d')
 
 
 VECTS_RE=re.compile("\nLen = ([0-9]+)\nMsg = ([0-9a-f]+)\nMD = ([0-9a-f]+)")
@@ -153,7 +153,7 @@ class SHSVectors(unittest.TestCase):
             md = a2b_hex(mo.group(3))
 
             computed_md = sha256.SHA256(msg).digest()
-            self.failUnlessEqual(computed_md, md)
+            self.assertEqual(computed_md, md)
 
     def test_monte(self):
         inlines = resource_string_lines('pycryptopp', 'testvectors/SHA256Monte.txt')
@@ -175,5 +175,5 @@ class SHSVectors(unittest.TestCase):
                     m = mds[-3]+mds[-2]+mds[-1]
                     mds.append(sha256.SHA256(m).digest())
                 seed = mds[-1]
-                self.failUnlessEqual(line[5:], b2a_hex(seed))
+                self.assertEqual(line[5:], b2a_hex(seed))
                 j += 1

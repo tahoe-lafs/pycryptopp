@@ -26,59 +26,59 @@ class Basic(unittest.TestCase):
         else:
             elapsed = now - self.timer
             self.timer = now
-            print " (%f elapsed)" % elapsed
-        print msg
+            print(" (%f elapsed)" % elapsed)
+        print(msg)
 
     def test_version(self):
         # just make sure it can be retrieved
         ver = ed25519.__version__
-        self.failUnless(isinstance(ver, type("")))
+        self.assertTrue(isinstance(ver, type("")))
 
     def test_constants(self):
         # the secret key we get from raw.keypair() are 64 bytes long, and
         # are mostly the output of a sha512 call. The first 32 bytes are the
         # private exponent (random, with a few bits stomped).
-        self.failUnlessEqual(raw.SECRETKEYBYTES, 64)
+        self.assertEqual(raw.SECRETKEYBYTES, 64)
         # the public key is the encoded public point
-        self.failUnlessEqual(raw.PUBLICKEYBYTES, 32)
-        self.failUnlessEqual(raw.SIGNATUREKEYBYTES, 64)
+        self.assertEqual(raw.PUBLICKEYBYTES, 32)
+        self.assertEqual(raw.SIGNATUREKEYBYTES, 64)
 
     def test_raw(self):
         sk_s = "\x00" * 32 # usually urandom(32)
         vk_s, skvk_s = raw.publickey(sk_s)
-        self.failUnlessEqual(len(vk_s), 32)
+        self.assertEqual(len(vk_s), 32)
         exp_vks = unhexlify("3b6a27bcceb6a42d62a3a8d02a6f0d73"
                             "653215771de243a63ac048a18b59da29")
-        self.failUnlessEqual(vk_s, exp_vks)
-        self.failUnlessEqual(skvk_s[:32], sk_s)
-        self.failUnlessEqual(skvk_s[32:], vk_s)
+        self.assertEqual(vk_s, exp_vks)
+        self.assertEqual(skvk_s[:32], sk_s)
+        self.assertEqual(skvk_s[32:], vk_s)
         msg = "hello world"
         msg_and_sig = raw.sign(msg, skvk_s)
         sig = msg_and_sig[:-len(msg)]
-        self.failUnlessEqual(len(sig), 64)
+        self.assertEqual(len(sig), 64)
         exp_sig = unhexlify("b0b47780f096ae60bfff8d8e7b19c36b"
                             "321ae6e69cca972f2ff987ef30f20d29"
                             "774b53bae404485c4391ddf1b3f37aaa"
                             "8a9747f984eb0884e8aa533386e73305")
-        self.failUnlessEqual(sig, exp_sig)
+        self.assertEqual(sig, exp_sig)
         ret = raw.open(sig+msg, vk_s) # don't raise exception
-        self.failUnlessEqual(ret, msg)
-        self.failUnlessRaises(raw.BadSignatureError,
+        self.assertEqual(ret, msg)
+        self.assertRaises(raw.BadSignatureError,
                               raw.open,
                               sig+msg+".. NOT!", vk_s)
-        self.failUnlessRaises(raw.BadSignatureError,
+        self.assertRaises(raw.BadSignatureError,
                               raw.open,
                               sig+flip_bit(msg), vk_s)
-        self.failUnlessRaises(raw.BadSignatureError,
+        self.assertRaises(raw.BadSignatureError,
                               raw.open,
                               sig+msg, flip_bit(vk_s))
-        self.failUnlessRaises(raw.BadSignatureError,
+        self.assertRaises(raw.BadSignatureError,
                               raw.open,
                               sig+msg, flip_bit(vk_s, in_byte=2))
-        self.failUnlessRaises(raw.BadSignatureError,
+        self.assertRaises(raw.BadSignatureError,
                               raw.open,
                               flip_bit(sig)+msg, vk_s)
-        self.failUnlessRaises(raw.BadSignatureError,
+        self.assertRaises(raw.BadSignatureError,
                               raw.open,
                               flip_bit(sig, in_byte=33)+msg, vk_s)
 
@@ -87,36 +87,36 @@ class Basic(unittest.TestCase):
         sk_bytes = unhexlify("4ba96b0b5303328c7405220598a587c4"
                              "acb06ed9a9601d149f85400195f1ec3d")
         sk = ed25519.SigningKey(sk_bytes)
-        self.failUnlessRaises(ValueError, ed25519.SigningKey, "wrong length")
+        self.assertRaises(ValueError, ed25519.SigningKey, "wrong length")
 
         vk_bytes = sk.get_verifying_key_bytes()
-        self.failUnlessEqual(hexlify(vk_bytes),
+        self.assertEqual(hexlify(vk_bytes),
                              "a66d161e090652b054740748f059f92a"
                              "5b731f1c27b05571f6d942e4f8b7b264")
 
         ed25519.VerifyingKey(vk_bytes)
-        self.failUnlessRaises(ValueError, ed25519.VerifyingKey, "wrong length")
+        self.assertRaises(ValueError, ed25519.VerifyingKey, "wrong length")
 
     def test_OOP(self):
         sk_bytes = unhexlify("4ba96b0b5303328c7405220598a587c4"
                              "acb06ed9a9601d149f85400195f1ec3d")
         sk = ed25519.SigningKey(sk_bytes)
 
-        self.failUnlessEqual(hexlify(sk.get_verifying_key_bytes()),
+        self.assertEqual(hexlify(sk.get_verifying_key_bytes()),
                              "a66d161e090652b054740748f059f92a"
                              "5b731f1c27b05571f6d942e4f8b7b264")
         vk = ed25519.VerifyingKey(sk.get_verifying_key_bytes())
 
         msg = "hello world"
         sig = sk.sign(msg)
-        self.failUnlessEqual(len(sig), 64)
-        self.failUnlessEqual(hexlify(sig),
+        self.assertEqual(len(sig), 64)
+        self.assertEqual(hexlify(sig),
                              "6eaffe94f2972b35158b6aaa9b69c1da"
                              "97f0896aca29c41b1dd7b32e6c9e2ff6"
                              "76fc8d8b034709cdcc37d8aeb86bebfb"
                              "173ace3c319e211ea1d7e8d8884c1808")
-        self.failUnlessEqual(vk.verify(sig, msg), None) # also, don't throw
-        self.failUnlessRaises(ed25519.BadSignatureError,
+        self.assertEqual(vk.verify(sig, msg), None) # also, don't throw
+        self.assertRaises(ed25519.BadSignatureError,
                               vk.verify, sig, msg+".. NOT!")
 
     def test_object_identity(self):
@@ -127,21 +127,21 @@ class Basic(unittest.TestCase):
         sk1a = ed25519.SigningKey(sk1_bytes)
         sk1b = ed25519.SigningKey(sk1_bytes)
         sk2 = ed25519.SigningKey(sk2_bytes)
-        self.failUnlessEqual(sk1a, sk1b)
-        self.failIfEqual(sk1a, sk2)
+        self.assertEqual(sk1a, sk1b)
+        self.assertNotEqual(sk1a, sk2)
 
         vk1_bytes = sk1a.get_verifying_key_bytes()
-        self.failUnlessEqual(vk1_bytes, sk1b.get_verifying_key_bytes())
+        self.assertEqual(vk1_bytes, sk1b.get_verifying_key_bytes())
         vk2_bytes = sk2.get_verifying_key_bytes()
         vk1a = ed25519.VerifyingKey(vk1_bytes)
         vk1b = ed25519.VerifyingKey(vk1_bytes)
         vk2 = ed25519.VerifyingKey(vk2_bytes)
-        self.failUnlessEqual(vk1a, vk1b)
-        self.failIfEqual(vk1a, vk2)
+        self.assertEqual(vk1a, vk1b)
+        self.assertNotEqual(vk1a, vk2)
 
         # exercise compare-against-other-type
-        self.failIfEqual(sk2, "not a SigningKey")
-        self.failIfEqual(vk2, "not a VerifyingKey")
+        self.assertNotEqual(sk2, "not a SigningKey")
+        self.assertNotEqual(vk2, "not a VerifyingKey")
 
 
 if __name__ == '__main__':

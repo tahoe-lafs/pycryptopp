@@ -91,9 +91,9 @@ if DISABLE_EMBEDDED_CRYPTOPP:
             break
 
     if not libraries:
-        print "Did not locate libcryptopp in the usual places."
-        print "Adding /usr/local/{include,lib} and -lcryptopp in the hopes"
-        print "that they will work."
+        print("Did not locate libcryptopp in the usual places.")
+        print("Adding /usr/local/{include,lib} and -lcryptopp in the hopes")
+        print("that they will work.")
 
         # Note that when using cygwin build tools (including gcc) to build
         # Windows-native binaries, the os.path.exists() will not see the

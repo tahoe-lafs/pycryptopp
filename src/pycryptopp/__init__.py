@@ -25,7 +25,7 @@ def _import_my_names(thismodule, prefix):
             myname = name[len(prefix):]
             thismodule[myname] = getattr(_pycryptopp, name)
 
-import publickey, hash, cipher
+from . import publickey, hash, cipher
 
 quiet_pyflakes=[__version__, publickey, hash, cipher, _pycryptopp, __doc__, _import_my_names]
 del quiet_pyflakes

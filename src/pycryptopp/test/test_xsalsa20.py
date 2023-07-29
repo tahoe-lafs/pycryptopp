@@ -15,7 +15,7 @@ class XSalsa20Test(unittest.TestCase):
         key="1b27556473e985d462cd51197a9a46c76009549eac6474f206c4ee0844f68389"
         iv="69696ee955b62b73cd62bda875fc73d68219e0036b7a0b37"
         computedcipher=xsalsa20.XSalsa20(a2b_hex(key),a2b_hex(iv)).process('\x00'*139)
-        self.failUnlessEqual(a2b_hex(self.enc0), computedcipher, "enc0: %s, computedciper: %s" % (self.enc0, b2a_hex(computedcipher)))
+        self.assertEqual(a2b_hex(self.enc0), computedcipher, "enc0: %s, computedciper: %s" % (self.enc0, b2a_hex(computedcipher)))
 
         cryptor=xsalsa20.XSalsa20(a2b_hex(key),a2b_hex(iv))
 
@@ -23,7 +23,7 @@ class XSalsa20Test(unittest.TestCase):
         computedcipher2=cryptor.process('\x00'*69)
         computedcipher3=cryptor.process('\x00')
         computedcipher12=b2a_hex(computedcipher1)+b2a_hex(computedcipher2)+b2a_hex(computedcipher3)
-        self.failUnlessEqual(self.enc0, computedcipher12)
+        self.assertEqual(self.enc0, computedcipher12)
 
 
     def test_XSalsa(self):
@@ -47,7 +47,7 @@ class XSalsa20Test(unittest.TestCase):
             #print "ciphertext", b2a_hex(computedcipher), '\n'
             #print "computedtext", ciphertext, '\n'
             #print count, ": \n"
-            self.failUnlessEqual(computedcipher,a2b_hex(ciphertext),"computedcipher: %s, ciphertext: %s" % (b2a_hex(computedcipher), ciphertext))
+            self.assertEqual(computedcipher,a2b_hex(ciphertext),"computedcipher: %s, ciphertext: %s" % (b2a_hex(computedcipher), ciphertext))
 
             #the random decomposing
             plaintext1 = ""
@@ -63,7 +63,7 @@ class XSalsa20Test(unittest.TestCase):
                 plaintext2 += plaintext[point+2:]
                 rccipher += b2a_hex(cryptor.process(a2b_hex(plaintext1)))
                 rccipher += b2a_hex(cryptor.process(a2b_hex(plaintext2)))
-                self.failUnlessEqual(rccipher, ciphertext, "random computed cipher: %s, ciphertext: %s" % (rccipher, ciphertext))
+                self.assertEqual(rccipher, ciphertext, "random computed cipher: %s, ciphertext: %s" % (rccipher, ciphertext))
 
             #every byte encrypted
             cryptor = xsalsa20.XSalsa20(key,iv)
@@ -72,29 +72,29 @@ class XSalsa20Test(unittest.TestCase):
             while l<=(length-2):
                     eccipher += b2a_hex(cryptor.process(a2b_hex(plaintext[l:l+2])))
                     l += 2
-            self.failUnlessEqual(eccipher, ciphertext, "every byte computed cipher: %s, ciphertext: %s" % (eccipher, ciphertext))
+            self.assertEqual(eccipher, ciphertext, "every byte computed cipher: %s, ciphertext: %s" % (eccipher, ciphertext))
 
 
     def test_types_and_lengths(self):
         # the key= argument must be a bytestring exactly 32 bytes long
-        self.failUnlessRaises(TypeError, xsalsa20.XSalsa20, None)
+        self.assertRaises(TypeError, xsalsa20.XSalsa20, None)
         for i in range(70):
             key = "a"*i
             if i != 32:
-                self.failUnlessRaises(xsalsa20.Error, xsalsa20.XSalsa20, key)
+                self.assertRaises(xsalsa20.Error, xsalsa20.XSalsa20, key)
             else:
-                self.failUnless(xsalsa20.XSalsa20(key))
+                self.assertTrue(xsalsa20.XSalsa20(key))
 
         # likewise, iv= (if provided) must be exactly 24 bytes long. Passing
         # None is not treated the same as not passing the argument at all.
         key = "a"*32
-        self.failUnlessRaises(TypeError, xsalsa20.XSalsa20, key, None)
+        self.assertRaises(TypeError, xsalsa20.XSalsa20, key, None)
         for i in range(70):
             iv = "i"*i
             if i != 24:
-                self.failUnlessRaises(xsalsa20.Error, xsalsa20.XSalsa20, key, iv)
+                self.assertRaises(xsalsa20.Error, xsalsa20.XSalsa20, key, iv)
             else:
-                self.failUnless(xsalsa20.XSalsa20(key, iv))
+                self.assertTrue(xsalsa20.XSalsa20(key, iv))
 
     def test_recursive(self):
         # Try to use the same technique as:
@@ -123,7 +123,7 @@ class XSalsa20Test(unittest.TestCase):
             s = s[-K-N-B:]
         output = b2a_hex(s[-B:])
         # I've compared this output against pynacl -warner
-        self.failUnlessEqual(output,
+        self.assertEqual(output,
                              "77f8e2792dd4f2d44edf469c3a7ad5f7"
                              "5cb373fe0c3d9c8ee570dc91e00f1caa"
                              "25f725c202f3781869a40b8a2c856b55"
