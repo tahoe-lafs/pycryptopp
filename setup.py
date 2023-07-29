@@ -81,6 +81,7 @@ if DISABLE_EMBEDDED_CRYPTOPP:
 
     # Link with a Crypto++ library that is already installed on the system.
 
+    # TODO use pkg-config to find incldir and libdir of cryptopp
     for inclpath in ["/usr/local/include/cryptopp", "/usr/include/cryptopp"]:
         if os.path.exists(inclpath):
             libraries.append("cryptopp")
