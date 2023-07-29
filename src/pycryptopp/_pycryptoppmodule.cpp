@@ -32,16 +32,28 @@ static PyMethodDef _pycryptopp_functions[] = {
     {NULL, NULL, 0, NULL}  /* sentinel */
 };
 
+static struct PyModuleDef _pycryptopp = {
+    PyModuleDef_HEAD_INIT,
+    // TODO "" or "_"
+    //"pycryptopp",
+    "_pycryptopp",
+    _pycryptopp__doc__,
+    -1,
+    _pycryptopp_functions
+};
+
 #ifndef PyMODINIT_FUNC /* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
 PyMODINIT_FUNC
-init_pycryptopp(void) {
+// TODO "_" or "__"
+//PyInit_pycryptopp(void) {
+PyInit__pycryptopp(void) {
     PyObject *module;
 
-    module = Py_InitModule3("_pycryptopp", _pycryptopp_functions, _pycryptopp__doc__);
+    module = PyModule_Create(&_pycryptopp);
     if (!module)
-      return;
+      return NULL;
 
     PyObject* version;
 
@@ -61,7 +73,7 @@ init_pycryptopp(void) {
 
     int succ = PyModule_AddObject(module, "cryptopp_version", version);
     if (succ != 0)
-        return;
+        return NULL;
 
 
     init_ecdsa(module);
@@ -69,4 +81,6 @@ init_pycryptopp(void) {
     init_sha256(module);
     init_aes(module);
     init_xsalsa20(module);
+
+    return module;
 }
