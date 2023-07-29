@@ -159,10 +159,10 @@ ext_modules.append(
 # python-ed25519
 sources = [os.path.join("src-ed25519","glue","ed25519module.c")]
 sources.extend([os.path.join("src-ed25519","supercop-ref",s)
-                for s in os.listdir(os.path.join("src-ed25519","supercop-ref"))
+                for s in os.listdir(os.path.join("src-ed25519","src"))
                 if s.endswith(".c") and s!="test.c"])
 m = Extension("pycryptopp.publickey.ed25519._ed25519",
-              include_dirs=[os.path.join("src-ed25519","supercop-ref")],
+              include_dirs=[os.path.join("src-ed25519","src")],
               sources=sources)
 ext_modules.append(m)
 
