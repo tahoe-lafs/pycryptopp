@@ -189,7 +189,7 @@ if "sdist_dsc" in sys.argv:
 
 data_fnames=['COPYING.GPL', 'COPYING.TGPPL.rst', 'COPYING.MIT.txt', 'COPYING.SPL.txt', 'README.rst']
 
-readmetext = open('README.rst').read()
+readmetext = open('README.rst', 'rb').read()
 if readmetext[:3] == '\xef\xbb\xbf':
     # utf-8 "BOM" 
     readmetext = readmetext[3:]
